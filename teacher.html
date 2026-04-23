@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>👨‍🏫 Teacher Dashboard</h2>
+        <button onclick="logout()" class="btn-logout">Logout</button>
+    </nav>
+
+    <div class="container dashboard">
+        <div class="card">
+            <h3>Create New Session</h3>
+            <select id="sessionType">
+                <option value="practice">Practice</option>
+                <option value="exam">Exam</option>
+            </select>
+            <input type="text" id="sessionTitle" placeholder="Title (e.g., Math Quiz 1)">
+            <textarea id="sessionDesc" placeholder="Description"></textarea>
+            <input type="number" id="timeLimit" placeholder="Time Limit (minutes, 0 = unlimited)">
+            <button onclick="createSession()" class="btn-primary">Generate Code & Create</button>
+            <div id="generatedCode" class="code-display"></div>
+        </div>
+
+        <div class="card" id="questionSection" style="display:none;">
+            <h3>Add Questions</h3>
+            <input type="text" id="qSessionCode" placeholder="Enter Session Code">
+            <select id="questionType">
+                <option value="mcq">MCQ</option>
+                <option value="written">Written Answer</option>
+                <option value="image">Upload Solution Image</option>
+            </select>
+            <textarea id="questionText" placeholder="Question"></textarea>
+            
+            <div id="mcqOptions" style="display:none;">
+                <input type="text" id="optA" placeholder="Option A">
+                <input type="text" id="optB" placeholder="Option B">
+                <input type="text" id="optC" placeholder="Option C">
+                <input type="text" id="optD" placeholder="Option D">
+                <select id="correctOpt">
+                    <option value="A">Correct: A</option>
+                    <option value="B">Correct: B</option>
+                    <option value="C">Correct: C</option>
+                    <option value="D">Correct: D</option>
+                </select>
+            </div>
+            
+            <button onclick="addQuestion()" class="btn-primary">Add Question</button>
+        </div>
+
+        <div class="card">
+            <h3>Evaluate Submissions</h3>
+            <input type="text" id="evalCode" placeholder="Enter Session Code">
+            <button onclick="loadSubmissions()" class="btn-primary">Load Submissions</button>
+            <div id="submissionsList"></div>
+        </div>
+
+        <div class="card">
+            <h3>My Sessions</h3>
+            <div id="mySessions"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/teacher.js"></script>
+</body>
+</html>

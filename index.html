@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher-Student Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Exam Portal</h1>
+        
+        <div class="role-selector">
+            <button class="role-btn active" onclick="selectRole('student')">👨‍🎓 Student</button>
+            <button class="role-btn" onclick="selectRole('teacher')">👨‍🏫 Teacher</button>
+        </div>
+
+        <div class="login-box">
+            <h2 id="roleTitle">Student Login</h2>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button onclick="login()" class="btn-primary">Login</button>
+            <p>Don't have an account? <a href="#" onclick="toggleRegister()">Register</a></p>
+        </div>
+
+        <div class="register-box" style="display:none;">
+            <h2>Register as <span id="regRole">Student</span></h2>
+            <input type="text" id="regName" placeholder="Full Name" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="password" id="regPassword" placeholder="Password (min 6 chars)" required>
+            <button onclick="register()" class="btn-primary">Register</button>
+            <p>Already have an account? <a href="#" onclick="toggleRegister()">Login</a></p>
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

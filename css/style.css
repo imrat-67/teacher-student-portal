@@ -1,0 +1,204 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+h1 { text-align: center; color: #333; margin-bottom: 30px; }
+
+.role-selector {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.role-btn {
+    padding: 15px 40px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.role-btn.active, .role-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+textarea { min-height: 100px; resize: vertical; }
+
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.2s;
+}
+
+.btn-primary:hover { transform: translateY(-2px); }
+
+.btn-logout {
+    padding: 8px 20px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #2ed573;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.btn-small {
+    padding: 6px 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.dashboard { max-width: 1000px; }
+
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.card h3 { color: #667eea; margin-bottom: 15px; }
+
+.code-display {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f0f3ff;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.highlight {
+    font-size: 32px;
+    color: #667eea;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.question-box {
+    background: #f8f9fa;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.options label {
+    display: block;
+    padding: 10px;
+    margin: 5px 0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.options label:hover { background: #e0e7ff; }
+
+.timer {
+    font-size: 24px;
+    color: #ff4757;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.submission-card, .session-item {
+    padding: 15px;
+    margin: 10px 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: white;
+    margin-right: 10px;
+}
+
+.badge.practice { background: #2ed573; }
+.badge.exam { background: #ff4757; }
+
+.grading {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.file-input { padding: 10px; background: #f0f0f0; }
+
+a { color: #667eea; }
+
+@media (max-width: 600px) {
+    .container { padding: 20px; }
+    .role-selector { flex-direction: column; }
+}

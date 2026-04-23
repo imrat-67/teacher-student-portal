@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <h2>👨‍🎓 Student Dashboard</h2>
+        <button onclick="logout()" class="btn-logout">Logout</button>
+    </nav>
+
+    <div class="container dashboard">
+        <div class="card">
+            <h3>Join Session</h3>
+            <input type="text" id="joinCode" placeholder="Enter Practice/Exam Code" maxlength="6">
+            <button onclick="joinSession()" class="btn-primary">Join</button>
+        </div>
+
+        <div class="card" id="activeSession" style="display:none;">
+            <h3 id="sessionTitle">Session</h3>
+            <div id="timer" class="timer"></div>
+            <div id="questionsList"></div>
+            <button onclick="submitExam()" class="btn-submit">Submit All Answers</button>
+        </div>
+
+        <div class="card">
+            <h3>My Submissions</h3>
+            <div id="mySubmissions"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/student.js"></script>
+</body>
+</html>
