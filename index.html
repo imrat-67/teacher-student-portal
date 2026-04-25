@@ -1141,6 +1141,18 @@ select.finput {
         <div id="mySubsContainer"></div>
       </div>
 
+      <div id="view-joinsec" class="view">
+        <div class="ph"><h2>Join a Section</h2><p>Enter the code your teacher shared</p></div>
+        <div style="background:var(--s1);border:1px solid var(--border2);border-radius:var(--r);padding:20px;margin-bottom:14px">
+          <div style="font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:10px">SECTION CODE</div>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="joinCodeMobile" class="input" placeholder="e.g. ABC123" maxlength="8" style="text-transform:uppercase;font-family:var(--mono)" onkeydown="if(event.key==='Enter')joinSectionMobile()">
+            <button class="btn btn-accent" style="width:auto;padding:0 20px" onclick="joinSectionMobile()">Join</button>
+          </div>
+        </div>
+        <div id="joinedListMobile"></div>
+      </div>
+
       <!-- Teacher views -->
       <div id="view-tproblems" class="view">
         <div class="ph"><h2>Manage Problems</h2><p>Add problems to sections</p></div>
@@ -1376,6 +1388,7 @@ function setupUI() {
     buildMobileNav([
       { id:"problems", ico:"📋", label:"Problems" },
       { id:"mysubs", ico:"✅", label:"My Subs" },
+      { id:"joinsec", ico:"🔑", label:"Join" },
     ]);
     showStudentView("problems");
   }
@@ -1439,6 +1452,7 @@ window.showStudentView = function(vid) {
   setActiveNav(vid);
   if (vid === "problems") renderProblems();
   if (vid === "mysubs") loadMySubmissions();
+  if (vid === "joinsec") renderJoinedListMobile();
 };
 
 window.showTeacherView = function(vid) {
@@ -1503,6 +1517,14 @@ window.joinSection = async function() {
   await setDoc(doc(db, "users", me.uid, "unlockedSections", sec.id), { joinedAt: serverTimestamp(), sectionName: sec.name });
   document.getElementById("joinCode").value = "";
   toast("Unlocked: " + sec.name);
+  // Update banner
+  const bWrap = document.getElementById("sessbannerWrap");
+  const bTxt = document.getElementById("sessBannerTxt");
+  if (bWrap && bTxt) {
+    const names = allSections.filter(s => unlockedSections.has(s.id)).map(s => s.name).join(", ");
+    bTxt.textContent = "Active sections: " + names;
+    bWrap.classList.add("show");
+  }
   renderJoinedList();
   renderSectionChips();
   renderProblems();
@@ -1516,6 +1538,37 @@ function renderJoinedList() {
     const d = document.createElement("div");
     d.className = "session-active show";
     d.style.marginTop = "6px";
+    d.textContent = "✓ " + s.name;
+    el.appendChild(d);
+  });
+}
+
+// ── Join Section Mobile ──
+window.joinSectionMobile = async function() {
+  const input = document.getElementById("joinCodeMobile");
+  const code = (input?.value || "").trim().toUpperCase();
+  if (!code) return;
+  const sec = allSections.find(s => s.code === code);
+  if (!sec) { toast("Section not found!", "bad"); return; }
+  if (unlockedSections.has(sec.id)) { toast("Already joined: " + sec.name); return; }
+  unlockedSections.add(sec.id);
+  await setDoc(doc(db, "users", me.uid, "unlockedSections", sec.id), { joinedAt: serverTimestamp(), sectionName: sec.name });
+  if (input) input.value = "";
+  toast("Unlocked: " + sec.name);
+  renderJoinedListMobile();
+  renderSectionChips();
+  renderProblems();
+  updateProgress();
+};
+
+function renderJoinedListMobile() {
+  const el = document.getElementById("joinedListMobile");
+  if (!el) return;
+  el.innerHTML = "";
+  allSections.filter(s => unlockedSections.has(s.id)).forEach(s => {
+    const d = document.createElement("div");
+    d.className = "session-active show";
+    d.style.marginBottom = "6px";
     d.textContent = "✓ " + s.name;
     el.appendChild(d);
   });
@@ -1662,7 +1715,7 @@ async function loadStudentEval(probId) {
     const snap = await getDocs(q);
     if (!snap.empty) {
       const sub = snap.docs[0].data();
-      if (sub.evalScore !== undefined) {
+      if (sub.evaluated && sub.evalScore !== null && sub.evalScore !== undefined) {
         const res = document.getElementById("evalResult_" + probId);
         const sc = document.getElementById("evalScore_" + probId);
         const cm = document.getElementById("evalComment_" + probId);
@@ -1836,10 +1889,8 @@ window.createSection = async function() {
   const code = genCode();
   await addDoc(collection(db, "sections"), { name, code, createdBy: me.uid, createdAt: serverTimestamp() });
   document.getElementById("secName").value = "";
-  toast(`Created! Code: ${code}`);
+  toast("Created! Code: " + code);
   await loadSections();
-  loadSections(); // reload display
-  showTeacherView("tsections");
 };
 
 async function loadSections() {
@@ -1847,25 +1898,25 @@ async function loadSections() {
   allSections = [];
   snap.forEach(d => allSections.push({ id: d.id, ...d.data() }));
   allSections.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+  // Only render if the view elements exist (avoid errors during initial load)
+  renderSectionsList();
+  if (document.getElementById("qSection")) populateSectionDropdown();
+}
+
+function renderSectionsList() {
   const el = document.getElementById("sectionsList");
   if (!el) return;
   el.innerHTML = "";
   if (allSections.length === 0) {
-    el.innerHTML = `<div class="empty"><div class="eico">🏷️</div><p>No sections yet. Create one above!</p></div>`;
+    el.innerHTML = '<div class="empty"><div class="eico">🏷️</div><p>No sections yet. Create one above!</p></div>';
     return;
   }
   allSections.forEach(sec => {
     const card = document.createElement("div");
     card.className = "sess-card";
-    card.innerHTML = `
-      <div class="sess-info">
-        <h4>${sec.name}</h4>
-        <div class="code-chip">Code: ${sec.code}</div>
-      </div>
-      <div class="sess-actions">
-        <button class="btn-del" onclick="deleteSection('${sec.id}')">Delete</button>
-      </div>
-    `;
+    card.innerHTML =
+      '<div class="sess-info"><h4>' + sec.name + '</h4><div class="code-chip">Code: ' + sec.code + '</div></div>' +
+      '<div class="sess-actions"><button class="btn-del" onclick="deleteSection(\'' + sec.id + '\')">Delete</button></div>';
     el.appendChild(card);
   });
 }
@@ -1874,9 +1925,8 @@ window.deleteSection = async function(id) {
   if (!confirm("Delete this section? All linked problems will become inaccessible.")) return;
   await deleteDoc(doc(db, "sections", id));
   toast("Section deleted.");
-  await loadSections();
+  await loadSections(); // this now auto-calls populateSectionDropdown + renderSectionsList
   await loadProblems();
-  populateSectionDropdown();
   renderTeacherProblems();
 };
 
@@ -1958,18 +2008,20 @@ window.loadTeacherSubs = async function() {
   if (!el) return;
   el.innerHTML = `<div style="color:var(--text3);font-family:var(--mono);font-size:13px;padding:20px">Loading...</div>`;
 
-  // Populate filters
+  // Populate filters — rebuild each time to stay fresh
   const secSel = document.getElementById("fSection");
-  if (secSel && secSel.options.length <= 1) {
-    allSections.forEach(s => {
-      if (!Array.from(secSel.options).find(o=>o.value===s.id)) {
-        secSel.appendChild(new Option(s.name, s.id));
-      }
-    });
+  if (secSel) {
+    const prevSec = secSel.value;
+    secSel.innerHTML = '<option value="">All Sections</option>';
+    allSections.forEach(s => secSel.appendChild(new Option(s.name, s.id)));
+    if (prevSec) secSel.value = prevSec;
   }
   const probSel = document.getElementById("fProblem");
-  if (probSel && probSel.options.length <= 1) {
+  if (probSel) {
+    const prevProb = probSel.value;
+    probSel.innerHTML = '<option value="">All Problems</option>';
     allProblems.forEach(p => probSel.appendChild(new Option(p.title, p.id)));
+    if (prevProb) probSel.value = prevProb;
   }
 
   const secFilter = document.getElementById("fSection")?.value || "";
