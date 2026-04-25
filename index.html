@@ -1,255 +1,2063 @@
-<div class="form-full">
-              <label class="form-label">Problem Statement</label>
-              <textarea id="qStatement" class="form-input" placeholder="Describe the problem..."></textarea>
-            </div>
-            <div class="form-full">
-              <label class="form-label">Example (Input/Output)</label>
-              <textarea id="qExample" class="form-input" placeholder="e.g. Input: 5, Output: 25"></textarea>
-            </div>
-            <div class="form-full">
-              <button class="btn-add-q" onclick="addNewProblem()">Create Problem ✨</button>
-            </div>
-          </div>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CodeRoom</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070f;
+  --s1: #0e0e1c;
+  --s2: #14142a;
+  --s3: #1c1c3a;
+  --border: rgba(120,120,255,0.12);
+  --border2: rgba(120,120,255,0.22);
+  --accent: #7c6dff;
+  --accent-dim: rgba(124,109,255,0.15);
+  --green: #3de8a0;
+  --green-dim: rgba(61,232,160,0.12);
+  --pink: #ff6b9d;
+  --pink-dim: rgba(255,107,157,0.12);
+  --gold: #ffd166;
+  --gold-dim: rgba(255,209,102,0.12);
+  --text: #e8e8f5;
+  --text2: #8080a8;
+  --text3: #3a3a5c;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --r: 14px;
+  --r2: 10px;
+  --r3: 8px;
+  --shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
 
-        <div id="teacherProblemsList"></div>
-      </div>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-      <div id="view-teacherSessions" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Live Sessions</div>
-            <div class="page-subtitle">Create and manage real-time coding rooms</div>
-          </div>
-        </div>
+html { scroll-behavior: smooth; }
 
-        <div class="session-creator">
-          <h3>🚀 Start New Session</h3>
-          <div class="input-row">
-            <input type="text" id="newSessionName" class="form-input-sm" placeholder="Session Name (e.g. Lab 04)">
-            <button class="btn-create" onclick="createSession()">Generate Session Code</button>
-          </div>
-        </div>
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-        <div class="sessions-list" id="activeSessionsList"></div>
-      </div>
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 99px; }
 
-      <div id="view-teacherSubmissions" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Student Submissions</div>
-            <div class="page-subtitle">Review code and images from all students</div>
-          </div>
-        </div>
-        <div id="allSubsList"></div>
-      </div>
+/* ---- SCREENS ---- */
+.screen { display: none; }
+.screen.active { display: flex; }
 
-    </main>
+/* ---- AUTH ---- */
+#authScreen, #teacherAuthScreen {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  opacity: 0.4;
+}
+.glow-1 { width: 500px; height: 500px; background: var(--accent); top: -200px; left: -150px; }
+.glow-2 { width: 400px; height: 400px; background: var(--pink); bottom: -150px; right: -100px; }
+.glow-t1 { width: 500px; height: 500px; background: var(--pink); top: -200px; right: -150px; }
+.glow-t2 { width: 400px; height: 400px; background: var(--accent); bottom: -150px; left: -100px; }
+
+.auth-card {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 40px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(20px);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(24px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.brand-mark {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 12px;
+  box-shadow: 0 0 40px rgba(124,109,255,0.4);
+}
+
+.brand h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.brand p {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.tab-row {
+  display: flex;
+  background: var(--s2);
+  border-radius: var(--r2);
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 9px;
+  background: none;
+  border: none;
+  border-radius: var(--r3);
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--s3);
+  color: var(--text);
+}
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+
+.input {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,109,255,0.15);
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--r2);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: #8f82ff; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,109,255,0.4); }
+.btn-pink { background: var(--pink); color: #fff; }
+.btn-pink:hover { background: #ff82ae; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,107,157,0.4); }
+.btn-green { background: var(--green); color: #000; }
+.btn-green:hover { background: #52edac; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+.err-box {
+  background: var(--pink-dim);
+  border: 1px solid rgba(255,107,157,0.3);
+  border-radius: var(--r3);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--pink);
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  display: none;
+}
+.err-box.show { display: block; }
+
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  color: var(--text3);
+  font-size: 12px;
+  font-family: var(--mono);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--text2); }
+
+/* ---- APP LAYOUT ---- */
+#appScreen {
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* NAV */
+.nav {
+  height: 58px;
+  background: rgba(14,14,28,0.9);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  flex-shrink: 0;
+}
+
+.nav-left { display: flex; align-items: center; gap: 12px; }
+
+.nav-logo {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.nav-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.nav-right { display: flex; align-items: center; gap: 10px; }
+
+.role-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+}
+.pill-student { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,232,160,0.25); }
+.pill-teacher { background: var(--pink-dim); color: var(--pink); border: 1px solid rgba(255,107,157,0.25); }
+
+.nav-name {
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 500;
+  display: none;
+}
+
+@media(min-width:500px){ .nav-name { display: block; } }
+
+.btn-sm {
+  padding: 6px 14px;
+  border-radius: var(--r3);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-sm:hover { color: var(--text); border-color: var(--accent); }
+
+/* LAYOUT */
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 58px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 200px;
+  background: var(--s1);
+  border-right: 1px solid var(--border);
+  padding: 16px 10px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+@media(max-width: 640px) {
+  .sidebar { display: none; }
+}
+
+.sb-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text3);
+  text-transform: uppercase;
+  font-family: var(--mono);
+  padding: 12px 10px 6px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: var(--r2);
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.sb-item:hover { background: var(--s2); color: var(--text); }
+.sb-item.on { background: var(--accent-dim); color: var(--accent); border-color: rgba(124,109,255,0.2); }
+.sb-icon { font-size: 15px; flex-shrink: 0; }
+
+/* JOIN BOX */
+.join-box {
+  margin: 8px 0;
+  padding: 12px;
+  background: var(--s2);
+  border-radius: var(--r2);
+  border: 1px solid var(--border);
+}
+
+.join-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  margin-bottom: 8px;
+}
+
+.join-row { display: flex; gap: 6px; }
+
+.join-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r3);
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  outline: none;
+  text-transform: uppercase;
+  min-width: 0;
+}
+.join-input:focus { border-color: var(--accent); }
+
+.join-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r3);
+  padding: 7px 12px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.join-btn:hover { background: #8f82ff; }
+
+.session-active {
+  margin-top: 8px;
+  padding: 7px 10px;
+  background: var(--green-dim);
+  border: 1px solid rgba(61,232,160,0.2);
+  border-radius: var(--r3);
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--green);
+  display: none;
+}
+.session-active.show { display: block; }
+
+/* CONTENT */
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 58px);
+}
+
+@media(max-width: 640px) {
+  .content { padding: 14px; max-height: none; }
+}
+
+/* MOBILE NAV BAR */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(14,14,28,0.97);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  z-index: 200;
+  padding: 8px 0 env(safe-area-inset-bottom, 0);
+}
+@media(max-width: 640px) { .mobile-nav { display: flex; } }
+
+.mob-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text3);
+  font-size: 9px;
+  font-family: var(--sans);
+  font-weight: 600;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-item .ico { font-size: 20px; }
+.mob-item.on { color: var(--accent); }
+
+@media(max-width: 640px) { .content { padding-bottom: 80px; } }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* PAGE HEADER */
+.ph {
+  margin-bottom: 18px;
+}
+.ph h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+.ph p { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+/* BANNER */
+.banner {
+  padding: 10px 16px;
+  border-radius: var(--r2);
+  margin-bottom: 14px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-family: var(--mono);
+}
+.banner.show { display: flex; }
+.banner-green { background: var(--green-dim); border: 1px solid rgba(61,232,160,0.2); color: var(--green); }
+
+/* PROGRESS */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.prog-track {
+  flex: 1;
+  height: 6px;
+  background: var(--s2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+}
+.prog-text {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* TABS */
+.chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 14px;
+  padding-bottom: 2px;
+}
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sans);
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip:hover:not(.on) { border-color: var(--accent); color: var(--text); }
+
+/* PROBLEM CARD */
+.pcard {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pcard:hover { border-color: var(--border2); box-shadow: 0 4px 24px rgba(124,109,255,0.1); }
+.pcard.solved { border-color: rgba(61,232,160,0.25); background: rgba(61,232,160,0.04); }
+
+.pcard-header {
+  display: flex;
+  align-items: center;
+  padding: 13px 14px;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.check-box {
+  width: 22px; height: 22px;
+  border-radius: 7px;
+  border: 2px solid var(--border2);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+}
+.check-box.checked { background: var(--green); border-color: var(--green); color: #000; }
+
+.pnum {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  font-weight: 700;
+  min-width: 24px;
+}
+
+.ptitle {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 0;
+}
+.ptitle.done { text-decoration: line-through; color: var(--green); }
+
+.diff {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+.easy { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,232,160,0.2); }
+.medium { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(255,209,102,0.2); }
+.hard { background: var(--pink-dim); color: var(--pink); border: 1px solid rgba(255,107,157,0.2); }
+
+.arrow {
+  color: var(--text3);
+  font-size: 11px;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.arrow.open { transform: rotate(180deg); }
+
+/* CARD BODY — smooth expand */
+.pcard-body {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  max-height: 0;
+}
+.pcard-body.open { max-height: 3000px; }
+
+.pcard-inner {
+  padding: 0 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.block {
+  border-radius: var(--r2);
+  padding: 13px 14px;
+}
+.block-p { background: rgba(124,109,255,0.06); border-left: 3px solid var(--accent); }
+.block-e { background: rgba(56,189,248,0.06); border-left: 3px solid #38bdf8; }
+.block-h { background: rgba(251,146,60,0.06); border-left: 3px solid #fb923c; }
+.block-c { background: rgba(61,232,160,0.06); border-left: 3px solid var(--green); }
+
+.block-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  margin-bottom: 7px;
+}
+.block-p .block-lbl { color: var(--accent); }
+.block-e .block-lbl { color: #38bdf8; }
+.block-h .block-lbl { color: #fb923c; }
+.block-c .block-lbl { color: var(--green); }
+
+.block-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+.block-pre { font-family: var(--mono); font-size: 12px; color: #7dd3fc; white-space: pre-wrap; word-break: break-word; }
+
+/* CODE EDITOR */
+.code-editor-wrap { position: relative; }
+
+.code-area {
+  width: 100%;
+  min-height: 150px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 13px;
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.65;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  display: block;
+}
+
+.code-area:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,109,255,0.12);
+}
+
+/* Prevent click propagation from textarea */
+.code-area, .code-area * {
+  pointer-events: auto;
+}
+
+.submit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-sub {
+  padding: 9px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r3);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-sub:hover { background: #8f82ff; }
+
+.btn-img-add {
+  padding: 9px 16px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r3);
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-img-add:hover { border-color: var(--accent); color: var(--text); }
+
+.sub-ok {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  display: none;
+}
+.sub-ok.show { display: inline; }
+
+.img-thumb {
+  max-width: 180px;
+  max-height: 120px;
+  border-radius: var(--r3);
+  border: 1px solid var(--border2);
+  margin-top: 8px;
+  display: none;
+  object-fit: cover;
+}
+.img-thumb.show { display: block; }
+
+/* EVALUATION RESULT */
+.eval-result {
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 12px 14px;
+  margin-top: 10px;
+  display: none;
+}
+.eval-result.show { display: block; }
+.eval-score {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.eval-comment {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 5px;
+  line-height: 1.6;
+}
+
+/* EMPTY STATE */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3);
+}
+.empty .eico { font-size: 44px; margin-bottom: 10px; }
+.empty p { font-size: 14px; }
+
+/* TEACHER */
+.card {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 10px;
+}
+.card h3 { font-size: 15px; font-weight: 800; margin-bottom: 14px; color: var(--text); }
+
+.fgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media(max-width: 640px) { .fgrid { grid-template-columns: 1fr; } }
+.fcol2 { grid-column: 1 / -1; }
+
+.finput {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--r3);
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.finput:focus { border-color: var(--accent); }
+
+textarea.finput {
+  resize: vertical;
+  min-height: 80px;
+  font-family: var(--mono);
+  line-height: 1.6;
+}
+
+select.finput {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%238080a8'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  appearance: none;
+}
+
+.btn-add {
+  padding: 10px 22px;
+  background: var(--green);
+  border: none;
+  border-radius: var(--r3);
+  color: #000;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+.btn-add:hover { background: #52edac; transform: translateY(-1px); }
+
+.btn-del {
+  padding: 6px 12px;
+  background: var(--pink-dim);
+  border: 1px solid rgba(255,107,157,0.3);
+  border-radius: var(--r3);
+  color: var(--pink);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-del:hover { background: rgba(255,107,157,0.25); }
+
+/* SESSION CARD */
+.sess-card {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.sess-info h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+.code-chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  padding: 2px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: inline-block;
+}
+.sess-actions { display: flex; gap: 8px; }
+
+.btn-view {
+  padding: 7px 14px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r3);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.2s;
+}
+.btn-view:hover { border-color: var(--accent); color: var(--accent); }
+
+/* SUB CARDS (teacher) */
+.sub-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.sub-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+.sub-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.sub-meta { font-size: 11px; font-family: var(--mono); color: var(--text2); margin-top: 2px; }
+
+.code-block {
+  background: var(--bg);
+  border-radius: var(--r3);
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--green);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sub-img { max-width: 280px; max-height: 180px; border-radius: var(--r3); border: 1px solid var(--border2); margin-top: 8px; display: block; }
+
+/* EVAL FORM (teacher) */
+.eval-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.eval-score-input {
+  width: 70px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r3);
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+}
+.eval-score-input:focus { border-color: var(--gold); }
+.eval-comment-input {
+  flex: 1;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r3);
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  min-width: 140px;
+}
+.eval-comment-input:focus { border-color: var(--accent); }
+
+.btn-eval {
+  padding: 7px 14px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(255,209,102,0.3);
+  border-radius: var(--r3);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-eval:hover { background: rgba(255,209,102,0.2); }
+
+.eval-done-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--green-dim);
+  color: var(--green);
+  padding: 3px 10px;
+  border-radius: 99px;
+  display: none;
+}
+.eval-done-chip.show { display: inline-block; }
+
+.btn-del-sub {
+  padding: 6px 10px;
+  background: var(--pink-dim);
+  border: 1px solid rgba(255,107,157,0.25);
+  border-radius: var(--r3);
+  color: var(--pink);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-weight: 700;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-del-sub:hover { background: rgba(255,107,157,0.2); }
+
+/* FILTER ROW */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 11px 18px;
+  font-size: 13px;
+  font-family: var(--mono);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+  max-width: 280px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.ok { color: var(--green); border-color: rgba(61,232,160,0.3); }
+.toast.bad { color: var(--pink); border-color: rgba(255,107,157,0.3); }
+
+@media(min-width: 641px) { .toast { bottom: 24px; } }
+
+/* SECTION TAG for problems not yet joined */
+.locked-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+}
+.lock-icon { font-size: 20px; }
+.lock-text { font-size: 13px; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- STUDENT AUTH -->
+<div id="authScreen" class="screen">
+  <div class="auth-glow glow-1"></div>
+  <div class="auth-glow glow-2"></div>
+  <div class="auth-card">
+    <div class="brand">
+      <div class="brand-mark">⚡</div>
+      <h1>CodeRoom</h1>
+      <p>// problem solving platform</p>
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="authTab('login')">Login</button>
+      <button class="tab-btn" onclick="authTab('register')">Register</button>
+    </div>
+    <div id="authErr" class="err-box"></div>
+    <div id="loginForm">
+      <div class="field"><label>Email</label><input type="email" id="lEmail" class="input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="field"><label>Password</label><input type="password" id="lPass" class="input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-accent" id="loginBtn" onclick="doLogin()">Login →</button>
+    </div>
+    <div id="regForm" style="display:none">
+      <div class="field"><label>Name</label><input type="text" id="rName" class="input" placeholder="Your name"></div>
+      <div class="field"><label>Email</label><input type="email" id="rEmail" class="input" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label><input type="password" id="rPass" class="input" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <button class="btn btn-accent" id="regBtn" onclick="doRegister()">Create Account →</button>
+    </div>
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<!-- TEACHER AUTH -->
+<div id="teacherAuthScreen" class="screen">
+  <div class="auth-glow glow-t1"></div>
+  <div class="auth-glow glow-t2"></div>
+  <div class="auth-card" style="border-color:rgba(255,107,157,0.3)">
+    <div class="brand">
+      <div class="brand-mark" style="background:linear-gradient(135deg,var(--pink),var(--accent))">🔐</div>
+      <h1>Teacher Panel</h1>
+      <p>// restricted access</p>
+    </div>
+    <div id="tErr" class="err-box"></div>
+    <div class="field"><label>Master Password</label><input type="password" id="tPass" class="input" placeholder="Enter master password" onkeydown="if(event.key==='Enter')doTeacherAuth()" style="border-color:rgba(255,107,157,0.3)"></div>
+    <button class="btn btn-pink" onclick="doTeacherAuth()">Enter →</button>
+    <a class="back-link" href="/">← Student login</a>
+  </div>
+</div>
 
-<script>
-  // --- INITIAL DATA ---
-  let problems = JSON.parse(localStorage.getItem('cr_problems')) || [
-    { id: 1, title: "Factorial Calculation", section: "Numbers & Math", difficulty: "Easy", concept: "Recursion", solved: false, statement: "Write a function to find the factorial of N.", example: "Input: 5\nOutput: 120" },
-    { id: 2, title: "Palindrome Check", section: "Strings", difficulty: "Medium", concept: "Slicing", solved: false, statement: "Check if a given string is a palindrome.", example: "Input: 'racecar'\nOutput: true" }
-  ];
-  
-  let submissions = JSON.parse(localStorage.getItem('cr_subs')) || [];
-  let sessions = JSON.parse(localStorage.getItem('cr_sessions')) || [];
-  let currentUser = JSON.parse(localStorage.getItem('cr_user')) || null;
-  let activeSessionCode = null;
+<!-- APP -->
+<div id="appScreen" class="screen">
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-logo">⚡</div>
+      <span class="nav-title">CodeRoom</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-name" id="navName"></span>
+      <span class="role-pill" id="rolePill">STUDENT</span>
+      <button class="btn-sm" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
 
-  // --- AUTH LOGIC ---
-  function checkAuth() {
-    const isTeacherUrl = window.location.search.includes('teacher');
-    if (currentUser) {
-      document.getElementById('authScreen').classList.remove('active');
-      document.getElementById('teacherAuthScreen').classList.remove('active');
-      document.getElementById('appScreen').classList.add('active');
-      setupUI(currentUser.role);
-    } else {
-      if (isTeacherUrl) {
-        document.getElementById('teacherAuthScreen').classList.add('active');
-      } else {
-        document.getElementById('authScreen').classList.add('active');
-      }
-    }
-  }
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <!-- filled by JS -->
+    </aside>
 
-  function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
-    if (!email) return showError('authError', 'Please enter an email');
-    
-    currentUser = { name: email.split('@')[0], email, role: 'student' };
-    localStorage.setItem('cr_user', JSON.stringify(currentUser));
-    location.reload();
-  }
-
-  function handleTeacherAuth() {
-    const pass = document.getElementById('teacherMasterPass').value;
-    if (pass === 'admin123') { // Simple demo password
-      currentUser = { name: 'Admin Instructor', email: 'admin@coderoom.io', role: 'teacher' };
-      localStorage.setItem('cr_user', JSON.stringify(currentUser));
-      location.reload();
-    } else {
-      showError('teacherAuthError', 'Invalid Master Password');
-    }
-  }
-
-  function handleLogout() {
-    localStorage.removeItem('cr_user');
-    location.reload();
-  }
-
-  // --- NAVIGATION ---
-  function setupUI(role) {
-    document.getElementById('navUserName').innerText = currentUser.name;
-    const badge = document.getElementById('navRoleBadge');
-    badge.innerText = role.toUpperCase();
-    badge.className = `nav-badge badge-${role}`;
-
-    if (role === 'teacher') {
-      document.getElementById('studentSidebar').style.display = 'none';
-      document.getElementById('teacherSidebar').style.display = 'block';
-      showTeacherView('manageProblems');
-    } else {
-      renderStudentProblems();
-    }
-  }
-
-  function showView(view) {
-    ['view-problems', 'view-mySubmissions'].forEach(id => document.getElementById(id).style.display = 'none');
-    document.getElementById(`view-${view}`).style.display = 'block';
-    
-    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-
-    if (view === 'mySubmissions') renderMySubmissions();
-    if (view === 'problems') renderStudentProblems();
-  }
-
-  function showTeacherView(view) {
-    const views = ['teacherProblems', 'teacherSessions', 'teacherSubmissions'];
-    views.forEach(v => document.getElementById(`view-${v}`).style.display = 'none');
-    
-    const target = view.replace('manage', 'teacher').replace('view', 'teacher');
-    document.getElementById(`view-${target}`).style.display = 'block';
-    
-    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    
-    if (view === 'manageProblems') renderTeacherProblems();
-    if (view === 'manageSessions') renderSessions();
-    if (view === 'viewSubmissions') renderAllSubmissions();
-  }
-
-  // --- CORE FUNCTIONALITY ---
-  function renderStudentProblems() {
-    const list = document.getElementById('problemsList');
-    const sections = [...new Set(problems.map(p => p.section))];
-    
-    // Render Section Tabs
-    const tabRow = document.getElementById('sectionTabsRow');
-    tabRow.innerHTML = `<button class="tab-chip active">All Problems</button>` + 
-      sections.map(s => `<button class="tab-chip">${s}</button>`).join('');
-
-    // Render Problems
-    list.innerHTML = problems.map(p => `
-      <div class="problem-card ${p.solved ? 'solved' : ''}" onclick="toggleCard(${p.id})">
-        <div class="card-row">
-          <div class="card-check ${p.solved ? 'checked' : ''}">✔</div>
-          <div class="card-num">#${p.id}</div>
-          <div class="card-title ${p.solved ? 'solved-title' : ''}">${p.title}</div>
-          <div class="diff-badge diff-${p.difficulty.toLowerCase()}">${p.difficulty}</div>
+    <!-- CONTENT -->
+    <main class="content" id="mainContent">
+      <!-- Student views -->
+      <div id="view-problems" class="view">
+        <div id="sessbannerWrap" class="banner banner-green">
+          <span>🟢</span><span id="sessBannerTxt"></span>
         </div>
-        <div class="card-body" id="body-${p.id}" style="display:none" onclick="event.stopPropagation()">
-          <div class="card-inner">
-            <div class="block block-problem">
-              <div class="block-label">The Challenge</div>
-              <div class="block-text">${p.statement}</div>
+        <div class="progress-row">
+          <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+          <span class="prog-text" id="progText">0/0</span>
+        </div>
+        <div class="chips" id="sectionChips"></div>
+        <div id="problemsList"></div>
+      </div>
+
+      <div id="view-mysubs" class="view">
+        <div class="ph"><h2>My Submissions</h2><p>All your solved problems</p></div>
+        <div id="mySubsContainer"></div>
+      </div>
+
+      <!-- Teacher views -->
+      <div id="view-tproblems" class="view">
+        <div class="ph"><h2>Manage Problems</h2><p>Add problems to sections</p></div>
+        <div class="card">
+          <h3>➕ Add New Problem</h3>
+          <div class="fgrid">
+            <div><label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">TITLE</label><input type="text" id="qTitle" class="finput" placeholder="Problem title"></div>
+            <div>
+              <label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">SECTION</label>
+              <select id="qSection" class="finput">
+                <option value="">-- Choose Section --</option>
+              </select>
             </div>
-            <div class="block block-example">
-              <div class="block-label">Example</div>
-              <pre class="block-pre">${p.example}</pre>
+            <div>
+              <label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">DIFFICULTY</label>
+              <select id="qDiff" class="finput">
+                <option>Easy</option><option>Medium</option><option>Hard</option>
+              </select>
             </div>
-            <textarea class="code-textarea" id="code-${p.id}" placeholder="Write your solution here..."></textarea>
-            <div class="submit-row">
-              <button class="btn-submit" onclick="submitSolution(${p.id})">Submit Solution</button>
-              <span class="submitted-badge" id="badge-${p.id}">Success! Solution stored.</span>
-            </div>
+            <div><label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">CONCEPT</label><input type="text" id="qConcept" class="finput" placeholder="e.g. Loops + Arithmetic"></div>
+            <div class="fcol2"><label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">PROBLEM STATEMENT</label><textarea id="qProblem" class="finput" placeholder="Describe the problem..."></textarea></div>
+            <div class="fcol2"><label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">EXAMPLE</label><textarea id="qExample" class="finput" placeholder="Input / Output examples..."></textarea></div>
+            <div class="fcol2"><label style="font-size:11px;color:var(--text2);font-family:var(--mono);display:block;margin-bottom:6px">HINT</label><textarea id="qHint" class="finput" placeholder="Optional hint..."></textarea></div>
+          </div>
+          <button class="btn-add" onclick="addProblem()">Add Problem</button>
+        </div>
+        <div id="tProblemList"></div>
+      </div>
+
+      <div id="view-tsections" class="view">
+        <div class="ph"><h2>Sections</h2><p>Each section has its own join code</p></div>
+        <div class="card">
+          <h3>➕ Create New Section</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" id="secName" class="finput" style="flex:1;min-width:180px" placeholder="e.g. Python Basics, Arrays...">
+            <button class="btn-add" style="margin-top:0" onclick="createSection()">Create Section</button>
           </div>
         </div>
+        <div id="sectionsList"></div>
       </div>
-    `).join('');
-    
+
+      <div id="view-tsubs" class="view">
+        <div class="ph"><h2>Submissions</h2><p>Evaluate student work in real-time</p></div>
+        <div class="filter-row">
+          <select id="fSection" class="finput" style="max-width:180px" onchange="loadTeacherSubs()"><option value="">All Sections</option></select>
+          <select id="fProblem" class="finput" style="max-width:180px" onchange="loadTeacherSubs()"><option value="">All Problems</option></select>
+        </div>
+        <div id="tSubsContainer"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-nav" id="mobileNav"></nav>
+</div>
+
+<!-- Toast & hidden input -->
+<div class="toast" id="toast"></div>
+<input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImg(event)">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc,
+  updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── Firebase ──
+const fbConfig = {
+  apiKey: "AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",
+  authDomain: "teacher-student-portal-b1fed.firebaseapp.com",
+  projectId: "teacher-student-portal-b1fed",
+  storageBucket: "teacher-student-portal-b1fed.firebasestorage.app",
+  messagingSenderId: "553128972767",
+  appId: "1:553128972767:web:96a77d5907c054bcb2746a"
+};
+const fireApp = initializeApp(fbConfig);
+const auth = getAuth(fireApp);
+const db = getFirestore(fireApp);
+
+// ── imgBB key ──
+const IMGBB_KEY = "a7bf8a30bc4027b2fb7ca7498da18c39"; // free public key — replace with your own
+
+// ── Config ──
+const TEACHER_PASS = "coderoom_teacher_2024";
+
+// ── State ──
+let me = null;
+let isTeacher = false;
+let allProblems = [];
+let allSections = [];
+let unlockedSections = new Set(); // section ids student has joined
+let solvedMap = {};
+let activeSection = "ALL";
+let openCards = {};
+let subsListener = null;
+let pendingImgProbId = null;
+let pendingImgUrl = null; // imgBB url
+
+// ── Utils ──
+window.toast = function(msg, type = "ok") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 3200);
+};
+
+function screen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function showView(id) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  const el = document.getElementById("view-" + id);
+  if (el) el.classList.add("active");
+}
+
+// ── Auth ──
+window.authTab = function(tab) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.textContent.toLowerCase() === tab));
+  document.getElementById("loginForm").style.display = tab === "login" ? "block" : "none";
+  document.getElementById("regForm").style.display = tab === "register" ? "block" : "none";
+  document.getElementById("authErr").classList.remove("show");
+};
+
+function authErr(msg) {
+  const el = document.getElementById("authErr");
+  el.textContent = msg;
+  el.classList.add("show");
+}
+
+window.doLogin = async function() {
+  const email = document.getElementById("lEmail").value.trim();
+  const pass = document.getElementById("lPass").value;
+  if (!email || !pass) { authErr("Fill in all fields."); return; }
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true; btn.textContent = "Logging in...";
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    authErr(e.message.replace("Firebase: ", "").replace(/\s*\(.*\)/, ""));
+    btn.disabled = false; btn.textContent = "Login →";
+  }
+};
+
+window.doRegister = async function() {
+  const name = document.getElementById("rName").value.trim();
+  const email = document.getElementById("rEmail").value.trim();
+  const pass = document.getElementById("rPass").value;
+  if (!name || !email || !pass) { authErr("Fill in all fields."); return; }
+  if (pass.length < 6) { authErr("Password must be at least 6 characters."); return; }
+  const btn = document.getElementById("regBtn");
+  btn.disabled = true; btn.textContent = "Creating...";
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: name });
+    await setDoc(doc(db, "users", cred.user.uid), { name, email, role: "student", createdAt: serverTimestamp() });
+    toast("Welcome, " + name + "!");
+  } catch(e) {
+    authErr(e.message.replace("Firebase: ", "").replace(/\s*\(.*\)/, ""));
+    btn.disabled = false; btn.textContent = "Create Account →";
+  }
+};
+
+window.doTeacherAuth = function() {
+  const pass = document.getElementById("tPass").value;
+  const err = document.getElementById("tErr");
+  err.classList.remove("show");
+  if (pass === TEACHER_PASS) {
+    sessionStorage.setItem("cr_teacher", "1");
+    isTeacher = true;
+    me = { uid: "teacher_master", displayName: "Teacher", email: "teacher@coderoom" };
+    screen("appScreen");
+    setupUI();
+    loadAll();
+  } else {
+    err.textContent = "Incorrect password.";
+    err.classList.add("show");
+    document.getElementById("tPass").value = "";
+  }
+};
+
+window.doLogout = async function() {
+  sessionStorage.removeItem("cr_teacher");
+  isTeacher = false;
+  unlockedSections = new Set();
+  if (subsListener) subsListener();
+  if (auth.currentUser) await signOut(auth);
+  const isT = window.location.search.includes("teacher");
+  screen(isT ? "teacherAuthScreen" : "authScreen");
+};
+
+onAuthStateChanged(auth, async user => {
+  if (isTeacher) return;
+  if (user) {
+    me = user;
+    screen("appScreen");
+    setupUI();
+    await loadAll();
+  } else {
+    me = null;
+    if (!window.location.search.includes("teacher")) {
+      screen("authScreen");
+      const b = document.getElementById("loginBtn");
+      if (b) { b.disabled = false; b.textContent = "Login →"; }
+    }
+  }
+});
+
+// ── UI Setup ──
+function setupUI() {
+  const name = me.displayName || (me.email ? me.email.split("@")[0] : "Teacher");
+  document.getElementById("navName").textContent = name;
+  document.getElementById("rolePill").textContent = isTeacher ? "TEACHER" : "STUDENT";
+  document.getElementById("rolePill").className = "role-pill " + (isTeacher ? "pill-teacher" : "pill-student");
+
+  if (isTeacher) {
+    buildTeacherSidebar();
+    buildMobileNav([
+      { id:"tproblems", ico:"📝", label:"Problems" },
+      { id:"tsections", ico:"🏷️", label:"Sections" },
+      { id:"tsubs", ico:"👁️", label:"Submissions" },
+    ]);
+    showTeacherView("tproblems");
+  } else {
+    buildStudentSidebar();
+    buildMobileNav([
+      { id:"problems", ico:"📋", label:"Problems" },
+      { id:"mysubs", ico:"✅", label:"My Subs" },
+    ]);
+    showStudentView("problems");
+  }
+}
+
+function buildStudentSidebar() {
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = `
+    <div class="sb-label">Navigation</div>
+    <div class="sb-item on" data-sv="problems" onclick="showStudentView('problems')"><span class="sb-icon">📋</span>Problems</div>
+    <div class="sb-item" data-sv="mysubs" onclick="showStudentView('mysubs')"><span class="sb-icon">✅</span>My Submissions</div>
+    <div class="sb-label" style="margin-top:14px">Join Section</div>
+    <div class="join-box">
+      <div class="join-label">Enter section code</div>
+      <div class="join-row">
+        <input type="text" id="joinCode" class="join-input" placeholder="ABC123" maxlength="8" onkeydown="if(event.key==='Enter')joinSection()">
+        <button class="join-btn" onclick="joinSection()">Join</button>
+      </div>
+      <div id="joinedList"></div>
+    </div>
+  `;
+}
+
+function buildTeacherSidebar() {
+  const sb = document.getElementById("sidebar");
+  sb.innerHTML = `
+    <div class="sb-label">Teacher</div>
+    <div class="sb-item on" data-tv="tproblems" onclick="showTeacherView('tproblems')"><span class="sb-icon">📝</span>Problems</div>
+    <div class="sb-item" data-tv="tsections" onclick="showTeacherView('tsections')"><span class="sb-icon">🏷️</span>Sections</div>
+    <div class="sb-item" data-tv="tsubs" onclick="showTeacherView('tsubs')"><span class="sb-icon">👁️</span>Submissions</div>
+  `;
+}
+
+function buildMobileNav(items) {
+  const nav = document.getElementById("mobileNav");
+  nav.innerHTML = "";
+  items.forEach(it => {
+    const btn = document.createElement("button");
+    btn.className = "mob-item";
+    btn.dataset.id = it.id;
+    btn.innerHTML = `<span class="ico">${it.ico}</span>${it.label}`;
+    btn.onclick = () => isTeacher ? showTeacherView(it.id) : showStudentView(it.id);
+    nav.appendChild(btn);
+  });
+  // activate first
+  nav.querySelector(".mob-item").classList.add("on");
+}
+
+function setActiveNav(viewId) {
+  document.querySelectorAll(".sb-item").forEach(i => {
+    const match = i.dataset.sv === viewId || i.dataset.tv === viewId;
+    i.classList.toggle("on", match);
+  });
+  document.querySelectorAll(".mob-item").forEach(i => {
+    i.classList.toggle("on", i.dataset.id === viewId);
+  });
+}
+
+window.showStudentView = function(vid) {
+  showView(vid);
+  setActiveNav(vid);
+  if (vid === "problems") renderProblems();
+  if (vid === "mysubs") loadMySubmissions();
+};
+
+window.showTeacherView = function(vid) {
+  showView(vid);
+  setActiveNav(vid);
+  if (vid === "tproblems") { populateSectionDropdown(); renderTeacherProblems(); }
+  if (vid === "tsections") loadSections();
+  if (vid === "tsubs") loadTeacherSubs();
+};
+
+// ── Load All ──
+async function loadAll() {
+  await Promise.all([loadSections(), loadProblems()]);
+  if (!isTeacher) {
+    await loadSolvedStatus();
+    await loadUnlockedSections();
+    renderSectionChips();
+    renderProblems();
     updateProgress();
+  } else {
+    populateSectionDropdown();
+    renderTeacherProblems();
+  }
+}
+
+async function loadProblems() {
+  const snap = await getDocs(collection(db, "problems"));
+  allProblems = [];
+  snap.forEach(d => allProblems.push({ id: d.id, ...d.data() }));
+  allProblems.sort((a,b) => (a.order||0)-(b.order||0));
+}
+
+async function loadSections() {
+  const snap = await getDocs(collection(db, "sections"));
+  allSections = [];
+  snap.forEach(d => allSections.push({ id: d.id, ...d.data() }));
+  allSections.sort((a,b) => (a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+}
+
+async function loadSolvedStatus() {
+  const snap = await getDocs(collection(db, "users", me.uid, "solved"));
+  solvedMap = {};
+  snap.forEach(d => { solvedMap[d.id] = true; });
+}
+
+async function loadUnlockedSections() {
+  try {
+    const snap = await getDocs(collection(db, "users", me.uid, "unlockedSections"));
+    unlockedSections = new Set();
+    snap.forEach(d => unlockedSections.add(d.id));
+  } catch { unlockedSections = new Set(); }
+}
+
+// ── Join Section ──
+window.joinSection = async function() {
+  const code = (document.getElementById("joinCode")?.value || "").trim().toUpperCase();
+  if (!code) return;
+  const sec = allSections.find(s => s.code === code);
+  if (!sec) { toast("Section not found!", "bad"); return; }
+  if (unlockedSections.has(sec.id)) { toast("Already joined: " + sec.name); return; }
+  unlockedSections.add(sec.id);
+  await setDoc(doc(db, "users", me.uid, "unlockedSections", sec.id), { joinedAt: serverTimestamp(), sectionName: sec.name });
+  document.getElementById("joinCode").value = "";
+  toast("Unlocked: " + sec.name);
+  renderJoinedList();
+  renderSectionChips();
+  renderProblems();
+};
+
+function renderJoinedList() {
+  const el = document.getElementById("joinedList");
+  if (!el) return;
+  el.innerHTML = "";
+  allSections.filter(s => unlockedSections.has(s.id)).forEach(s => {
+    const d = document.createElement("div");
+    d.className = "session-active show";
+    d.style.marginTop = "6px";
+    d.textContent = "✓ " + s.name;
+    el.appendChild(d);
+  });
+}
+
+// ── Section Chips ──
+function renderSectionChips() {
+  const chips = document.getElementById("sectionChips");
+  if (!chips) return;
+  // Only sections that are unlocked
+  const unlocked = allSections.filter(s => unlockedSections.has(s.id));
+  chips.innerHTML = "";
+  const all = document.createElement("button");
+  all.className = "chip" + (activeSection === "ALL" ? " on" : "");
+  all.textContent = "📚 All Unlocked";
+  all.onclick = () => { activeSection = "ALL"; renderSectionChips(); renderProblems(); };
+  chips.appendChild(all);
+  unlocked.forEach(sec => {
+    const c = document.createElement("button");
+    c.className = "chip" + (activeSection === sec.id ? " on" : "");
+    c.textContent = sec.name;
+    c.onclick = () => { activeSection = sec.id; renderSectionChips(); renderProblems(); };
+    chips.appendChild(c);
+  });
+}
+
+// ── Render Problems (Student) ──
+function renderProblems() {
+  const list = document.getElementById("problemsList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  // If nothing unlocked
+  if (unlockedSections.size === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="eico">🔒</div>
+        <p>Enter a section code in the sidebar to unlock problems.</p>
+      </div>`;
+    return;
   }
 
-  function toggleCard(id) {
-    const body = document.getElementById(`body-${id}`);
-    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  // Filter by unlocked sections + active tab
+  let filtered = allProblems.filter(p => unlockedSections.has(p.sectionId));
+  if (activeSection !== "ALL") filtered = filtered.filter(p => p.sectionId === activeSection);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="eico">📭</div><p>No problems in this section yet.</p></div>`;
+    return;
   }
 
-  function submitSolution(id) {
-    const code = document.getElementById(`code-${id}`).value;
-    if (!code) return showToast("Please write some code first!", "error");
-    
-    const sub = {
-      id: Date.now(),
-      problemId: id,
-      user: currentUser.name,
-      code: code,
-      timestamp: new Date().toLocaleString(),
-      session: activeSessionCode
-    };
-    
-    submissions.push(sub);
-    localStorage.setItem('cr_subs', JSON.stringify(submissions));
-    
-    const prob = problems.find(p => p.id === id);
-    prob.solved = true;
-    localStorage.setItem('cr_problems', JSON.stringify(problems));
-    
-    document.getElementById(`badge-${id}`).classList.add('visible');
-    showToast("Solution submitted successfully!", "success");
-    updateProgress();
+  filtered.forEach((prob, idx) => {
+    const solved = !!solvedMap[prob.id];
+    const open = !!openCards[prob.id];
+    const card = document.createElement("div");
+    card.className = "pcard" + (solved ? " solved" : "");
+
+    const header = document.createElement("div");
+    header.className = "pcard-header";
+    header.innerHTML = `
+      <div class="check-box ${solved ? "checked" : ""}" data-id="${prob.id}">
+        ${solved ? "✓" : ""}
+      </div>
+      <span class="pnum">#${idx+1}</span>
+      <span class="ptitle ${solved ? "done" : ""}">${prob.title}</span>
+      <span class="diff ${(prob.difficulty||"Easy").toLowerCase()}">${prob.difficulty||"Easy"}</span>
+      <span class="arrow ${open ? "open" : ""}">▼</span>
+    `;
+
+    // Check box click
+    header.querySelector(".check-box").addEventListener("click", e => {
+      e.stopPropagation();
+      toggleSolved(prob.id);
+    });
+
+    // Toggle expand — only from header itself, not child elements
+    header.addEventListener("click", e => {
+      if (e.target.closest(".check-box")) return;
+      openCards[prob.id] = !openCards[prob.id];
+      renderProblems();
+    });
+
+    const body = document.createElement("div");
+    body.className = "pcard-body" + (open ? " open" : "");
+
+    if (open) {
+      body.innerHTML = buildCardBody(prob);
+      // Prevent click inside body from toggling card
+      body.addEventListener("click", e => e.stopPropagation());
+    }
+
+    card.appendChild(header);
+    card.appendChild(body);
+    list.appendChild(card);
+
+    // Load any existing evaluation for student
+    if (open) {
+      loadStudentEval(prob.id);
+    }
+  });
+}
+
+function buildCardBody(prob) {
+  return `
+    <div class="pcard-inner">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:10px;background:var(--accent-dim);color:var(--accent);padding:3px 10px;border-radius:99px">🧠 ${prob.concept||""}</span>
+        <span style="font-size:11px;color:var(--text3)">${prob.sectionName||""}</span>
+      </div>
+      <div class="block block-p">
+        <div class="block-lbl">Problem</div>
+        <p class="block-text">${prob.problem||""}</p>
+      </div>
+      ${prob.example ? `<div class="block block-e"><div class="block-lbl">Example</div><pre class="block-pre">${prob.example}</pre></div>` : ""}
+      ${prob.hint ? `<div class="block block-h"><div class="block-lbl">💡 Hint</div><p class="block-text" style="font-family:var(--mono);font-size:12px;color:#fed7aa">${prob.hint}</p></div>` : ""}
+      <div class="block block-c">
+        <div class="block-lbl">✏️ Your Solution</div>
+        <textarea class="code-area" id="code_${prob.id}" placeholder="# Write your solution here..."></textarea>
+        <img id="thumb_${prob.id}" class="img-thumb">
+        <div class="submit-actions">
+          <button class="btn-sub" data-pid="${prob.id}">Submit</button>
+          <button class="btn-img-add" data-pid="${prob.id}">📷 Add Image</button>
+          <span class="sub-ok" id="subok_${prob.id}">✓ Submitted</span>
+        </div>
+        <div class="eval-result" id="evalResult_${prob.id}">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--text2);margin-bottom:6px">TEACHER EVALUATION</div>
+          <div class="eval-score" id="evalScore_${prob.id}"></div>
+          <div class="eval-comment" id="evalComment_${prob.id}"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadStudentEval(probId) {
+  try {
+    // Find the student's most recent submission for this problem
+    const q = query(
+      collection(db, "submissions"),
+      where("userId", "==", me.uid),
+      where("problemId", "==", probId),
+      orderBy("submittedAt", "desc")
+    );
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      const sub = snap.docs[0].data();
+      if (sub.evalScore !== undefined) {
+        const res = document.getElementById("evalResult_" + probId);
+        const sc = document.getElementById("evalScore_" + probId);
+        const cm = document.getElementById("evalComment_" + probId);
+        if (res && sc && cm) {
+          res.classList.add("show");
+          sc.textContent = `Score: ${sub.evalScore}/10`;
+          cm.textContent = sub.evalComment || "";
+        }
+      }
+    }
+  } catch {}
+}
+
+// ── Toggle Solved ──
+async function toggleSolved(probId) {
+  if (solvedMap[probId]) {
+    delete solvedMap[probId];
+    await deleteDoc(doc(db, "users", me.uid, "solved", probId));
+  } else {
+    solvedMap[probId] = true;
+    await setDoc(doc(db, "users", me.uid, "solved", probId), { solvedAt: serverTimestamp() });
+  }
+  updateProgress();
+  renderProblems();
+}
+
+function updateProgress() {
+  const unlockedProbs = allProblems.filter(p => unlockedSections.has(p.sectionId));
+  const total = unlockedProbs.length;
+  const done = unlockedProbs.filter(p => solvedMap[p.id]).length;
+  const pct = total ? (done/total)*100 : 0;
+  const fill = document.getElementById("progFill");
+  const txt = document.getElementById("progText");
+  if (fill) fill.style.width = pct + "%";
+  if (txt) txt.textContent = `${done}/${total}`;
+}
+
+// ── Image ──
+window.openImagePicker = function(probId) {
+  pendingImgProbId = probId;
+  document.getElementById("imgInput").click();
+};
+
+window.handleImg = async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  toast("Uploading image...");
+  try {
+    const b64 = await toBase64(file);
+    const fd = new FormData();
+    fd.append("image", b64.split(",")[1]);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
+    const data = await res.json();
+    if (data.success) {
+      pendingImgUrl = data.data.url;
+      const thumb = document.getElementById("thumb_" + pendingImgProbId);
+      if (thumb) { thumb.src = pendingImgUrl; thumb.classList.add("show"); }
+      toast("Image ready ✓");
+    } else {
+      toast("Image upload failed", "bad");
+    }
+  } catch(err) {
+    toast("Image upload error", "bad");
+  }
+  e.target.value = "";
+};
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// Submit button handler (event delegation to work inside dynamic HTML)
+document.addEventListener("click", async function(e) {
+  if (e.target.classList.contains("btn-sub")) {
+    e.stopPropagation();
+    const pid = e.target.dataset.pid;
+    await submitSolution(pid);
+  }
+  if (e.target.classList.contains("btn-img-add")) {
+    e.stopPropagation();
+    window.openImagePicker(e.target.dataset.pid);
+  }
+});
+
+async function submitSolution(probId) {
+  const codeEl = document.getElementById("code_" + probId);
+  const code = codeEl ? codeEl.value.trim() : "";
+  const imgUrl = (pendingImgProbId === probId) ? pendingImgUrl : null;
+  if (!code && !imgUrl) { toast("Write a solution or add an image.", "bad"); return; }
+  const prob = allProblems.find(p => p.id === probId);
+  const name = me.displayName || me.email;
+  try {
+    await addDoc(collection(db, "submissions"), {
+      userId: me.uid,
+      userName: name,
+      problemId: probId,
+      problemTitle: prob ? prob.title : probId,
+      sectionId: prob ? prob.sectionId : "",
+      sectionName: prob ? prob.sectionName : "",
+      code: code || null,
+      imageUrl: imgUrl || null,
+      submittedAt: serverTimestamp(),
+      evaluated: false,
+      evalScore: null,
+      evalComment: null
+    });
+    if (!solvedMap[probId]) {
+      solvedMap[probId] = true;
+      await setDoc(doc(db, "users", me.uid, "solved", probId), { solvedAt: serverTimestamp() });
+      updateProgress();
+    }
+    toast("✓ Submitted!");
+    const ok = document.getElementById("subok_" + probId);
+    if (ok) ok.classList.add("show");
+    if (pendingImgProbId === probId) { pendingImgUrl = null; pendingImgProbId = null; }
+  } catch(err) {
+    toast("Submit failed: " + err.message, "bad");
+  }
+}
+
+// ── My Submissions ──
+async function loadMySubmissions() {
+  const el = document.getElementById("mySubsContainer");
+  if (!el) return;
+  el.innerHTML = `<div style="color:var(--text3);font-family:var(--mono);font-size:13px;padding:20px">Loading...</div>`;
+  try {
+    const q = query(collection(db, "submissions"), where("userId","==",me.uid), orderBy("submittedAt","desc"));
+    const snap = await getDocs(q);
+    el.innerHTML = "";
+    if (snap.empty) {
+      el.innerHTML = `<div class="empty"><div class="eico">📭</div><p>No submissions yet.</p></div>`;
+      return;
+    }
+    snap.forEach(d => {
+      const s = d.data();
+      const ts = s.submittedAt ? new Date(s.submittedAt.seconds*1000).toLocaleString() : "—";
+      const card = document.createElement("div");
+      card.className = "sub-card";
+      card.innerHTML = `
+        <div class="sub-header">
+          <div>
+            <div class="sub-name">${s.problemTitle}</div>
+            <div class="sub-meta">${s.sectionName||""} · ${ts}</div>
+          </div>
+          ${s.evaluated ? `<span style="font-family:var(--mono);font-size:10px;background:var(--gold-dim);color:var(--gold);padding:3px 10px;border-radius:99px">Score: ${s.evalScore}/10</span>` : ""}
+        </div>
+        ${s.code ? `<div class="code-block">${esc(s.code)}</div>` : ""}
+        ${s.imageUrl ? `<img class="sub-img" src="${s.imageUrl}">` : ""}
+        ${s.evaluated && s.evalComment ? `<div style="margin-top:8px;font-size:13px;color:var(--text2);line-height:1.6"><span style="color:var(--gold)">Teacher: </span>${esc(s.evalComment)}</div>` : ""}
+      `;
+      el.appendChild(card);
+    });
+  } catch(err) {
+    el.innerHTML = `<div style="color:var(--pink);font-family:var(--mono);font-size:12px;padding:16px">Error: ${err.message}</div>`;
+  }
+}
+
+// ── Teacher: Section management ──
+function genCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+window.createSection = async function() {
+  const name = document.getElementById("secName").value.trim();
+  if (!name) { toast("Enter a section name.", "bad"); return; }
+  const code = genCode();
+  await addDoc(collection(db, "sections"), { name, code, createdBy: me.uid, createdAt: serverTimestamp() });
+  document.getElementById("secName").value = "";
+  toast(`Created! Code: ${code}`);
+  await loadSections();
+  loadSections(); // reload display
+  showTeacherView("tsections");
+};
+
+async function loadSections() {
+  const snap = await getDocs(collection(db, "sections"));
+  allSections = [];
+  snap.forEach(d => allSections.push({ id: d.id, ...d.data() }));
+  allSections.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+  const el = document.getElementById("sectionsList");
+  if (!el) return;
+  el.innerHTML = "";
+  if (allSections.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="eico">🏷️</div><p>No sections yet. Create one above!</p></div>`;
+    return;
+  }
+  allSections.forEach(sec => {
+    const card = document.createElement("div");
+    card.className = "sess-card";
+    card.innerHTML = `
+      <div class="sess-info">
+        <h4>${sec.name}</h4>
+        <div class="code-chip">Code: ${sec.code}</div>
+      </div>
+      <div class="sess-actions">
+        <button class="btn-del" onclick="deleteSection('${sec.id}')">Delete</button>
+      </div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+window.deleteSection = async function(id) {
+  if (!confirm("Delete this section? All linked problems will become inaccessible.")) return;
+  await deleteDoc(doc(db, "sections", id));
+  toast("Section deleted.");
+  await loadSections();
+  await loadProblems();
+  populateSectionDropdown();
+  renderTeacherProblems();
+};
+
+function populateSectionDropdown() {
+  const sel = document.getElementById("qSection");
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">-- Choose Section --</option>`;
+  allSections.forEach(s => {
+    const o = document.createElement("option");
+    o.value = s.id;
+    o.textContent = s.name;
+    sel.appendChild(o);
+  });
+  if (cur) sel.value = cur;
+}
+
+// ── Teacher: Problems ──
+window.addProblem = async function() {
+  const title = document.getElementById("qTitle").value.trim();
+  const sectionId = document.getElementById("qSection").value;
+  const diff = document.getElementById("qDiff").value;
+  const concept = document.getElementById("qConcept").value.trim();
+  const problem = document.getElementById("qProblem").value.trim();
+  const example = document.getElementById("qExample").value.trim();
+  const hint = document.getElementById("qHint").value.trim();
+
+  if (!title || !sectionId || !problem) { toast("Title, section, and problem are required.", "bad"); return; }
+
+  const sec = allSections.find(s => s.id === sectionId);
+  await addDoc(collection(db, "problems"), {
+    title, sectionId, sectionName: sec ? sec.name : "",
+    difficulty: diff, concept, problem, example, hint,
+    order: Date.now(), createdAt: serverTimestamp()
+  });
+  toast("Problem added!");
+  ["qTitle","qConcept","qProblem","qExample","qHint"].forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+  document.getElementById("qSection").value = "";
+  await loadProblems();
+  renderTeacherProblems();
+};
+
+function renderTeacherProblems() {
+  const el = document.getElementById("tProblemList");
+  if (!el) return;
+  el.innerHTML = "";
+  if (allProblems.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="eico">📭</div><p>No problems yet.</p></div>`;
+    return;
+  }
+  allProblems.forEach((prob, idx) => {
+    const card = document.createElement("div");
+    card.className = "sub-card";
+    card.innerHTML = `
+      <div class="sub-header">
+        <div>
+          <div class="sub-name">#${idx+1} ${prob.title}</div>
+          <div class="sub-meta">${prob.sectionName||"No section"} · <span class="diff ${(prob.difficulty||"easy").toLowerCase()}" style="display:inline-block;font-size:9px">${prob.difficulty}</span></div>
+        </div>
+        <button class="btn-del" onclick="deleteProblem('${prob.id}')">Delete</button>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">${prob.problem}</div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+window.deleteProblem = async function(id) {
+  if (!confirm("Delete this problem?")) return;
+  await deleteDoc(doc(db, "problems", id));
+  toast("Deleted.");
+  await loadProblems();
+  renderTeacherProblems();
+};
+
+// ── Teacher: Submissions ──
+window.loadTeacherSubs = async function() {
+  const el = document.getElementById("tSubsContainer");
+  if (!el) return;
+  el.innerHTML = `<div style="color:var(--text3);font-family:var(--mono);font-size:13px;padding:20px">Loading...</div>`;
+
+  // Populate filters
+  const secSel = document.getElementById("fSection");
+  if (secSel && secSel.options.length <= 1) {
+    allSections.forEach(s => {
+      if (!Array.from(secSel.options).find(o=>o.value===s.id)) {
+        secSel.appendChild(new Option(s.name, s.id));
+      }
+    });
+  }
+  const probSel = document.getElementById("fProblem");
+  if (probSel && probSel.options.length <= 1) {
+    allProblems.forEach(p => probSel.appendChild(new Option(p.title, p.id)));
   }
 
-  function updateProgress() {
-    const solvedCount = problems.filter(p => p.solved).length;
-    const percent = (solvedCount / problems.length) * 100;
-    document.getElementById('progressFill').style.width = `${percent}%`;
-    document.getElementById('progressCounter').innerText = `${solvedCount}/${problems.length}`;
+  const secFilter = document.getElementById("fSection")?.value || "";
+  const probFilter = document.getElementById("fProblem")?.value || "";
+
+  let q;
+  if (secFilter && probFilter) {
+    q = query(collection(db,"submissions"), where("sectionId","==",secFilter), where("problemId","==",probFilter), orderBy("submittedAt","desc"));
+  } else if (secFilter) {
+    q = query(collection(db,"submissions"), where("sectionId","==",secFilter), orderBy("submittedAt","desc"));
+  } else if (probFilter) {
+    q = query(collection(db,"submissions"), where("problemId","==",probFilter), orderBy("submittedAt","desc"));
+  } else {
+    q = query(collection(db,"submissions"), orderBy("submittedAt","desc"));
   }
 
-  function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.innerText = msg;
-    t.className = `toast show ${type}`;
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
+  if (subsListener) subsListener();
+  subsListener = onSnapshot(q, snap => {
+    el.innerHTML = "";
+    if (snap.empty) {
+      el.innerHTML = `<div class="empty"><div class="eico">📭</div><p>No submissions yet.</p></div>`;
+      return;
+    }
+    snap.forEach(d => {
+      const s = d.data();
+      const ts = s.submittedAt ? new Date(s.submittedAt.seconds*1000).toLocaleString() : "—";
+      const card = document.createElement("div");
+      card.className = "sub-card";
+      card.innerHTML = `
+        <div class="sub-header">
+          <div>
+            <div class="sub-name">${s.userName||"Unknown"}</div>
+            <div class="sub-meta">${s.problemTitle} · ${s.sectionName||""} · ${ts}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <span class="eval-done-chip ${s.evaluated ? "show" : ""}" id="evalchip_${d.id}">✓ Evaluated</span>
+            <button class="btn-del-sub" onclick="deleteSub('${d.id}')">🗑 Delete</button>
+          </div>
+        </div>
+        ${s.code ? `<div class="code-block">${esc(s.code)}</div>` : ""}
+        ${s.imageUrl ? `<img class="sub-img" src="${s.imageUrl}">` : ""}
+        <div class="eval-form">
+          <input type="number" min="0" max="10" class="eval-score-input" id="escore_${d.id}" placeholder="0–10" value="${s.evalScore !== null && s.evalScore !== undefined ? s.evalScore : ''}">
+          <input type="text" class="eval-comment-input" id="ecomment_${d.id}" placeholder="Write feedback..." value="${s.evalComment ? esc(s.evalComment) : ''}">
+          <button class="btn-eval" onclick="evaluateSub('${d.id}')">Evaluate</button>
+        </div>
+      `;
+      el.appendChild(card);
+    });
+  });
+};
 
-  // --- UTILS ---
-  function switchAuthTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-  }
+window.evaluateSub = async function(subId) {
+  const score = parseInt(document.getElementById("escore_" + subId)?.value);
+  const comment = document.getElementById("ecomment_" + subId)?.value?.trim() || "";
+  if (isNaN(score) || score < 0 || score > 10) { toast("Score must be 0–10", "bad"); return; }
+  await updateDoc(doc(db, "submissions", subId), {
+    evaluated: true,
+    evalScore: score,
+    evalComment: comment
+  });
+  const chip = document.getElementById("evalchip_" + subId);
+  if (chip) chip.classList.add("show");
+  toast("Evaluation saved ✓");
+};
 
-  function showError(id, msg) {
-    const el = document.getElementById(id);
-    el.innerText = msg;
-    el.classList.add('visible');
-    setTimeout(() => el.classList.remove('visible'), 3000);
-  }
+window.deleteSub = async function(subId) {
+  if (!confirm("Delete this submission?")) return;
+  await deleteDoc(doc(db, "submissions", subId));
+  toast("Submission deleted.");
+};
 
-  // Init
-  checkAuth();
+// ── Helpers ──
+function esc(t) { return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ── Init routing ──
+(function init() {
+  const isT = window.location.search.includes("teacher");
+  if (isT && sessionStorage.getItem("cr_teacher") === "1") {
+    isTeacher = true;
+    me = { uid: "teacher_master", displayName: "Teacher", email: "teacher@coderoom" };
+    screen("appScreen");
+    setupUI();
+    loadAll();
+    return;
+  }
+  screen(isT ? "teacherAuthScreen" : "authScreen");
+})();
 </script>
-
 </body>
 </html>
