@@ -1,624 +1,255 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>CodeRoom · Live Problem Solving</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    :root {
-      --bg: #0a0a12;
-      --surface: #12121c;
-      --surface2: #181828;
-      --border: #23233a;
-      --border2: #2d2d48;
-      --accent: #8b5cf6;
-      --accent2: #f43f5e;
-      --accent3: #10b981;
-      --text: #f1f1f6;
-      --text2: #9ca3af;
-      --text3: #4b5563;
-      --radius: 20px;
-      --radius-sm: 14px;
-      --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* smooth scroll & mobile */
-    html { scroll-behavior: smooth; }
-
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
-
-    .screen { display: none; min-height: 100vh; animation: fadeIn 0.25s ease; }
-    .screen.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    /* Auth */
-    #authScreen, #teacherAuthScreen {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at 20% 30%, #8b5cf615, transparent 70%);
-    }
-
-    .auth-card {
-      background: rgba(18,18,28,0.9);
-      backdrop-filter: blur(8px);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 32px 28px;
-      width: 440px;
-      max-width: 92vw;
-      box-shadow: 0 25px 45px rgba(0,0,0,0.5);
-      transition: var(--transition);
-    }
-
-    .auth-logo h1 {
-      font-size: 32px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #a78bfa, #fb7185);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .form-input, .form-input-sm, .join-input {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-family: 'JetBrains Mono', monospace;
-      transition: var(--transition);
-    }
-    .form-input:focus, .join-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px #8b5cf630; }
-
-    .btn-primary, .btn-submit, .btn-create {
-      background: var(--accent);
-      border: none;
-      border-radius: 40px;
-      font-weight: 700;
-      padding: 12px;
-      transition: var(--transition);
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .btn-primary:hover { background: #7c3aed; transform: translateY(-1px); }
-
-    /* Layout */
-    .topnav {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 20px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-
-    .app-body {
-      display: flex;
-      flex-direction: row;
-      min-height: calc(100vh - 64px);
-    }
-
-    .sidebar {
-      width: 260px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      padding: 20px 12px;
-      flex-shrink: 0;
-    }
-
-    .content {
-      flex: 1;
-      padding: 24px 28px;
-      overflow-y: auto;
-      max-width: 100%;
-    }
-
-    /* Problem card */
-    .problem-card {
-      background: var(--surface);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      margin-bottom: 12px;
-      transition: var(--transition);
-      cursor: pointer;
-    }
-    .problem-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-
-    .card-row {
-      display: flex;
-      align-items: center;
-      padding: 16px 18px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .card-title { font-weight: 700; flex: 1; }
-    .diff-badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 40px; }
-    .diff-easy { background: #10b98120; color: #34d399; }
-    .diff-medium { background: #f59e0b20; color: #fbbf24; }
-    .diff-hard { background: #f43f5e20; color: #fb7185; }
-
-    /* Code block */
-    .code-textarea {
-      width: 100%;
-      background: #0a0a10;
-      border: 1px solid var(--border2);
-      border-radius: 14px;
-      padding: 14px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      resize: vertical;
-      transition: var(--transition);
-    }
-    .code-textarea:focus { border-color: var(--accent); outline: none; }
-
-    .img-preview {
-      max-width: 100%;
-      max-height: 140px;
-      border-radius: 12px;
-      border: 1px solid var(--border2);
-      margin-top: 8px;
-    }
-
-    .evaluation-badge {
-      display: inline-block;
-      background: #f59e0b20;
-      color: #fbbf24;
-      padding: 2px 10px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .evaluation-result {
-      margin-top: 12px;
-      padding: 12px;
-      background: #1e1e2e;
-      border-radius: 12px;
-      border-left: 3px solid var(--accent3);
-    }
-
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .content { padding: 16px; }
-      .card-row { flex-wrap: wrap; }
-      .tabs-row { flex-wrap: wrap; }
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 50px;
-      padding: 12px 24px;
-      font-size: 13px;
-      z-index: 2000;
-      backdrop-filter: blur(8px);
-      transition: transform 0.2s, opacity 0.2s;
-      transform: translateY(100px);
-      opacity: 0;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-  </style>
-</head>
-<body>
-
-<!-- Student Auth -->
-<div id="authScreen" class="screen">
-  <div class="auth-card">
-    <div class="auth-logo"><h1>⚡ CodeRoom</h1><p style="color:var(--text2);">solve · learn · grow</p></div>
-    <div class="auth-tabs" style="display:flex; gap:12px; margin:20px 0;">
-      <button class="auth-tab active" onclick="switchAuthTab('login')" style="background:none; border:none; font-weight:700;">Login</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')" style="background:none; border:none; font-weight:700;">Register</button>
-    </div>
-    <div id="authError" style="color:#f43f5e; font-size:13px; margin-bottom:12px;"></div>
-    <div id="loginForm">
-      <input type="email" id="loginEmail" class="form-input" placeholder="Email" style="width:100%; margin-bottom:12px;">
-      <input type="password" id="loginPassword" class="form-input" placeholder="Password" style="width:100%; margin-bottom:16px;">
-      <button class="btn-primary" onclick="handleLogin()" style="width:100%">Enter →</button>
-    </div>
-    <div id="registerForm" style="display:none">
-      <input type="text" id="regName" class="form-input" placeholder="Full Name" style="width:100%; margin-bottom:12px;">
-      <input type="email" id="regEmail" class="form-input" placeholder="Email" style="width:100%; margin-bottom:12px;">
-      <input type="password" id="regPassword" class="form-input" placeholder="Password" style="width:100%; margin-bottom:16px;">
-      <button class="btn-primary" onclick="handleRegister()" style="width:100%">Sign up →</button>
-    </div>
-  </div>
-</div>
-
-<!-- Teacher Auth -->
-<div id="teacherAuthScreen" class="screen">
-  <div class="auth-card">
-    <h1 style="font-size:28px;">🔐 Teacher Zone</h1>
-    <p style="color:var(--text2); margin-bottom:20px;">master access</p>
-    <input type="password" id="teacherMasterPass" class="form-input" placeholder="Master password" style="width:100%; margin-bottom:16px;">
-    <button class="btn-primary" onclick="handleTeacherAuth()" style="background:var(--accent2)">Authenticate</button>
-    <div style="margin-top:16px;"><a href="/" style="color:var(--text3);">← back</a></div>
-  </div>
-</div>
-
-<!-- Main App -->
-<div id="appScreen" class="screen">
-  <nav class="topnav">
-    <div style="font-weight:800; font-size:20px;">⚡ CodeRoom</div>
-    <div style="display:flex; gap:12px; align-items:center;">
-      <span id="navUserName" style="font-size:13px;"></span>
-      <span id="navRoleBadge" class="diff-badge" style="background:#8b5cf630;">student</span>
-      <button class="btn-logout" onclick="handleLogout()" style="background:var(--surface2); border:none; padding:6px 14px; border-radius:99px; cursor:pointer;">Logout</button>
-    </div>
-  </nav>
-  <div class="app-body">
-    <aside class="sidebar">
-      <div id="studentSidebar">
-        <div class="sidebar-item active" onclick="showView('problems')">📋 Problems</div>
-        <div class="sidebar-item" onclick="showView('mySubmissions')">📄 My Submissions</div>
-        <div class="join-box" style="margin-top:24px;">
-          <label style="font-size:12px;">🔑 Session code</label>
-          <input type="text" id="joinCodeInput" placeholder="e.g. PYTHON123" style="width:100%; margin:8px 0;">
-          <button class="btn-join" onclick="joinSession()" style="background:var(--accent3); width:100%;">Unlock Section</button>
-          <div id="activeSessionBox" style="margin-top:8px; font-size:12px; color:var(--accent3);"></div>
+<div class="form-full">
+              <label class="form-label">Problem Statement</label>
+              <textarea id="qStatement" class="form-input" placeholder="Describe the problem..."></textarea>
+            </div>
+            <div class="form-full">
+              <label class="form-label">Example (Input/Output)</label>
+              <textarea id="qExample" class="form-input" placeholder="e.g. Input: 5, Output: 25"></textarea>
+            </div>
+            <div class="form-full">
+              <button class="btn-add-q" onclick="addNewProblem()">Create Problem ✨</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div id="teacherSidebar" style="display:none;">
-        <div class="sidebar-item" onclick="showTeacherView('manageProblems')">📚 Manage Problems</div>
-        <div class="sidebar-item" onclick="showTeacherView('sections')">🏷️ Sections & Codes</div>
-        <div class="sidebar-item" onclick="showTeacherView('evaluate')">✅ Evaluate Submissions</div>
-      </div>
-    </aside>
 
-    <main class="content">
-      <!-- STUDENT VIEWS -->
-      <div id="view-problems">
-        <div id="sessionBanner" style="background:#10b98120; border-radius:12px; padding:12px; margin-bottom:16px; display:none;"></div>
-        <div class="progress-wrapper" style="display:flex; gap:12px; margin-bottom:20px;">
-          <div class="progress-bar-bg" style="flex:1; background:var(--surface2); border-radius:99px; height:8px;"><div class="progress-fill" id="progressFill" style="width:0%; height:100%; background:var(--accent3); border-radius:99px;"></div></div>
-          <span id="progressCounter">0/0</span>
-        </div>
-        <div id="problemsList"></div>
-      </div>
-
-      <div id="view-mySubmissions" style="display:none;"><div class="page-title">My Submissions</div><div id="mySubsList"></div></div>
-
-      <!-- TEACHER VIEWS -->
-      <div id="view-teacherProblems" style="display:none;">
-        <div class="page-title">➕ New Problem</div>
-        <div style="background:var(--surface); border-radius:var(--radius-sm); padding:20px; margin:16px 0;">
-          <input id="qTitle" placeholder="Title" class="form-input" style="width:100%; margin-bottom:8px;">
-          <select id="qSection" class="form-input" style="margin-bottom:8px;"><option value="Python Basics">Python Basics</option><option value="Data Structures">Data Structures</option><option value="Algorithms">Algorithms</option></select>
-          <select id="qDifficulty" class="form-input" style="margin-bottom:8px;"><option>Easy</option><option>Medium</option><option>Hard</option></select>
-          <textarea id="qProblem" placeholder="Problem statement" class="form-input" rows="3"></textarea>
-          <textarea id="qExample" placeholder="Example" class="form-input" rows="2"></textarea>
-          <textarea id="qHint" placeholder="Hint" class="form-input" rows="2"></textarea>
-          <button onclick="addQuestion()" class="btn-create" style="margin-top:12px;">Add Problem</button>
-        </div>
         <div id="teacherProblemsList"></div>
       </div>
 
-      <div id="view-teacherSections" style="display:none;">
-        <div class="page-title">📌 Sections & Join Codes</div>
-        <div style="background:var(--surface); border-radius:var(--radius-sm); padding:20px; margin:16px 0;">
-          <input id="newSectionName" placeholder="Section name (e.g. Python Basics)" class="form-input" style="width:60%; display:inline-block;">
-          <button onclick="createSectionWithCode()" class="btn-create" style="margin-left:8px;">Generate Code</button>
+      <div id="view-teacherSessions" style="display:none">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Live Sessions</div>
+            <div class="page-subtitle">Create and manage real-time coding rooms</div>
+          </div>
         </div>
-        <div id="sectionsList"></div>
+
+        <div class="session-creator">
+          <h3>🚀 Start New Session</h3>
+          <div class="input-row">
+            <input type="text" id="newSessionName" class="form-input-sm" placeholder="Session Name (e.g. Lab 04)">
+            <button class="btn-create" onclick="createSession()">Generate Session Code</button>
+          </div>
+        </div>
+
+        <div class="sessions-list" id="activeSessionsList"></div>
       </div>
 
-      <div id="view-teacherEvaluate" style="display:none;">
-        <div class="page-title">📝 Pending & Evaluated Submissions</div>
-        <select id="evalFilterSection" class="form-input" style="margin:12px 0; max-width:260px;"></select>
-        <div id="evalSubmissionsList"></div>
+      <div id="view-teacherSubmissions" style="display:none">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Student Submissions</div>
+            <div class="page-subtitle">Review code and images from all students</div>
+          </div>
+        </div>
+        <div id="allSubsList"></div>
       </div>
+
     </main>
   </div>
 </div>
+
 <div id="toast" class="toast"></div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, onSnapshot, arrayUnion, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",
-    authDomain: "teacher-student-portal-b1fed.firebaseapp.com",
-    projectId: "teacher-student-portal-b1fed",
-    storageBucket: "teacher-student-portal-b1fed.firebasestorage.app",
-    messagingSenderId: "553128972767",
-    appId: "1:553128972767:web:96a77d5907c054bcb2746a"
-  };
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  const TEACHER_SECRET = "coderoom_teacher_2024";
-  let currentUser = null, isTeacher = false, currentSessionSection = null, currentSectionName = "";
-  let allProblems = [], sectionProblems = [], solvedMap = {}, expandedCards = {};
-
-  // helpers
-  function showToast(msg, type = "success") { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 2800); }
-
-  // AUTH
-  window.switchAuthTab = (tab) => {
-    document.getElementById("loginForm").style.display = tab === "login" ? "block" : "none";
-    document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
-  };
-  window.handleLogin = async () => {
-    try { await signInWithEmailAndPassword(auth, document.getElementById("loginEmail").value, document.getElementById("loginPassword").value); } 
-    catch(e){ document.getElementById("authError").innerText = e.message; }
-  };
-  window.handleRegister = async () => {
-    try{
-      const cred = await createUserWithEmailAndPassword(auth, document.getElementById("regEmail").value, document.getElementById("regPassword").value);
-      await updateProfile(cred.user, { displayName: document.getElementById("regName").value });
-      await setDoc(doc(db, "users", cred.user.uid), { name: document.getElementById("regName").value, email: cred.user.email });
-    } catch(e){ document.getElementById("authError").innerText = e.message; }
-  };
-  window.handleTeacherAuth = () => {
-    if(document.getElementById("teacherMasterPass").value === TEACHER_SECRET){
-      sessionStorage.setItem("coderoom_teacher","true");
-      isTeacher = true;
-      currentUser = { uid: "teacher_master", displayName: "Teacher" };
-      showScreen("appScreen"); setupUI(); loadTeacherData();
-    } else showToast("Wrong password","error");
-  };
-  window.handleLogout = async () => { sessionStorage.removeItem("coderoom_teacher"); if(auth.currentUser) await signOut(auth); isTeacher=false; window.location.href = "/"; };
-  function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
-
-  onAuthStateChanged(auth, async (user) => {
-    if(isTeacher) return;
-    if(user){
-      currentUser = user;
-      showScreen("appScreen");
-      setupUI();
-      await loadStudentData();
-    } else if(!window.location.search.includes("teacher")) showScreen("authScreen");
-  });
-
-  function setupUI(){
-    document.getElementById("navUserName").innerText = currentUser.displayName || currentUser.email?.split("@")[0] || "Student";
-    if(isTeacher){
-      document.getElementById("navRoleBadge").innerText = "TEACHER";
-      document.getElementById("studentSidebar").style.display = "none";
-      document.getElementById("teacherSidebar").style.display = "block";
-      showTeacherView("manageProblems");
-    } else {
-      document.getElementById("navRoleBadge").innerText = "STUDENT";
-      document.getElementById("studentSidebar").style.display = "block";
-      document.getElementById("teacherSidebar").style.display = "none";
-      showView("problems");
-    }
-  }
-
-  // ********** SESSION & SECTION LOGIC **********
-  async function joinSession(){
-    const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
-    if(!code) return;
-    const qSnap = await getDocs(query(collection(db,"sectionCodes"), where("code","==",code)));
-    if(qSnap.empty){ showToast("Invalid code","error"); return; }
-    const sectDoc = qSnap.docs[0];
-    const sectionName = sectDoc.data().sectionName;
-    currentSessionSection = sectDoc.id;
-    currentSectionName = sectionName;
-    document.getElementById("activeSessionBox").innerHTML = `✅ Active: ${sectionName}`;
-    document.getElementById("sessionBanner").style.display = "block";
-    document.getElementById("sessionBanner").innerHTML = `🔓 You unlocked: <strong>${sectionName}</strong> — solve problems below.`;
-    await loadProblemsBySection(currentSessionSection);
-    showView("problems");
-    document.getElementById("joinCodeInput").value = "";
-  }
-
-  async function loadProblemsBySection(sectionId){
-    const snap = await getDocs(query(collection(db,"problems"), where("sectionId","==",sectionId)));
-    sectionProblems = snap.docs.map(d=> ({ id:d.id, ...d.data() }));
-    // load solved status
-    if(currentUser && !isTeacher){
-      const solvedSnap = await getDocs(collection(db, "users", currentUser.uid, "solved"));
-      solvedMap = {};
-      solvedSnap.forEach(d=>{ solvedMap[d.id]=true; });
-    }
-    renderProblemsList();
-    updateProgressStudent();
-  }
-
-  function renderProblemsList(){
-    const container = document.getElementById("problemsList");
-    if(!sectionProblems.length){ container.innerHTML = `<div class="empty-state">📭 No problems in this section yet.</div>`; return; }
-    container.innerHTML = "";
-    sectionProblems.forEach((prob,idx)=>{
-      const isSolved = !!solvedMap[prob.id];
-      const expanded = expandedCards[prob.id];
-      const card = document.createElement("div"); card.className = "problem-card";
-      card.innerHTML = `
-        <div class="card-row">
-          <div style="width:28px; font-weight:bold;">${isSolved ? "✅" : "○"}</div>
-          <div class="card-title" style="${isSolved ? 'text-decoration:line-through; opacity:0.7' : ''}">${prob.title}</div>
-          <div class="diff-badge diff-${prob.difficulty?.toLowerCase()}">${prob.difficulty || "Easy"}</div>
-          <div>${expanded ? "▲" : "▼"}</div>
-        </div>
-        ${expanded ? buildExpanded(prob) : ""}
-      `;
-      card.addEventListener("click",(e)=> { if(e.target.closest("button")) return; expandedCards[prob.id]=!expandedCards[prob.id]; renderProblemsList(); });
-      container.appendChild(card);
-    });
-  }
-
-  function buildExpanded(prob){
-    return `<div class="card-body" style="padding:0 18px 18px 18px;">
-      <div style="background:#0f0f1a; border-radius:14px; padding:12px; margin-bottom:12px;"><b>📖 Problem</b><br>${prob.problem}</div>
-      <div style="background:#0f0f1a; border-radius:14px; padding:12px; margin-bottom:12px;"><b>📌 Example</b><br><pre style="font-family:monospace;">${prob.example}</pre></div>
-      <div style="background:#0f0f1a; border-radius:14px; padding:12px; margin-bottom:12px;"><b>💡 Hint</b><br>${prob.hint}</div>
-      <textarea id="code_${prob.id}" rows="5" class="code-textarea" placeholder="Write your Python solution..."></textarea>
-      <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-        <button onclick="submitSolution('${prob.id}')" class="btn-submit" style="background:var(--accent);">Submit Code</button>
-        <button onclick="uploadImageAndSubmit('${prob.id}')" class="btn-img" style="background:var(--surface2);">📸 Add Image</button>
-      </div>
-      <div id="imgPreview_${prob.id}" style="margin-top:8px;"></div>
-      <div id="subResult_${prob.id}" style="margin-top:8px;"></div>
-    </div>`;
-  }
-
-  window.uploadImageAndSubmit = async (probId) => {
-    const input = document.createElement("input"); input.type = "file"; input.accept = "image/*";
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if(!file) return;
-      const formData = new FormData(); formData.append("image", file);
-      showToast("Uploading to ImgBB...", "success");
-      try {
-        const res = await fetch("https://api.imgbb.com/1/upload?key=6d207e02198a847aa98d0a2a901485a5", { method:"POST", body:formData });
-        const data = await res.json();
-        if(data.success){ 
-          const imgUrl = data.data.url;
-          await submitWithImage(probId, imgUrl);
-        } else showToast("Upload failed", "error");
-      } catch(err){ showToast("Image upload error", "error"); }
-    };
-    input.click();
-  };
-
-  async function submitWithImage(probId, imgUrl){
-    const code = document.getElementById(`code_${probId}`)?.value || "";
-    await addDoc(collection(db, "submissions"), {
-      userId: currentUser.uid, userName: currentUser.displayName || "Student", problemId: probId, problemTitle: sectionProblems.find(p=>p.id===probId)?.title,
-      code: code, imageUrl: imgUrl, sectionId: currentSessionSection, sectionName: currentSectionName,
-      evaluated: false, score: null, feedback: "", submittedAt: serverTimestamp()
-    });
-    if(!solvedMap[probId]){
-      solvedMap[probId] = true;
-      await setDoc(doc(db, "users", currentUser.uid, "solved", probId), { solvedAt: serverTimestamp() });
-    }
-    showToast("Solution + image submitted! Pending evaluation.", "success");
-    renderProblemsList();
-    updateProgressStudent();
-  }
-
-  window.submitSolution = async (probId) => {
-    const code = document.getElementById(`code_${probId}`)?.value;
-    if(!code){ showToast("Write some code","error"); return; }
-    await addDoc(collection(db, "submissions"), {
-      userId: currentUser.uid, userName: currentUser.displayName || "Student", problemId: probId, problemTitle: sectionProblems.find(p=>p.id===probId)?.title,
-      code: code, imageUrl: null, sectionId: currentSessionSection, sectionName: currentSectionName,
-      evaluated: false, score: null, feedback: "", submittedAt: serverTimestamp()
-    });
-    if(!solvedMap[probId]){ solvedMap[probId]=true; await setDoc(doc(db, "users", currentUser.uid, "solved", probId), { solvedAt: serverTimestamp() }); }
-    showToast("Submitted! Waiting for teacher review.","success");
-    renderProblemsList();
-    updateProgressStudent();
-  };
-
-  function updateProgressStudent(){ const total = sectionProblems.length, solvedCount = sectionProblems.filter(p=>solvedMap[p.id]).length; document.getElementById("progressFill").style.width = total? (solvedCount/total)*100+"%":"0%"; document.getElementById("progressCounter").innerText = `${solvedCount}/${total}`; }
-
-  // MY SUBMISSIONS with evaluation results
-  async function loadMySubmissions(){
-    const subsSnap = await getDocs(query(collection(db,"submissions"), where("userId","==",currentUser.uid), orderBy("submittedAt","desc")));
-    const listDiv = document.getElementById("mySubsList");
-    if(subsSnap.empty){ listDiv.innerHTML = "<div class='empty-state'>📭 No submissions yet.</div>"; return; }
-    listDiv.innerHTML = "";
-    subsSnap.forEach(d=>{
-      const s = d.data();
-      listDiv.innerHTML += `<div class="problem-card" style="padding:16px;"><div><b>${s.problemTitle}</b> <span class="diff-badge">${s.sectionName || "no section"}</span> ${s.evaluated ? '<span style="color:#10b981;">✓ Evaluated</span>' : '<span style="color:#fbbf24;">⏳ Pending</span>'}</div>${s.code ? `<pre style="background:#0a0a12; padding:8px; border-radius:12px; font-family:monospace;">${s.code}</pre>` : ""}${s.imageUrl ? `<img src="${s.imageUrl}" style="max-width:200px; border-radius:12px;">` : ""}${s.evaluated ? `<div class="evaluation-result"><span style="font-weight:bold;">📊 Score: ${s.score}/10</span><br>💬 ${s.feedback}</div>` : ""}</div>`;
-    });
-  }
-
-  // ---------- TEACHER SECTION MANAGEMENT ----------
-  async function loadTeacherData(){
-    await loadAllProblems();
-    renderTeacherProblemsList();
-    loadSectionsList();
-    populateEvalFilters();
-  }
-
-  async function loadAllProblems(){
-    const snap = await getDocs(collection(db,"problems"));
-    allProblems = snap.docs.map(d=> ({ id:d.id, ...d.data() }));
-  }
-  window.addQuestion = async () => {
-    if(!currentSessionSection && !isTeacher){ showToast("No section active","error"); return; }
-    const sectId = currentSessionSection || prompt("Section ID? (teacher visible)");
-    if(!sectId) return;
-    const title = document.getElementById("qTitle").value;
-    if(!title) return;
-    await addDoc(collection(db,"problems"), {
-      title, sectionId: sectId, difficulty: document.getElementById("qDifficulty").value,
-      problem: document.getElementById("qProblem").value, example: document.getElementById("qExample").value,
-      hint: document.getElementById("qHint").value, createdAt: serverTimestamp()
-    });
-    showToast("Problem added to section");
-    await loadAllProblems(); renderTeacherProblemsList();
-  };
-  function renderTeacherProblemsList(){
-    const container = document.getElementById("teacherProblemsList");
-    if(!container) return;
-    container.innerHTML = allProblems.map(p=>`<div class="problem-card" style="padding:12px;"><b>${p.title}</b> (section: ${p.sectionId})<br><small>${p.problem?.slice(0,80)}</small><button onclick="deleteProblem('${p.id}')" style="float:right;">🗑️</button></div>`).join("");
-  }
-  window.deleteProblem = async(id)=>{ await deleteDoc(doc(db,"problems",id)); await loadAllProblems(); renderTeacherProblemsList(); };
-
-  // Create section with join code
-  window.createSectionWithCode = async ()=>{
-    const name = document.getElementById("newSectionName").value.trim();
-    if(!name) return;
-    const code = Math.random().toString(36).substring(2,8).toUpperCase();
-    await addDoc(collection(db,"sectionCodes"), { sectionName: name, code, createdAt: serverTimestamp(), createdBy: "teacher" });
-    showToast(`Section "${name}" created. Code: ${code}`);
-    loadSectionsList();
-  };
-  async function loadSectionsList(){
-    const snap = await getDocs(collection(db,"sectionCodes"));
-    const div = document.getElementById("sectionsList");
-    div.innerHTML = snap.docs.map(d=>`<div class="problem-card" style="padding:12px;"><b>${d.data().sectionName}</b> &nbsp;<code>${d.data().code}</code><button onclick="deleteSection('${d.id}')" style="margin-left:10px;">Delete</button></div>`).join("");
-  }
-  window.deleteSection = async(id)=>{ await deleteDoc(doc(db,"sectionCodes",id)); loadSectionsList(); };
+<script>
+  // --- INITIAL DATA ---
+  let problems = JSON.parse(localStorage.getItem('cr_problems')) || [
+    { id: 1, title: "Factorial Calculation", section: "Numbers & Math", difficulty: "Easy", concept: "Recursion", solved: false, statement: "Write a function to find the factorial of N.", example: "Input: 5\nOutput: 120" },
+    { id: 2, title: "Palindrome Check", section: "Strings", difficulty: "Medium", concept: "Slicing", solved: false, statement: "Check if a given string is a palindrome.", example: "Input: 'racecar'\nOutput: true" }
+  ];
   
-  // Evaluation panel
-  async function populateEvalFilters(){
-    const snap = await getDocs(collection(db,"sectionCodes"));
-    const select = document.getElementById("evalFilterSection");
-    select.innerHTML = '<option value="">All sections</option>';
-    snap.forEach(d=>{ select.innerHTML += `<option value="${d.id}">${d.data().sectionName}</option>`; });
-    select.onchange = () => loadEvalSubmissions();
-    loadEvalSubmissions();
+  let submissions = JSON.parse(localStorage.getItem('cr_subs')) || [];
+  let sessions = JSON.parse(localStorage.getItem('cr_sessions')) || [];
+  let currentUser = JSON.parse(localStorage.getItem('cr_user')) || null;
+  let activeSessionCode = null;
+
+  // --- AUTH LOGIC ---
+  function checkAuth() {
+    const isTeacherUrl = window.location.search.includes('teacher');
+    if (currentUser) {
+      document.getElementById('authScreen').classList.remove('active');
+      document.getElementById('teacherAuthScreen').classList.remove('active');
+      document.getElementById('appScreen').classList.add('active');
+      setupUI(currentUser.role);
+    } else {
+      if (isTeacherUrl) {
+        document.getElementById('teacherAuthScreen').classList.add('active');
+      } else {
+        document.getElementById('authScreen').classList.add('active');
+      }
+    }
   }
-  async function loadEvalSubmissions(){
-    const sectionFilter = document.getElementById("evalFilterSection").value;
-    let q = query(collection(db,"submissions"), orderBy("submittedAt","desc"));
-    const div = document.getElementById("evalSubmissionsList");
-    const snap = await getDocs(q);
-    let subs = snap.docs.map(d=> ({ id:d.id, ...d.data() }));
-    if(sectionFilter) subs = subs.filter(s=> s.sectionId === sectionFilter);
-    div.innerHTML = "";
-    for(let s of subs){
-      div.innerHTML += `<div class="problem-card" style="padding:16px; margin-bottom:12px;">
-        <div><b>${s.userName}</b> — ${s.problemTitle} <span class="diff-badge">${s.sectionName}</span> ${s.evaluated ? "✅ rated" : "🕒 pending"}</div>
-        ${s.code ? `<pre style="background:#0a0a12; padding:8px; border-radius:12px;">${s.code}</pre>` : ""}
-        ${s.imageUrl ? `<img src="${s.imageUrl}" style="max-width:180px; border-radius:12px;">` : ""}
-        <div style="margin-top:10px;">
-          <input id="score_${s.id}" placeholder="Score (0-10)" style="width:80px;" value="${s.score || ''}">
-          <input id="fb_${s.id}" placeholder="Feedback" value="${s.feedback || ''}">
-          <button onclick="evaluateSubmission('${s.id}')" class="btn-submit" style="background:var(--accent2);">Save Evaluation</button>
-        </
+
+  function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    if (!email) return showError('authError', 'Please enter an email');
+    
+    currentUser = { name: email.split('@')[0], email, role: 'student' };
+    localStorage.setItem('cr_user', JSON.stringify(currentUser));
+    location.reload();
+  }
+
+  function handleTeacherAuth() {
+    const pass = document.getElementById('teacherMasterPass').value;
+    if (pass === 'admin123') { // Simple demo password
+      currentUser = { name: 'Admin Instructor', email: 'admin@coderoom.io', role: 'teacher' };
+      localStorage.setItem('cr_user', JSON.stringify(currentUser));
+      location.reload();
+    } else {
+      showError('teacherAuthError', 'Invalid Master Password');
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('cr_user');
+    location.reload();
+  }
+
+  // --- NAVIGATION ---
+  function setupUI(role) {
+    document.getElementById('navUserName').innerText = currentUser.name;
+    const badge = document.getElementById('navRoleBadge');
+    badge.innerText = role.toUpperCase();
+    badge.className = `nav-badge badge-${role}`;
+
+    if (role === 'teacher') {
+      document.getElementById('studentSidebar').style.display = 'none';
+      document.getElementById('teacherSidebar').style.display = 'block';
+      showTeacherView('manageProblems');
+    } else {
+      renderStudentProblems();
+    }
+  }
+
+  function showView(view) {
+    ['view-problems', 'view-mySubmissions'].forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById(`view-${view}`).style.display = 'block';
+    
+    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    if (view === 'mySubmissions') renderMySubmissions();
+    if (view === 'problems') renderStudentProblems();
+  }
+
+  function showTeacherView(view) {
+    const views = ['teacherProblems', 'teacherSessions', 'teacherSubmissions'];
+    views.forEach(v => document.getElementById(`view-${v}`).style.display = 'none');
+    
+    const target = view.replace('manage', 'teacher').replace('view', 'teacher');
+    document.getElementById(`view-${target}`).style.display = 'block';
+    
+    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    if (view === 'manageProblems') renderTeacherProblems();
+    if (view === 'manageSessions') renderSessions();
+    if (view === 'viewSubmissions') renderAllSubmissions();
+  }
+
+  // --- CORE FUNCTIONALITY ---
+  function renderStudentProblems() {
+    const list = document.getElementById('problemsList');
+    const sections = [...new Set(problems.map(p => p.section))];
+    
+    // Render Section Tabs
+    const tabRow = document.getElementById('sectionTabsRow');
+    tabRow.innerHTML = `<button class="tab-chip active">All Problems</button>` + 
+      sections.map(s => `<button class="tab-chip">${s}</button>`).join('');
+
+    // Render Problems
+    list.innerHTML = problems.map(p => `
+      <div class="problem-card ${p.solved ? 'solved' : ''}" onclick="toggleCard(${p.id})">
+        <div class="card-row">
+          <div class="card-check ${p.solved ? 'checked' : ''}">✔</div>
+          <div class="card-num">#${p.id}</div>
+          <div class="card-title ${p.solved ? 'solved-title' : ''}">${p.title}</div>
+          <div class="diff-badge diff-${p.difficulty.toLowerCase()}">${p.difficulty}</div>
+        </div>
+        <div class="card-body" id="body-${p.id}" style="display:none" onclick="event.stopPropagation()">
+          <div class="card-inner">
+            <div class="block block-problem">
+              <div class="block-label">The Challenge</div>
+              <div class="block-text">${p.statement}</div>
+            </div>
+            <div class="block block-example">
+              <div class="block-label">Example</div>
+              <pre class="block-pre">${p.example}</pre>
+            </div>
+            <textarea class="code-textarea" id="code-${p.id}" placeholder="Write your solution here..."></textarea>
+            <div class="submit-row">
+              <button class="btn-submit" onclick="submitSolution(${p.id})">Submit Solution</button>
+              <span class="submitted-badge" id="badge-${p.id}">Success! Solution stored.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    
+    updateProgress();
+  }
+
+  function toggleCard(id) {
+    const body = document.getElementById(`body-${id}`);
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function submitSolution(id) {
+    const code = document.getElementById(`code-${id}`).value;
+    if (!code) return showToast("Please write some code first!", "error");
+    
+    const sub = {
+      id: Date.now(),
+      problemId: id,
+      user: currentUser.name,
+      code: code,
+      timestamp: new Date().toLocaleString(),
+      session: activeSessionCode
+    };
+    
+    submissions.push(sub);
+    localStorage.setItem('cr_subs', JSON.stringify(submissions));
+    
+    const prob = problems.find(p => p.id === id);
+    prob.solved = true;
+    localStorage.setItem('cr_problems', JSON.stringify(problems));
+    
+    document.getElementById(`badge-${id}`).classList.add('visible');
+    showToast("Solution submitted successfully!", "success");
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const solvedCount = problems.filter(p => p.solved).length;
+    const percent = (solvedCount / problems.length) * 100;
+    document.getElementById('progressFill').style.width = `${percent}%`;
+    document.getElementById('progressCounter').innerText = `${solvedCount}/${problems.length}`;
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // --- UTILS ---
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.innerText = msg;
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), 3000);
+  }
+
+  // Init
+  checkAuth();
+</script>
+
+</body>
+</html>
