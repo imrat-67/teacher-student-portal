@@ -1035,7 +1035,7 @@
 </head>
 <body>
 
-<!-- ====== AUTH SCREEN ====== -->
+<!-- ====== STUDENT AUTH SCREEN ====== -->
 <div id="authScreen" class="screen">
   <div class="auth-bg"></div>
   <div class="auth-grid"></div>
@@ -1056,11 +1056,11 @@
     <div id="loginForm">
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com">
+        <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')handleLogin()">
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()">
       </div>
       <button class="btn-primary" onclick="handleLogin()" id="loginBtn">Login →</button>
     </div>
@@ -1076,18 +1076,34 @@
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input type="password" id="regPassword" class="form-input" placeholder="••••••••">
+        <input type="password" id="regPassword" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleRegister()">
       </div>
       <button class="btn-primary" onclick="handleRegister()" id="registerBtn">Create Account →</button>
     </div>
+  </div>
+</div>
 
-    <!-- Secret teacher login -->
-    <div class="secret-toggle">
-      <button onclick="toggleSecretField()">· · ·</button>
+<!-- ====== TEACHER AUTH SCREEN (only shown at ?teacher URL) ====== -->
+<div id="teacherAuthScreen" class="screen">
+  <div class="auth-bg" style="background: radial-gradient(ellipse 60% 40% at 20% 20%, #ff658418 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 80% 80%, #6c63ff18 0%, transparent 60%);"></div>
+  <div class="auth-grid"></div>
+  <div class="auth-card" style="border-color:#ff658430; box-shadow: 0 0 80px #ff658415;">
+    <div class="auth-logo">
+      <span class="auth-logo-icon">🔐</span>
+      <h1 style="background: linear-gradient(135deg,#ff6584,#6c63ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Teacher Panel</h1>
+      <p>// restricted access</p>
     </div>
-    <div id="secretField" class="secret-field">
-      <label class="form-label" style="color: #ff658480; font-size:10px">TEACHER SECRET CODE</label>
-      <input type="password" id="teacherSecret" class="form-input" placeholder="Enter secret code" style="border-color:#ff658430">
+
+    <div id="teacherAuthError" class="error-msg"></div>
+
+    <div class="form-group">
+      <label class="form-label" style="color:#ff658490">Master Password</label>
+      <input type="password" id="teacherMasterPass" class="form-input" placeholder="Enter master password" style="border-color:#ff658430" onkeydown="if(event.key==='Enter')handleTeacherAuth()">
+    </div>
+    <button class="btn-primary" onclick="handleTeacherAuth()" id="teacherAuthBtn" style="background:#ff6584">Enter →</button>
+
+    <div style="text-align:center; margin-top:16px">
+      <a href="/" style="color:var(--text3); font-size:12px; font-family:var(--mono); text-decoration:none">← Back to student login</a>
     </div>
   </div>
 </div>
@@ -1364,10 +1380,6 @@
     clearAuthError();
   };
 
-  window.toggleSecretField = function() {
-    document.getElementById("secretField").classList.toggle("visible");
-  };
-
   function showAuthError(msg) {
     const el = document.getElementById("authError");
     el.textContent = msg;
@@ -1378,11 +1390,33 @@
     document.getElementById("authError").classList.remove("visible");
   }
 
-  // ===== AUTH =====
+  // ===== TEACHER AUTH (password only, no Firebase) =====
+  window.handleTeacherAuth = function() {
+    const pass = document.getElementById("teacherMasterPass").value;
+    const errEl = document.getElementById("teacherAuthError");
+    errEl.classList.remove("visible");
+
+    if (pass === TEACHER_SECRET) {
+      // Store in sessionStorage so page refresh keeps teacher logged in
+      sessionStorage.setItem("coderoom_teacher", "true");
+      isTeacher = true;
+      // Sign in anonymously to Firestore or use a stored teacher account
+      // We just go straight to teacher app — no Firebase auth needed for teacher
+      currentUser = { uid: "teacher_master", displayName: "Teacher", email: "teacher@coderoom" };
+      showScreen("appScreen");
+      setupUI();
+      loadData();
+    } else {
+      errEl.textContent = "Incorrect password.";
+      errEl.classList.add("visible");
+      document.getElementById("teacherMasterPass").value = "";
+    }
+  };
+
+  // ===== STUDENT AUTH =====
   window.handleLogin = async function() {
     const email = document.getElementById("loginEmail").value.trim();
     const pass = document.getElementById("loginPassword").value;
-    const secret = document.getElementById("teacherSecret").value;
     clearAuthError();
 
     if (!email || !pass) { showAuthError("Please fill in all fields."); return; }
@@ -1392,9 +1426,6 @@
 
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      if (secret === TEACHER_SECRET) {
-        isTeacher = true;
-      }
     } catch (e) {
       showAuthError("Login failed: " + e.message.replace("Firebase: ", ""));
       btn.disabled = false; btn.textContent = "Login →";
@@ -1425,15 +1456,22 @@
   };
 
   window.handleLogout = async function() {
-    await signOut(auth);
+    sessionStorage.removeItem("coderoom_teacher");
     isTeacher = false;
     currentSessionId = null;
     currentSessionName = "";
     if (subsUnsubscribe) subsUnsubscribe();
+    // If Firebase user, sign out
+    if (auth.currentUser) await signOut(auth);
+    // Redirect to correct screen
+    const isTeacherPage = window.location.search.includes("teacher");
+    showScreen(isTeacherPage ? "teacherAuthScreen" : "authScreen");
   };
 
-  // ===== AUTH STATE LISTENER =====
+  // ===== AUTH STATE LISTENER (students only) =====
   onAuthStateChanged(auth, async (user) => {
+    // Skip if already handled as teacher
+    if (isTeacher) return;
     if (user) {
       currentUser = user;
       showScreen("appScreen");
@@ -1441,9 +1479,12 @@
       await loadData();
     } else {
       currentUser = null;
-      showScreen("authScreen");
-      document.getElementById("loginBtn").disabled = false;
-      document.getElementById("loginBtn").textContent = "Login →";
+      const isTeacherPage = window.location.search.includes("teacher");
+      if (!isTeacherPage) {
+        showScreen("authScreen");
+        const btn = document.getElementById("loginBtn");
+        if (btn) { btn.disabled = false; btn.textContent = "Login →"; }
+      }
     }
   });
 
@@ -2001,15 +2042,28 @@
     }
   }
 
-  // Seed on load for teacher
-  onAuthStateChanged(auth, async (user) => {
-    if (user && isTeacher) {
-      await seedDefaultProblems();
-    }
-  });
+  // ===== INITIAL ROUTING based on URL =====
+  (function init() {
+    const isTeacherPage = window.location.search.includes("teacher");
 
-  // Initial screen
-  showScreen("authScreen");
+    // If teacher session already authenticated this browser session
+    if (isTeacherPage && sessionStorage.getItem("coderoom_teacher") === "true") {
+      isTeacher = true;
+      currentUser = { uid: "teacher_master", displayName: "Teacher", email: "teacher@coderoom" };
+      showScreen("appScreen");
+      setupUI();
+      loadData();
+      return;
+    }
+
+    // Show teacher password screen
+    if (isTeacherPage) {
+      showScreen("teacherAuthScreen");
+    } else {
+      // Student screen — onAuthStateChanged will handle redirect if already logged in
+      showScreen("authScreen");
+    }
+  })();
 </script>
 </body>
 </html>
