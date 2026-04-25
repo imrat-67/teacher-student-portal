@@ -1,2069 +1,990 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CodeRoom · Problem Solving Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #080810;
-      --surface: #0f0f1e;
-      --surface2: #141428;
-      --border: #1e1e3a;
-      --border2: #2a2a50;
-      --accent: #6c63ff;
-      --accent2: #ff6584;
-      --accent3: #43e97b;
-      --text: #e8e8f0;
-      --text2: #8888aa;
-      --text3: #4a4a6a;
-      --mono: 'JetBrains Mono', monospace;
-      --sans: 'Syne', sans-serif;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-
-    /* ===== SCREENS ===== */
-    .screen { display: none; min-height: 100vh; }
-    .screen.active { display: block; }
-
-    /* ===== AUTH SCREEN ===== */
-    #authScreen {
-      display: none;
-      background: var(--bg);
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      position: relative;
-      overflow: hidden;
-    }
-    #authScreen.active { display: flex; }
-
-    .auth-bg {
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse 60% 40% at 20% 20%, #6c63ff18 0%, transparent 60%),
-        radial-gradient(ellipse 50% 50% at 80% 80%, #ff658418 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .auth-grid {
-      position: absolute; inset: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 40px 40px;
-      opacity: 0.3;
-      pointer-events: none;
-    }
-
-    .auth-card {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 20px;
-      padding: 40px;
-      width: 420px;
-      max-width: 95vw;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 0 80px #6c63ff20;
-    }
-
-    .auth-logo {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .auth-logo-icon {
-      font-size: 40px;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .auth-logo h1 {
-      font-size: 28px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #6c63ff, #ff6584);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -1px;
-    }
-
-    .auth-logo p {
-      color: var(--text2);
-      font-size: 13px;
-      margin-top: 4px;
-      font-family: var(--mono);
-    }
-
-    .auth-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border2);
-      margin-bottom: 24px;
-    }
-
-    .auth-tab {
-      flex: 1;
-      padding: 10px;
-      background: none;
-      border: none;
-      color: var(--text2);
-      font-family: var(--sans);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-    }
-
-    .auth-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    .form-group { margin-bottom: 16px; }
-
-    .form-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text2);
-      margin-bottom: 6px;
-      font-family: var(--mono);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .form-input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px #6c63ff20;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 13px;
-      background: var(--accent);
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      font-family: var(--sans);
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-top: 8px;
-    }
-
-    .btn-primary:hover { background: #7c73ff; transform: translateY(-1px); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .secret-toggle {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .secret-toggle button {
-      background: none;
-      border: none;
-      color: var(--text3);
-      font-size: 11px;
-      cursor: pointer;
-      font-family: var(--mono);
-      transition: color 0.2s;
-    }
-
-    .secret-toggle button:hover { color: var(--text2); }
-
-    .secret-field {
-      display: none;
-      margin-top: 12px;
-    }
-
-    .secret-field.visible { display: block; }
-
-    .error-msg {
-      background: #ff658420;
-      border: 1px solid #ff658440;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #ff6584;
-      margin-bottom: 12px;
-      font-family: var(--mono);
-      display: none;
-    }
-
-    .error-msg.visible { display: block; }
-
-    /* ===== APP LAYOUT ===== */
-    #appScreen {
-      display: none;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    #appScreen.active { display: flex; }
-
-    /* TOP NAV */
-    .topnav {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav-brand-icon { font-size: 22px; }
-
-    .nav-brand-name {
-      font-size: 18px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #6c63ff, #ff6584);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.5px;
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .nav-user-info {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text2);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .nav-badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-weight: 700;
-    }
-
-    .badge-teacher {
-      background: #ff658420;
-      color: #ff6584;
-      border: 1px solid #ff658440;
-    }
-
-    .badge-student {
-      background: #43e97b20;
-      color: #43e97b;
-      border: 1px solid #43e97b40;
-    }
-
-    .btn-logout {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      padding: 6px 14px;
-      color: var(--text2);
-      font-size: 12px;
-      cursor: pointer;
-      font-family: var(--sans);
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-
-    .btn-logout:hover { color: var(--text); border-color: var(--accent); }
-
-    /* MAIN AREA */
-    .app-body {
-      display: flex;
-      flex: 1;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 220px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      padding: 20px 12px;
-      flex-shrink: 0;
-    }
-
-    .sidebar-section-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--text3);
-      text-transform: uppercase;
-      font-family: var(--mono);
-      margin: 16px 8px 8px;
-    }
-
-    .sidebar-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      color: var(--text2);
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.15s;
-      border: 1px solid transparent;
-    }
-
-    .sidebar-item:hover {
-      background: var(--surface2);
-      color: var(--text);
-    }
-
-    .sidebar-item.active {
-      background: #6c63ff18;
-      color: var(--accent);
-      border-color: #6c63ff30;
-    }
-
-    .sidebar-item .si-icon { font-size: 16px; }
-
-    /* JOIN SESSION */
-    .join-box {
-      margin: 12px 0;
-      padding: 12px;
-      background: var(--surface2);
-      border-radius: 12px;
-      border: 1px solid var(--border2);
-    }
-
-    .join-box label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text3);
-      text-transform: uppercase;
-      font-family: var(--mono);
-      letter-spacing: 1px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .join-input-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .join-input {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: 7px;
-      padding: 7px 10px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 12px;
-      outline: none;
-    }
-
-    .join-input:focus { border-color: var(--accent); }
-
-    .btn-join {
-      background: var(--accent);
-      border: none;
-      border-radius: 7px;
-      padding: 7px 12px;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--sans);
-      transition: background 0.2s;
-    }
-
-    .btn-join:hover { background: #7c73ff; }
-
-    .active-session-box {
-      margin-top: 6px;
-      padding: 8px 10px;
-      background: #43e97b15;
-      border: 1px solid #43e97b30;
-      border-radius: 8px;
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--accent3);
-      display: none;
-    }
-
-    .active-session-box.visible { display: block; }
-
-    /* CONTENT AREA */
-    .content {
-      flex: 1;
-      padding: 24px;
-      overflow-y: auto;
-      max-height: calc(100vh - 60px);
-    }
-
-    /* PAGE HEADER */
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .page-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.5px;
-    }
-
-    .page-subtitle {
-      font-size: 13px;
-      color: var(--text2);
-      margin-top: 2px;
-    }
-
-    /* PROGRESS */
-    .progress-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .progress-bar-bg {
-      flex: 1;
-      background: var(--surface2);
-      border-radius: 99px;
-      height: 7px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      transition: width 0.4s ease;
-      width: 0%;
-    }
-
-    .progress-counter {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    /* TABS */
-    .section-tabs-bar {
-      overflow-x: auto;
-      scrollbar-width: none;
-      margin-bottom: 16px;
-    }
-
-    .section-tabs-bar::-webkit-scrollbar { display: none; }
-
-    .tabs-row {
-      display: flex;
-      gap: 6px;
-      min-width: max-content;
-    }
-
-    .tab-chip {
-      padding: 6px 14px;
-      border-radius: 99px;
-      border: 1px solid var(--border2);
-      background: transparent;
-      color: var(--text2);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: var(--sans);
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    .tab-chip.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .tab-chip:hover:not(.active) {
-      border-color: var(--accent);
-      color: var(--text);
-    }
-
-    /* PROBLEM CARDS */
-    .problem-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      margin-bottom: 8px;
-      overflow: hidden;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-    }
-
-    .problem-card:hover {
-      border-color: var(--border2);
-      box-shadow: 0 4px 20px #6c63ff15;
-    }
-
-    .problem-card.solved {
-      border-color: #43e97b30;
-      background: #43e97b08;
-    }
-
-    .card-row {
-      display: flex;
-      align-items: center;
-      padding: 14px 16px;
-      gap: 12px;
-    }
-
-    .card-check {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      border: 2px solid var(--border2);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .card-check.checked {
-      background: var(--accent3);
-      border-color: var(--accent3);
-      color: #000;
-      font-weight: 900;
-      font-size: 13px;
-    }
-
-    .card-num {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text3);
-      font-weight: 700;
-      min-width: 26px;
-    }
-
-    .card-title {
-      flex: 1;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .card-title.solved-title {
-      text-decoration: line-through;
-      color: var(--accent3);
-    }
-
-    .diff-badge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 99px;
-      flex-shrink: 0;
-    }
-
-    .diff-easy { background: #43e97b18; color: #43e97b; border: 1px solid #43e97b30; }
-    .diff-medium { background: #ffd70018; color: #ffd700; border: 1px solid #ffd70030; }
-    .diff-hard { background: #ff658418; color: #ff6584; border: 1px solid #ff658430; }
-
-    .card-arrow {
-      color: var(--text3);
-      font-size: 12px;
-      transition: transform 0.2s;
-    }
-
-    /* EXPANDED */
-    .card-body {
-      padding: 0 16px 16px;
-      border-top: 1px solid var(--border);
-    }
-
-    .card-inner {
-      padding-top: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .block {
-      border-radius: 10px;
-      padding: 14px;
-    }
-
-    .block-problem { background: #0d0d20; border-left: 3px solid var(--accent); }
-    .block-example { background: #0a1628; border-left: 3px solid #38bdf8; }
-    .block-hint { background: #1a0f0a; border-left: 3px solid #fb923c; }
-    .block-code { background: #0d1a0d; border-left: 3px solid var(--accent3); }
-
-    .block-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-family: var(--mono);
-      margin-bottom: 8px;
-    }
-
-    .block-problem .block-label { color: var(--accent); }
-    .block-example .block-label { color: #38bdf8; }
-    .block-hint .block-label { color: #fb923c; }
-    .block-code .block-label { color: var(--accent3); }
-
-    .block-text {
-      font-size: 14px;
-      color: var(--text);
-      line-height: 1.7;
-    }
-
-    .block-pre {
-      font-family: var(--mono);
-      font-size: 13px;
-      color: #7dd3fc;
-      white-space: pre-wrap;
-    }
-
-    /* CODE SUBMISSION AREA */
-    .code-textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 14px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      resize: vertical;
-      min-height: 140px;
-      outline: none;
-      line-height: 1.6;
-      transition: border-color 0.2s;
-    }
-
-    .code-textarea:focus { border-color: var(--accent); }
-
-    .submit-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .btn-submit {
-      padding: 10px 22px;
-      background: var(--accent);
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-submit:hover { background: #7c73ff; }
-
-    .btn-img {
-      padding: 10px 16px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      color: var(--text2);
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-img:hover { border-color: var(--accent); color: var(--text); }
-
-    .submitted-badge {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent3);
-      display: none;
-    }
-
-    .submitted-badge.visible { display: inline; }
-
-    .img-preview {
-      max-width: 200px;
-      max-height: 120px;
-      border-radius: 8px;
-      border: 1px solid var(--border2);
-      display: none;
-    }
-
-    .img-preview.visible { display: block; }
-
-    /* SESSION ACTIVE BANNER */
-    .session-banner {
-      background: #43e97b15;
-      border: 1px solid #43e97b30;
-      border-radius: 10px;
-      padding: 10px 16px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      font-family: var(--mono);
-      color: var(--accent3);
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .session-banner.visible { display: flex; }
-
-    /* ===== TEACHER SECTION ===== */
-    .teacher-view-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .tv-tab {
-      padding: 8px 20px;
-      border-radius: 8px;
-      border: 1px solid var(--border2);
-      background: transparent;
-      color: var(--text2);
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .tv-tab.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    /* SESSION CREATOR */
-    .session-creator {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-
-    .session-creator h3 {
-      font-size: 15px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text);
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .form-input-sm {
-      flex: 1;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      outline: none;
-    }
-
-    .form-input-sm:focus { border-color: var(--accent); }
-
-    .btn-create {
-      padding: 10px 20px;
-      background: var(--accent2);
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-
-    .btn-create:hover { background: #ff7a9a; }
-
-    /* SESSIONS LIST */
-    .sessions-list { display: flex; flex-direction: column; gap: 10px; }
-
-    .session-card {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .session-info h4 {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .session-code-chip {
-      font-family: var(--mono);
-      font-size: 13px;
-      background: #6c63ff20;
-      color: var(--accent);
-      padding: 3px 10px;
-      border-radius: 6px;
-      margin-top: 4px;
-      display: inline-block;
-    }
-
-    .btn-view-subs {
-      padding: 8px 16px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      color: var(--text2);
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--sans);
-      transition: all 0.2s;
-    }
-
-    .btn-view-subs:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* SUBMISSIONS VIEW */
-    .submissions-view {
-      display: none;
-    }
-
-    .submissions-view.visible { display: block; }
-
-    .sub-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 8px;
-    }
-
-    .sub-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .sub-meta {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text2);
-    }
-
-    .sub-code-block {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent3);
-      white-space: pre-wrap;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .sub-img {
-      max-width: 300px;
-      max-height: 200px;
-      border-radius: 8px;
-      border: 1px solid var(--border2);
-      margin-top: 8px;
-    }
-
-    /* ADD QUESTION FORM */
-    .add-question-form {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-
-    .add-question-form h3 {
-      font-size: 15px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .form-full { grid-column: 1 / -1; }
-
-    select.form-input, select.form-input-sm {
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%238888aa'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 30px;
-    }
-
-    textarea.form-input {
-      resize: vertical;
-      min-height: 80px;
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .btn-add-q {
-      padding: 11px 24px;
-      background: var(--accent3);
-      border: none;
-      border-radius: 10px;
-      color: #000;
-      font-family: var(--sans);
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-add-q:hover { opacity: 0.85; }
-
-    /* EMPTY STATE */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text3);
-    }
-
-    .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
-    .empty-state p { font-size: 14px; }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-size: 13px;
-      font-family: var(--mono);
-      z-index: 9999;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .toast.success { border-color: #43e97b50; color: var(--accent3); }
-    .toast.error { border-color: #ff658450; color: var(--accent2); }
-
-    /* MOBILE */
-    @media (max-width: 700px) {
-      .sidebar { display: none; }
-      .form-grid { grid-template-columns: 1fr; }
-      .input-row { flex-direction: column; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CodeRoom</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0a0a12;--ink2:#12121e;--ink3:#1a1a2e;
+  --line:#ffffff0f;--line2:#ffffff18;--line3:#ffffff28;
+  --dim:#ffffff30;--mute:#8b8ba8;--soft:#c4c4d8;--text:#eeeef4;
+  --blue:#4f8ef7;--blue2:#3a7aef;
+  --green:#22c55e;--green2:#16a34a;
+  --amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+  --mono:'IBM Plex Mono',monospace;--sans:'Outfit',sans-serif;
+  --r:12px;--r2:8px;--sh:0 4px 24px #00000040;--sh2:0 8px 40px #00000060;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--ink);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line3);border-radius:99px}
+button{cursor:pointer;font-family:var(--sans);border:none;outline:none}
+input,textarea,select{font-family:var(--sans);outline:none;border:none}
+a{text-decoration:none;color:inherit}
+
+/* PAGES */
+.page{display:none;min-height:100vh;animation:fadeIn .25s ease}
+.page.show{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* AUTH */
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;min-height:100vh;position:relative;overflow:hidden}
+.auth-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 30% 20%,#4f8ef720 0%,transparent 65%),radial-gradient(ellipse 50% 60% at 80% 80%,#a855f715 0%,transparent 65%)}
+.auth-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#ffffff07 1px,transparent 1px);background-size:28px 28px}
+.auth-card{width:100%;max-width:400px;position:relative;z-index:1;background:var(--ink2);border:1px solid var(--line2);border-radius:20px;padding:36px 32px;box-shadow:var(--sh2)}
+@media(max-width:480px){.auth-card{padding:28px 20px;border-radius:16px}}
+.auth-brand{text-align:center;margin-bottom:28px}
+.auth-brand .logo{font-size:36px;margin-bottom:8px}
+.auth-brand h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.auth-brand h1 .hi{color:var(--blue)}
+.auth-brand p{font-size:12px;font-family:var(--mono);color:var(--mute);margin-top:4px}
+.auth-tabs{display:flex;border-bottom:1px solid var(--line2);margin-bottom:24px}
+.auth-tab{flex:1;padding:10px 8px;background:none;border:none;color:var(--mute);font-size:14px;font-weight:600;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s}
+.auth-tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);margin-bottom:6px}
+.inp{width:100%;background:var(--ink3);border:1px solid var(--line2);border-radius:var(--r2);padding:11px 14px;color:var(--text);font-size:14px;transition:.2s}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px #4f8ef720;outline:none}
+.inp::placeholder{color:var(--dim)}
+textarea.inp{resize:vertical;min-height:90px;font-family:var(--mono);font-size:13px;line-height:1.6}
+select.inp{cursor:pointer;-webkit-appearance:none;appearance:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:var(--r2);font-size:14px;font-weight:700;transition:.18s;white-space:nowrap;cursor:pointer;border:none;font-family:var(--sans)}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue);color:#fff;width:100%;margin-top:6px}
+.btn-primary:hover{background:var(--blue2)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:6px}
+.btn-xs{padding:5px 10px;font-size:11px;border-radius:5px}
+.btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--soft)}
+.btn-ghost:hover{border-color:var(--line3);color:var(--text);background:var(--line)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:var(--green2)}
+.btn-red{background:#ef444418;border:1px solid #ef444430;color:var(--red)}
+.btn-red:hover{background:#ef444430}
+.btn-purple{background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;width:100%;margin-top:6px}
+.btn-purple:hover{opacity:.9}
+.alert{display:none;padding:10px 14px;border-radius:var(--r2);font-size:13px;font-family:var(--mono);margin-bottom:12px}
+.alert.show{display:block}
+.alert-err{background:#ef444418;border:1px solid #ef444430;color:var(--red)}
+.alert-ok{background:#22c55e18;border:1px solid #22c55e30;color:var(--green)}
+.t-link{text-align:center;margin-top:18px}
+.t-link a{font-size:11px;font-family:var(--mono);color:var(--line3);transition:.2s}
+.t-link a:hover{color:var(--mute)}
+
+/* APP LAYOUT */
+#appPage{flex-direction:column}
+.topbar{height:56px;background:var(--ink2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:200;flex-shrink:0}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:800;letter-spacing:-.3px}
+.topbar-brand .hi{color:var(--blue)}
+.topbar-brand .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.user-pill{display:flex;align-items:center;gap:7px;padding:5px 10px;background:var(--ink3);border:1px solid var(--line2);border-radius:99px;font-size:12px;font-weight:600}
+.role-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.role-student{background:var(--green)}
+.role-teacher{background:var(--purple)}
+.topbar-logout{padding:5px 12px;background:none;border:1px solid var(--line2);border-radius:6px;color:var(--mute);font-size:12px;font-weight:600;transition:.2s}
+.topbar-logout:hover{color:var(--text);border-color:var(--line3)}
+.hamburger{display:none;flex-direction:column;gap:4px;padding:7px;background:none;border:1px solid var(--line2);border-radius:6px;cursor:pointer}
+.hamburger span{display:block;width:16px;height:2px;background:var(--mute);border-radius:2px}
+@media(max-width:700px){.hamburger{display:flex}}
+
+/* BODY SPLIT */
+.app-body{display:flex;flex:1;min-height:0;height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidebar{width:210px;background:var(--ink2);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;overflow-y:auto;flex-shrink:0;transition:transform .25s ease}
+@media(max-width:700px){
+  .sidebar{position:fixed;top:56px;left:0;bottom:0;z-index:150;transform:translateX(-100%);width:230px;box-shadow:var(--sh2)}
+  .sidebar.open{transform:none}
+  .sb-overlay{display:none;position:fixed;inset:0;top:56px;background:#00000060;z-index:140}
+  .sb-overlay.show{display:block}
+}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);color:var(--line3);padding:10px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r2);color:var(--mute);font-size:13px;font-weight:600;transition:.15s;border:1px solid transparent;cursor:pointer;user-select:none}
+.nav-item:hover{background:var(--line);color:var(--soft)}
+.nav-item.on{background:#4f8ef715;color:var(--blue);border-color:#4f8ef720}
+.nav-item .ni{font-size:15px;flex-shrink:0}
+.nav-sep{height:1px;background:var(--line);margin:6px 2px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column}
+@media(max-width:480px){.main{padding:14px}}
+
+/* PANELS */
+.panel{display:none;flex-direction:column;gap:16px;animation:fadeIn .2s ease}
+.panel.show{display:flex}
+
+/* PAGE HEADER */
+.ptitle{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.2}
+.psub{font-size:13px;color:var(--mute);margin-top:3px}
+
+/* PROGRESS */
+.prog-wrap{display:flex;align-items:center;gap:10px}
+.prog-bar{flex:1;height:6px;background:var(--ink3);border-radius:99px;overflow:hidden;min-width:80px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px;transition:width .4s ease;width:0%}
+.prog-label{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:700;white-space:nowrap}
+
+/* PILLS */
+.pill-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.pill-row::-webkit-scrollbar{display:none}
+.pill{padding:5px 13px;border-radius:99px;border:1px solid var(--line2);background:transparent;color:var(--mute);font-size:12px;font-weight:600;font-family:var(--sans);white-space:nowrap;transition:.15s;cursor:pointer}
+.pill:hover{border-color:var(--line3);color:var(--soft)}
+.pill.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* PROBLEM CARD */
+.pcard{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.pcard:hover{border-color:var(--line2)}
+.pcard.done{border-color:#22c55e25;background:#22c55e06}
+.pcard-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none}
+.pcard-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--line2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:11px;font-weight:900;cursor:pointer}
+.pcard-check.on{background:var(--green);border-color:var(--green);color:#fff}
+.pcard-num{font-family:var(--mono);font-size:11px;color:var(--line3);font-weight:700;min-width:22px;flex-shrink:0}
+.pcard-title{flex:1;font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
+.pcard-title.done{text-decoration:line-through;color:var(--green)}
+.diff{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0}
+.diff-easy{background:#22c55e18;color:var(--green);border:1px solid #22c55e25}
+.diff-medium{background:#f59e0b18;color:var(--amber);border:1px solid #f59e0b25}
+.diff-hard{background:#ef444418;color:var(--red);border:1px solid #ef444425}
+.pcard-arr{color:var(--line3);font-size:12px;transition:transform .2s;flex-shrink:0}
+
+/* CARD BODY */
+.pcard-body{border-top:1px solid var(--line);padding:14px}
+.pcard-inner{display:flex;flex-direction:column;gap:12px}
+.blk{border-radius:var(--r2);padding:13px}
+.blk-prob{background:#0d0d1e;border-left:3px solid var(--blue)}
+.blk-ex{background:#071220;border-left:3px solid #38bdf8}
+.blk-hint{background:#140f07;border-left:3px solid var(--amber)}
+.blk-code{background:#071407;border-left:3px solid var(--green)}
+.blk-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);margin-bottom:7px}
+.blk-prob .blk-label{color:var(--blue)}
+.blk-ex .blk-label{color:#38bdf8}
+.blk-hint .blk-label{color:var(--amber)}
+.blk-code .blk-label{color:var(--green)}
+.blk-text{font-size:13px;line-height:1.7;color:var(--soft)}
+.blk-pre{font-family:var(--mono);font-size:12px;color:#7dd3fc;white-space:pre-wrap;line-height:1.6}
+.code-area{width:100%;background:var(--ink);border:1px solid var(--line2);border-radius:var(--r2);padding:12px;color:var(--text);font-family:var(--mono);font-size:13px;resize:vertical;min-height:130px;line-height:1.6;transition:.2s;display:block}
+.code-area:focus{border-color:var(--blue);box-shadow:0 0 0 3px #4f8ef715;outline:none}
+.sub-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.sub-status{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:99px}
+.s-pending{background:#f59e0b18;color:var(--amber);border:1px solid #f59e0b30}
+.s-graded{background:#22c55e18;color:var(--green);border:1px solid #22c55e30}
+.grade-box{background:var(--ink3);border:1px solid var(--line2);border-radius:var(--r2);padding:12px}
+.grade-score{font-size:24px;font-weight:900;color:var(--green);font-family:var(--mono)}
+.grade-comment{font-size:13px;color:var(--soft);margin-top:4px;line-height:1.5}
+
+/* UNLOCK */
+.unlock-section-chip{background:var(--ink2);border:1px solid #22c55e25;border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.unlock-section-chip:hover{border-color:#22c55e40;background:#22c55e08}
+.usc-name{font-size:14px;font-weight:700}
+.usc-meta{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:2px}
+
+/* TEACHER SECTION CARD */
+.sec-card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.sec-card:hover{border-color:var(--line2)}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;gap:10px;flex-wrap:wrap}
+.sec-info h4{font-size:15px;font-weight:800}
+.sec-info p{font-size:12px;color:var(--mute);font-family:var(--mono);margin-top:2px}
+.sec-code-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#4f8ef715;border:1px solid #4f8ef730;border-radius:6px;font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:700;letter-spacing:.05em}
+.sec-body{border-top:1px solid var(--line);padding:16px}
+
+/* TEACHER SUBMISSION CARD */
+.tsub{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.tsub-head{display:flex;align-items:flex-start;justify-content:space-between;padding:14px;gap:10px;flex-wrap:wrap}
+.tsub-name{font-size:14px;font-weight:700}
+.tsub-meta{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:2px}
+.tsub-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.code-blk{background:var(--ink);border-radius:var(--r2);padding:12px;font-family:var(--mono);font-size:12px;color:var(--green);white-space:pre-wrap;max-height:200px;overflow-y:auto;line-height:1.6;border:1px solid var(--line)}
+.grade-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:4px}
+.score-inp{width:68px;background:var(--ink3);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:13px;text-align:center;transition:.2s}
+.score-inp:focus{border-color:var(--blue);outline:none}
+.comment-inp{flex:1;min-width:130px;background:var(--ink3);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;transition:.2s}
+.comment-inp:focus{border-color:var(--blue);outline:none}
+.comment-inp::placeholder{color:var(--dim)}
+
+/* MY SUBS */
+.msub{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px}
+.msub-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.msub-title{font-size:14px;font-weight:700}
+.msub-meta{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:2px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink2);border:1px solid var(--line2);border-radius:10px;padding:10px 18px;font-size:13px;font-family:var(--mono);z-index:9999;opacity:0;transition:.3s;white-space:nowrap;box-shadow:var(--sh2);pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{border-color:#22c55e40;color:var(--green)}
+.toast.err{border-color:#ef444440;color:var(--red)}
+
+/* SPINNER */
+.spinner{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:30px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty .ei{font-size:42px}
+.empty p{font-size:13px;color:var(--mute);line-height:1.6}
+
+/* CARD UTIL */
+.card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card-title{font-size:15px;font-weight:800;margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+
+/* TEACHER AUTH PAGE */
+#teacherAuthPage .auth-glow{background:radial-gradient(ellipse 70% 50% at 30% 20%,#a855f720,transparent 65%)}
+#teacherAuthPage .auth-card{border-color:#a855f730}
+#teacherAuthPage .auth-brand .hi{color:var(--purple)}
+</style>
 </head>
 <body>
 
-<!-- ====== STUDENT AUTH SCREEN ====== -->
-<div id="authScreen" class="screen">
-  <div class="auth-bg"></div>
-  <div class="auth-grid"></div>
-  <div class="auth-card">
-    <div class="auth-logo">
-      <span class="auth-logo-icon">⚡</span>
-      <h1>CodeRoom</h1>
-      <p>// problem solving platform</p>
-    </div>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
-    </div>
-
-    <div id="authError" class="error-msg"></div>
-
-    <div id="loginForm">
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')handleLogin()">
+<!-- ═══ STUDENT AUTH ═══ -->
+<div id="authPage" class="page">
+  <div class="auth-wrap">
+    <div class="auth-glow"></div>
+    <div class="auth-dots"></div>
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="logo">⚡</div>
+        <h1>Code<span class="hi">Room</span></h1>
+        <p>// student login</p>
       </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()">
+      <div class="auth-tabs">
+        <button class="auth-tab on" onclick="authTab('login')">Login</button>
+        <button class="auth-tab" onclick="authTab('register')">Register</button>
       </div>
-      <button class="btn-primary" onclick="handleLogin()" id="loginBtn">Login →</button>
-    </div>
-
-    <div id="registerForm" style="display:none">
-      <div class="form-group">
-        <label class="form-label">Name</label>
-        <input type="text" id="regName" class="form-input" placeholder="Your name">
+      <div id="authAlert" class="alert alert-err"></div>
+      <div id="loginForm">
+        <div class="field"><label>Email</label><input class="inp" type="email" id="lEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <div class="field"><label>Password</label><input class="inp" type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn btn-primary" id="lBtn" onclick="doLogin()">Login →</button>
       </div>
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input type="email" id="regEmail" class="form-input" placeholder="you@example.com">
+      <div id="regForm" style="display:none">
+        <div class="field"><label>Your Name</label><input class="inp" type="text" id="rName" placeholder="Full name"></div>
+        <div class="field"><label>Email</label><input class="inp" type="email" id="rEmail" placeholder="you@example.com"></div>
+        <div class="field"><label>Password</label><input class="inp" type="password" id="rPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()"></div>
+        <button class="btn btn-primary" id="rBtn" onclick="doRegister()">Create Account →</button>
       </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input type="password" id="regPassword" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleRegister()">
-      </div>
-      <button class="btn-primary" onclick="handleRegister()" id="registerBtn">Create Account →</button>
+      <div class="t-link"><a href="?teacher">Teacher? →</a></div>
     </div>
   </div>
 </div>
 
-<!-- ====== TEACHER AUTH SCREEN (only shown at ?teacher URL) ====== -->
-<div id="teacherAuthScreen" class="screen">
-  <div class="auth-bg" style="background: radial-gradient(ellipse 60% 40% at 20% 20%, #ff658418 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 80% 80%, #6c63ff18 0%, transparent 60%);"></div>
-  <div class="auth-grid"></div>
-  <div class="auth-card" style="border-color:#ff658430; box-shadow: 0 0 80px #ff658415;">
-    <div class="auth-logo">
-      <span class="auth-logo-icon">🔐</span>
-      <h1 style="background: linear-gradient(135deg,#ff6584,#6c63ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Teacher Panel</h1>
-      <p>// restricted access</p>
-    </div>
-
-    <div id="teacherAuthError" class="error-msg"></div>
-
-    <div class="form-group">
-      <label class="form-label" style="color:#ff658490">Master Password</label>
-      <input type="password" id="teacherMasterPass" class="form-input" placeholder="Enter master password" style="border-color:#ff658430" onkeydown="if(event.key==='Enter')handleTeacherAuth()">
-    </div>
-    <button class="btn-primary" onclick="handleTeacherAuth()" id="teacherAuthBtn" style="background:#ff6584">Enter →</button>
-
-    <div style="text-align:center; margin-top:16px">
-      <a href="/" style="color:var(--text3); font-size:12px; font-family:var(--mono); text-decoration:none">← Back to student login</a>
+<!-- ═══ TEACHER AUTH ═══ -->
+<div id="teacherAuthPage" class="page">
+  <div class="auth-wrap">
+    <div class="auth-glow"></div>
+    <div class="auth-dots"></div>
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="logo">🔐</div>
+        <h1>Teacher <span class="hi">Panel</span></h1>
+        <p>// restricted access</p>
+      </div>
+      <div id="tAuthAlert" class="alert alert-err"></div>
+      <div class="field"><label>Master Password</label><input class="inp" type="password" id="tPass" placeholder="Enter master password" onkeydown="if(event.key==='Enter')doTeacherAuth()"></div>
+      <button class="btn btn-purple" onclick="doTeacherAuth()">Enter Panel →</button>
+      <div class="t-link"><a href="/">← Student Login</a></div>
     </div>
   </div>
 </div>
 
-<!-- ====== APP SCREEN ====== -->
-<div id="appScreen" class="screen">
+<!-- ═══ APP ═══ -->
+<div id="appPage" class="page" style="flex-direction:column">
 
-  <!-- TOP NAV -->
-  <nav class="topnav">
-    <div class="nav-brand">
-      <span class="nav-brand-icon">⚡</span>
-      <span class="nav-brand-name">CodeRoom</span>
+  <header class="topbar">
+    <button class="hamburger" onclick="toggleSB()"><span></span><span></span><span></span></button>
+    <div class="topbar-brand">⚡ Code<span class="hi">Room</span><div class="dot"></div></div>
+    <div class="topbar-right">
+      <div class="user-pill"><div class="role-dot" id="roleDot"></div><span id="uName"></span></div>
+      <button class="topbar-logout" onclick="doLogout()">Logout</button>
     </div>
-    <div class="nav-right">
-      <div class="nav-user-info">
-        <span id="navUserName">Student</span>
-        <span id="navRoleBadge" class="nav-badge badge-student">STUDENT</span>
-      </div>
-      <button class="btn-logout" onclick="handleLogout()">Logout</button>
-    </div>
-  </nav>
+  </header>
+
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSB()"></div>
 
   <div class="app-body">
+    <nav class="sidebar" id="sidebar">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <!-- Student sidebar -->
-      <div id="studentSidebar">
-        <div class="sidebar-section-label">Navigation</div>
-        <div class="sidebar-item active" onclick="showView('problems')">
-          <span class="si-icon">📋</span> Problems
-        </div>
-        <div class="sidebar-item" onclick="showView('mySubmissions')">
-          <span class="si-icon">✅</span> My Submissions
-        </div>
-
-        <div class="sidebar-section-label" style="margin-top:20px">Live Session</div>
-        <div class="join-box">
-          <label>Join with code</label>
-          <div class="join-input-row">
-            <input type="text" id="joinCodeInput" class="join-input" placeholder="e.g. ABC123" maxlength="8">
-            <button class="btn-join" onclick="joinSession()">Go</button>
-          </div>
-          <div id="activeSessionBox" class="active-session-box"></div>
-        </div>
+      <!-- STUDENT NAV -->
+      <div id="sNav">
+        <div class="nav-label">Student</div>
+        <div class="nav-item on" id="sn-unlock" onclick="gotoS('unlock')"><span class="ni">🔑</span>Join Section</div>
+        <div class="nav-item" id="sn-problems" onclick="gotoS('problems')"><span class="ni">📋</span>Problems</div>
+        <div class="nav-item" id="sn-mysubs" onclick="gotoS('mysubs')"><span class="ni">📨</span>My Submissions</div>
       </div>
 
-      <!-- Teacher sidebar -->
-      <div id="teacherSidebar" style="display:none">
-        <div class="sidebar-section-label">Teacher</div>
-        <div class="sidebar-item active" onclick="showTeacherView('manageProblems')">
-          <span class="si-icon">📝</span> Problems
-        </div>
-        <div class="sidebar-item" onclick="showTeacherView('manageSessions')">
-          <span class="si-icon">🏫</span> Sessions
-        </div>
-        <div class="sidebar-item" onclick="showTeacherView('viewSubmissions')">
-          <span class="si-icon">👁️</span> Submissions
-        </div>
-      </div>
-    </aside>
-
-    <!-- CONTENT -->
-    <main class="content">
-
-      <!-- ===== STUDENT: PROBLEMS VIEW ===== -->
-      <div id="view-problems">
-        <!-- Session Banner -->
-        <div id="sessionBanner" class="session-banner">
-          <span>🟢</span>
-          <span id="sessionBannerText"></span>
-        </div>
-
-        <!-- Progress -->
-        <div class="progress-wrapper">
-          <div class="progress-bar-bg">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <span class="progress-counter" id="progressCounter">0/0</span>
-        </div>
-
-        <!-- Section Tabs -->
-        <div class="section-tabs-bar">
-          <div class="tabs-row" id="sectionTabsRow"></div>
-        </div>
-
-        <!-- Problems List -->
-        <div id="problemsList"></div>
+      <!-- TEACHER NAV -->
+      <div id="tNav" style="display:none">
+        <div class="nav-label">Teacher</div>
+        <div class="nav-item on" id="tn-sections" onclick="gotoT('sections')"><span class="ni">📁</span>Sections</div>
+        <div class="nav-item" id="tn-subs" onclick="gotoT('subs')"><span class="ni">👁</span>Submissions</div>
       </div>
 
-      <!-- ===== STUDENT: MY SUBMISSIONS VIEW ===== -->
-      <div id="view-mySubmissions" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">My Submissions</div>
-            <div class="page-subtitle">All your submitted solutions</div>
+    </nav>
+
+    <main class="main">
+
+      <!-- STUDENT: JOIN SECTION -->
+      <div class="panel show" id="pnl-unlock">
+        <div><div class="ptitle">Join a Section</div><div class="psub">Enter the code your teacher shared with you</div></div>
+        <div id="unlockAlert" class="alert alert-err"></div>
+        <div style="max-width:360px;display:flex;flex-direction:column;gap:10px">
+          <div class="field" style="margin:0"><label>Section Code</label>
+            <input class="inp" type="text" id="secCodeInp" placeholder="e.g. PY2024" maxlength="10" style="text-transform:uppercase;letter-spacing:.12em;font-family:var(--mono);font-size:15px" onkeydown="if(event.key==='Enter')joinSection()">
           </div>
+          <button class="btn btn-green" onclick="joinSection()">🔓 Unlock Section</button>
         </div>
-        <div id="mySubsList"></div>
+        <div id="unlockedList" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
 
-      <!-- ===== TEACHER: PROBLEMS VIEW ===== -->
-      <div id="view-teacherProblems" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Manage Problems</div>
-            <div class="page-subtitle">Add or edit problems for students</div>
-          </div>
+      <!-- STUDENT: PROBLEMS -->
+      <div class="panel" id="pnl-problems">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div><div class="ptitle">Problems</div><div class="psub" id="probSub">Your unlocked sections</div></div>
+          <div class="prog-wrap" style="min-width:150px"><div class="prog-bar"><div class="prog-fill" id="progFill"></div></div><span class="prog-label" id="progLabel">0/0</span></div>
         </div>
+        <div class="pill-row" id="pillRow"></div>
+        <div id="probList" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
 
-        <!-- Add Question Form -->
-        <div class="add-question-form">
-          <h3>➕ Add New Problem</h3>
+      <!-- STUDENT: MY SUBMISSIONS -->
+      <div class="panel" id="pnl-mysubs">
+        <div><div class="ptitle">My Submissions</div><div class="psub">All your work and evaluation results</div></div>
+        <div id="mySubsList" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
+      <!-- TEACHER: SECTIONS -->
+      <div class="panel" id="pnl-sections">
+        <div><div class="ptitle">Manage Sections</div><div class="psub">Create sections → add problems → share code with students</div></div>
+        <div class="card">
+          <div class="card-title">➕ Create New Section</div>
           <div class="form-grid">
-            <div>
-              <label class="form-label">Title</label>
-              <input type="text" id="qTitle" class="form-input" placeholder="Problem title">
-            </div>
-            <div>
-              <label class="form-label">Section</label>
-              <input type="text" id="qSection" class="form-input" placeholder="e.g. Numbers & Math" list="sectionSuggestions">
-              <datalist id="sectionSuggestions">
-                <option value="Numbers & Math">
-                <option value="Strings">
-                <option value="Lists">
-                <option value="Tuples & Sets">
-                <option value="Dictionaries">
-                <option value="Functions & Logic">
-                <option value="Classic Algorithms">
-              </datalist>
-            </div>
-            <div>
-              <label class="form-label">Difficulty</label>
-              <select id="qDifficulty" class="form-input">
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
-            </div>
-            <div>
-              <label class="form-label">Concept</label>
-              <input type="text" id="qConcept" class="form-input" placeholder="e.g. Loops + Arithmetic">
-            </div>
-            <div class="form-full">
-              <label class="form-label">Problem Statement</label>
-              <textarea id="qProblem" class="form-input" placeholder="Describe the problem..."></textarea>
-            </div>
-            <div class="form-full">
-              <label class="form-label">Example</label>
-              <textarea id="qExample" class="form-input" placeholder="Input / Output examples..."></textarea>
-            </div>
-            <div class="form-full">
-              <label class="form-label">Hint</label>
-              <textarea id="qHint" class="form-input" placeholder="Hint for students..."></textarea>
-            </div>
+            <div class="field full" style="margin:0"><label>Section Name</label><input class="inp" id="tSecName" placeholder="e.g. Python Basics"></div>
+            <div class="field full" style="margin:0"><label>Description (optional)</label><input class="inp" id="tSecDesc" placeholder="Brief description for students"></div>
           </div>
-          <div style="margin-top: 16px;">
-            <button class="btn-add-q" onclick="addQuestion()">Add Problem</button>
-          </div>
+          <div style="margin-top:12px"><button class="btn btn-green btn-sm" onclick="createSection()">Create Section</button></div>
         </div>
-
-        <!-- Problems List Teacher View -->
-        <div class="page-header">
-          <div>
-            <div class="page-title" style="font-size:16px">All Problems</div>
-          </div>
-        </div>
-        <div id="teacherProblemsList"></div>
+        <div id="secList" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
 
-      <!-- ===== TEACHER: SESSIONS VIEW ===== -->
-      <div id="view-teacherSessions" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Live Sessions</div>
-            <div class="page-subtitle">Create and manage classroom sessions</div>
+      <!-- TEACHER: SUBMISSIONS -->
+      <div class="panel" id="pnl-subs">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div><div class="ptitle">Submissions</div><div class="psub">Live updates — grade student work below</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select class="inp" id="filterSec" style="padding:7px 10px;font-size:12px;min-width:130px" onchange="loadTSubs()">
+              <option value="">All Sections</option>
+            </select>
+            <select class="inp" id="filterStatus" style="padding:7px 10px;font-size:12px" onchange="loadTSubs()">
+              <option value="">All</option>
+              <option value="pending">Pending</option>
+              <option value="graded">Graded</option>
+            </select>
           </div>
         </div>
-
-        <div class="session-creator">
-          <h3>🏫 Create New Session</h3>
-          <div class="input-row">
-            <input type="text" id="sessionName" class="form-input-sm" placeholder="Session name (e.g. Class 10 - Arrays)">
-            <button class="btn-create" onclick="createSession()">Create Session</button>
-          </div>
-        </div>
-
-        <div id="sessionsList" class="sessions-list"></div>
-      </div>
-
-      <!-- ===== TEACHER: SUBMISSIONS VIEW ===== -->
-      <div id="view-teacherSubmissions" style="display:none">
-        <div class="page-header">
-          <div>
-            <div class="page-title">All Submissions</div>
-            <div class="page-subtitle">View all student submissions in real-time</div>
-          </div>
-        </div>
-
-        <div style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap;">
-          <select id="filterSession" class="form-input-sm" style="max-width:200px" onchange="loadTeacherSubmissions()">
-            <option value="">All Sessions</option>
-          </select>
-          <select id="filterProblem" class="form-input-sm" style="max-width:200px" onchange="loadTeacherSubmissions()">
-            <option value="">All Problems</option>
-          </select>
-        </div>
-
-        <div id="allSubsList"></div>
+        <div id="tSubsList" style="display:flex;flex-direction:column;gap:10px"></div>
       </div>
 
     </main>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
+<input type="file" id="fileInp" accept="image/*" style="display:none" onchange="handleImg(event)">
 
-<!-- Hidden file input -->
-<input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
-
-<!-- ====== FIREBASE + APP SCRIPT ====== -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",
-    authDomain: "teacher-student-portal-b1fed.firebaseapp.com",
-    projectId: "teacher-student-portal-b1fed",
-    storageBucket: "teacher-student-portal-b1fed.firebasestorage.app",
-    messagingSenderId: "553128972767",
-    appId: "1:553128972767:web:96a77d5907c054bcb2746a"
-  };
+// ── CONFIG ──
+const FC={apiKey:"AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",authDomain:"teacher-student-portal-b1fed.firebaseapp.com",projectId:"teacher-student-portal-b1fed",storageBucket:"teacher-student-portal-b1fed.firebasestorage.app",messagingSenderId:"553128972767",appId:"1:553128972767:web:96a77d5907c054bcb2746a"};
+const TPASS="coderoom_teacher_2024"; // ← change this to your desired password
+const IMGBB="YOUR_IMGBB_KEY_HERE";   // ← get free key from imgbb.com/api
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+const app=initializeApp(FC);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-  // ===== CONFIG =====
-  const TEACHER_SECRET = "coderoom_teacher_2024"; // Change this to your desired secret!
+// ── STATE ──
+let me=null,isTeacher=false;
+let unsubLive=null;
+let pendingImgUrl=null,pendingImgProbId=null;
+let expandedCards={},expandedSecs={};
+let solvedMap={};
+let unlockedSecIds=[];
+let allProblems=[];  // flat list from all unlocked sections
+let activePill="all";
+let tSections=[];
 
-  // ===== STATE =====
-  let currentUser = null;
-  let isTeacher = false;
-  let allProblems = [];
-  let activeSection = "All";
-  let expandedCards = {};
-  let solvedProblems = {};
-  let currentSessionId = null;
-  let currentSessionName = "";
-  let pendingImageProblemId = null;
-  let pendingImageBase64 = null;
-  let subsUnsubscribe = null;
+// ── UTILS ──
+const $=id=>document.getElementById(id);
+const mk=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html)e.innerHTML=html;return e;};
+const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
-  // ===== HELPERS =====
-  window.showToast = function(msg, type = "success") {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
-    setTimeout(() => t.classList.remove("show"), 3000);
-  };
+window.showToast=(msg,type="ok")=>{
+  const t=$("toast");t.textContent=msg;t.className=`toast ${type} show`;
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),3000);
+};
 
-  function showScreen(id) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("show"));$(id).classList.add("show");}
+
+const isTeacherURL=location.search.includes("teacher");
+
+// ── AUTH TABS ──
+window.authTab=tab=>{
+  document.querySelectorAll(".auth-tab").forEach(b=>b.classList.toggle("on",b.textContent.trim().toLowerCase()===tab));
+  $("loginForm").style.display=tab==="login"?"block":"none";
+  $("regForm").style.display=tab==="register"?"block":"none";
+  $("authAlert").classList.remove("show");
+};
+
+function authErr(msg){const a=$("authAlert");a.textContent=msg;a.classList.add("show");}
+
+window.doLogin=async()=>{
+  const email=$("lEmail").value.trim(),pass=$("lPass").value;
+  $("authAlert").classList.remove("show");
+  if(!email||!pass){authErr("Please fill in all fields.");return;}
+  const btn=$("lBtn");btn.disabled=true;btn.textContent="Logging in…";
+  try{await signInWithEmailAndPassword(auth,email,pass);}
+  catch(e){authErr(e.message.replace("Firebase: ","").replace(/\(.*\)/,"").trim());btn.disabled=false;btn.textContent="Login →";}
+};
+
+window.doRegister=async()=>{
+  const name=$("rName").value.trim(),email=$("rEmail").value.trim(),pass=$("rPass").value;
+  $("authAlert").classList.remove("show");
+  if(!name||!email||!pass){authErr("Please fill in all fields.");return;}
+  if(pass.length<6){authErr("Password must be at least 6 characters.");return;}
+  const btn=$("rBtn");btn.disabled=true;btn.textContent="Creating…";
+  try{
+    const c=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(c.user,{displayName:name});
+    await setDoc(doc(db,"users",c.user.uid),{name,email,role:"student",createdAt:serverTimestamp()});
+    showToast("Welcome, "+name+"! 🎉");
+  }catch(e){authErr(e.message.replace("Firebase: ","").replace(/\(.*\)/,"").trim());btn.disabled=false;btn.textContent="Create Account →";}
+};
+
+window.doTeacherAuth=()=>{
+  const pass=$("tPass").value;
+  $("tAuthAlert").classList.remove("show");
+  if(pass===TPASS){
+    sessionStorage.setItem("cr_t","1");
+    isTeacher=true;
+    me={uid:"teacher_master",displayName:"Teacher",email:"teacher@coderoom"};
+    bootApp();
+  }else{
+    const a=$("tAuthAlert");a.textContent="Incorrect password.";a.classList.add("show");
+    $("tPass").value="";
   }
+};
 
-  window.switchAuthTab = function(tab) {
-    document.querySelectorAll(".auth-tab").forEach(t => t.classList.toggle("active", t.textContent.toLowerCase() === tab));
-    document.getElementById("loginForm").style.display = tab === "login" ? "block" : "none";
-    document.getElementById("registerForm").style.display = tab === "register" ? "block" : "none";
-    clearAuthError();
-  };
+window.doLogout=async()=>{
+  sessionStorage.removeItem("cr_t");
+  isTeacher=false;me=null;
+  if(unsubLive){unsubLive();unsubLive=null;}
+  try{if(auth.currentUser)await signOut(auth);}catch(_){}
+  location.href=isTeacherURL?"?teacher":"/";
+};
 
-  function showAuthError(msg) {
-    const el = document.getElementById("authError");
-    el.textContent = msg;
-    el.classList.add("visible");
+// ── FIREBASE AUTH ──
+onAuthStateChanged(auth,user=>{
+  if(isTeacher)return;
+  if(user){me=user;bootApp();}
+  else if(!isTeacherURL)showPage("authPage");
+});
+
+// ── BOOT ──
+async function bootApp(){
+  showPage("appPage");
+  $("uName").textContent=me.displayName||me.email?.split("@")[0]||"User";
+  $("roleDot").className="role-dot "+(isTeacher?"role-teacher":"role-student");
+  if(isTeacher){
+    $("tNav").style.display="block";$("sNav").style.display="none";
+    gotoT("sections");
+    await loadTSections();
+  }else{
+    $("tNav").style.display="none";$("sNav").style.display="block";
+    gotoS("unlock");
+    await loadStudentData();
   }
+}
 
-  function clearAuthError() {
-    document.getElementById("authError").classList.remove("visible");
+// ── SIDEBAR ──
+window.toggleSB=()=>{$("sidebar").classList.toggle("open");$("sbOverlay").classList.toggle("show");};
+function closeSB(){$("sidebar").classList.remove("open");$("sbOverlay").classList.remove("show");}
+
+// ── STUDENT NAV ──
+window.gotoS=id=>{
+  document.querySelectorAll("#sNav .nav-item").forEach(n=>n.classList.remove("on"));
+  $("sn-"+id)?.classList.add("on");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("show"));
+  $("pnl-"+id)?.classList.add("show");
+  closeSB();
+  if(id==="problems"){renderPills();renderProblems();}
+  if(id==="mysubs")loadMySubs();
+  if(id==="unlock")renderUnlockedList();
+};
+
+// ── TEACHER NAV ──
+window.gotoT=id=>{
+  document.querySelectorAll("#tNav .nav-item").forEach(n=>n.classList.remove("on"));
+  $("tn-"+id)?.classList.add("on");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("show"));
+  $("pnl-"+id)?.classList.add("show");
+  closeSB();
+  if(id==="subs")loadTSubs();
+  if(id==="sections")loadTSections();
+};
+
+// ═══════════════════════════════════
+// STUDENT DATA LOAD
+// ═══════════════════════════════════
+async function loadStudentData(){
+  unlockedSecIds=[];allProblems=[];solvedMap={};
+  const uSnap=await getDocs(collection(db,"users",me.uid,"unlocked"));
+  uSnap.forEach(d=>unlockedSecIds.push(d.id));
+  for(const sid of unlockedSecIds){
+    const secDoc=await getDoc(doc(db,"sections",sid));
+    const secName=secDoc.exists()?secDoc.data().name:"";
+    const pSnap=await getDocs(query(collection(db,"sections",sid,"problems"),orderBy("order","asc")));
+    pSnap.forEach(d=>allProblems.push({id:d.id,sectionId:sid,sectionName:secName,...d.data()}));
   }
+  const sSnap=await getDocs(collection(db,"users",me.uid,"solved"));
+  sSnap.forEach(d=>{solvedMap[d.id]=true;});
+}
 
-  // ===== TEACHER AUTH (password only, no Firebase) =====
-  window.handleTeacherAuth = function() {
-    const pass = document.getElementById("teacherMasterPass").value;
-    const errEl = document.getElementById("teacherAuthError");
-    errEl.classList.remove("visible");
+// ─── UNLOCK SECTION ───
+window.joinSection=async()=>{
+  const code=$("secCodeInp").value.trim().toUpperCase();
+  const alert=$("unlockAlert");alert.classList.remove("show");
+  if(!code){alert.textContent="Enter a code first.";alert.classList.add("show");return;}
+  try{
+    const snap=await getDocs(query(collection(db,"sections"),where("code","==",code)));
+    if(snap.empty){alert.textContent="No section found with that code.";alert.classList.add("show");return;}
+    const secId=snap.docs[0].id;
+    const secName=snap.docs[0].data().name;
+    if(unlockedSecIds.includes(secId)){alert.textContent="You already have this section.";alert.classList.add("show");return;}
+    await setDoc(doc(db,"users",me.uid,"unlocked",secId),{sectionId:secId,at:serverTimestamp()});
+    unlockedSecIds.push(secId);
+    const pSnap=await getDocs(query(collection(db,"sections",secId,"problems"),orderBy("order","asc")));
+    pSnap.forEach(d=>allProblems.push({id:d.id,sectionId:secId,sectionName:secName,...d.data()}));
+    $("secCodeInp").value="";
+    showToast("🔓 Unlocked: "+secName);
+    renderUnlockedList();
+  }catch(e){alert.textContent=e.message;alert.classList.add("show");}
+};
 
-    if (pass === TEACHER_SECRET) {
-      // Store in sessionStorage so page refresh keeps teacher logged in
-      sessionStorage.setItem("coderoom_teacher", "true");
-      isTeacher = true;
-      // Sign in anonymously to Firestore or use a stored teacher account
-      // We just go straight to teacher app — no Firebase auth needed for teacher
-      currentUser = { uid: "teacher_master", displayName: "Teacher", email: "teacher@coderoom" };
-      showScreen("appScreen");
-      setupUI();
-      loadData();
-    } else {
-      errEl.textContent = "Incorrect password.";
-      errEl.classList.add("visible");
-      document.getElementById("teacherMasterPass").value = "";
-    }
-  };
-
-  // ===== STUDENT AUTH =====
-  window.handleLogin = async function() {
-    const email = document.getElementById("loginEmail").value.trim();
-    const pass = document.getElementById("loginPassword").value;
-    clearAuthError();
-
-    if (!email || !pass) { showAuthError("Please fill in all fields."); return; }
-
-    const btn = document.getElementById("loginBtn");
-    btn.disabled = true; btn.textContent = "Logging in...";
-
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (e) {
-      showAuthError("Login failed: " + e.message.replace("Firebase: ", ""));
-      btn.disabled = false; btn.textContent = "Login →";
-    }
-  };
-
-  window.handleRegister = async function() {
-    const name = document.getElementById("regName").value.trim();
-    const email = document.getElementById("regEmail").value.trim();
-    const pass = document.getElementById("regPassword").value;
-    clearAuthError();
-
-    if (!name || !email || !pass) { showAuthError("Please fill in all fields."); return; }
-    if (pass.length < 6) { showAuthError("Password must be at least 6 characters."); return; }
-
-    const btn = document.getElementById("registerBtn");
-    btn.disabled = true; btn.textContent = "Creating...";
-
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile(cred.user, { displayName: name });
-      await setDoc(doc(db, "users", cred.user.uid), { name, email, role: "student", createdAt: serverTimestamp() });
-      showToast("Account created! Welcome " + name);
-    } catch (e) {
-      showAuthError("Register failed: " + e.message.replace("Firebase: ", ""));
-      btn.disabled = false; btn.textContent = "Create Account →";
-    }
-  };
-
-  window.handleLogout = async function() {
-    sessionStorage.removeItem("coderoom_teacher");
-    isTeacher = false;
-    currentSessionId = null;
-    currentSessionName = "";
-    if (subsUnsubscribe) subsUnsubscribe();
-    // If Firebase user, sign out
-    if (auth.currentUser) await signOut(auth);
-    // Redirect to correct screen
-    const isTeacherPage = window.location.search.includes("teacher");
-    showScreen(isTeacherPage ? "teacherAuthScreen" : "authScreen");
-  };
-
-  // ===== AUTH STATE LISTENER (students only) =====
-  onAuthStateChanged(auth, async (user) => {
-    // Skip if already handled as teacher
-    if (isTeacher) return;
-    if (user) {
-      currentUser = user;
-      showScreen("appScreen");
-      setupUI();
-      await loadData();
-    } else {
-      currentUser = null;
-      const isTeacherPage = window.location.search.includes("teacher");
-      if (!isTeacherPage) {
-        showScreen("authScreen");
-        const btn = document.getElementById("loginBtn");
-        if (btn) { btn.disabled = false; btn.textContent = "Login →"; }
-      }
-    }
+function renderUnlockedList(){
+  const wrap=$("unlockedList");wrap.innerHTML="";
+  if(unlockedSecIds.length===0){
+    wrap.innerHTML=`<div class="empty"><div class="ei">🔒</div><p>No sections unlocked yet.<br>Enter a code above to get started.</p></div>`;
+    return;
+  }
+  unlockedSecIds.forEach(sid=>{
+    const probs=allProblems.filter(p=>p.sectionId===sid);
+    const name=probs[0]?.sectionName||sid;
+    const done=probs.filter(p=>solvedMap[p.id]).length;
+    const chip=mk("div","unlock-section-chip");
+    chip.innerHTML=`<span style="font-size:22px">📂</span><div><div class="usc-name">${name}</div><div class="usc-meta">${probs.length} problems · ${done} solved</div></div>`;
+    chip.onclick=()=>gotoS("problems");
+    wrap.appendChild(chip);
   });
+}
 
-  function setupUI() {
-    const name = currentUser.displayName || currentUser.email.split("@")[0];
-    document.getElementById("navUserName").textContent = name;
+// ─── PROBLEMS ───
+function renderPills(){
+  const row=$("pillRow");row.innerHTML="";
+  const sectionMap={};
+  allProblems.forEach(p=>{if(!sectionMap[p.sectionId])sectionMap[p.sectionId]=p.sectionName||p.sectionId;});
+  const all=mk("button","pill on","All");
+  all.onclick=()=>{activePill="all";document.querySelectorAll(".pill").forEach(p=>p.classList.remove("on"));all.classList.add("on");renderProblems();};
+  row.appendChild(all);
+  Object.entries(sectionMap).forEach(([sid,name])=>{
+    const p=mk("button","pill",name);
+    p.onclick=()=>{activePill=sid;document.querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));p.classList.add("on");renderProblems();};
+    if(activePill===sid)p.classList.add("on");
+    row.appendChild(p);
+  });
+  if(activePill!=="all")all.classList.remove("on");
+}
 
-    if (isTeacher) {
-      document.getElementById("navRoleBadge").textContent = "TEACHER";
-      document.getElementById("navRoleBadge").className = "nav-badge badge-teacher";
-      document.getElementById("studentSidebar").style.display = "none";
-      document.getElementById("teacherSidebar").style.display = "block";
-      showTeacherView("manageProblems");
-    } else {
-      document.getElementById("navRoleBadge").textContent = "STUDENT";
-      document.getElementById("navRoleBadge").className = "nav-badge badge-student";
-      document.getElementById("studentSidebar").style.display = "block";
-      document.getElementById("teacherSidebar").style.display = "none";
-      showView("problems");
-    }
+function updateProgress(){
+  const total=allProblems.length,done=allProblems.filter(p=>solvedMap[p.id]).length;
+  const pct=total?(done/total*100):0;
+  $("progFill").style.width=pct+"%";
+  $("progLabel").textContent=`${done}/${total}`;
+}
+
+function renderProblems(){
+  const list=$("probList");list.innerHTML="";
+  updateProgress();
+  const probs=activePill==="all"?allProblems:allProblems.filter(p=>p.sectionId===activePill);
+  if(probs.length===0){
+    list.innerHTML=`<div class="empty"><div class="ei">📭</div><p>${allProblems.length===0?"Unlock a section first using Join Section.":"No problems in this section yet."}</p></div>`;
+    return;
   }
+  probs.forEach((prob,i)=>{
+    const done=!!solvedMap[prob.id];
+    const open=!!expandedCards[prob.id];
+    const card=mk("div",`pcard${done?" done":""}`);
 
-  // ===== LOAD DATA =====
-  async function loadData() {
-    await loadProblems();
-    if (!isTeacher) {
-      await loadSolvedStatus();
-    }
-  }
-
-  async function loadProblems() {
-    try {
-      const snap = await getDocs(collection(db, "problems"));
-      allProblems = [];
-      snap.forEach(d => allProblems.push({ id: d.id, ...d.data() }));
-      // Sort by order field if exists
-      allProblems.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-      if (!isTeacher) {
-        renderSectionTabs();
-        renderProblems();
-        updateProgress();
-      } else {
-        renderTeacherProblems();
-      }
-    } catch (e) {
-      console.error("Load problems error:", e);
-    }
-  }
-
-  async function loadSolvedStatus() {
-    try {
-      const uid = currentUser.uid;
-      const snap = await getDocs(collection(db, "users", uid, "solved"));
-      solvedProblems = {};
-      snap.forEach(d => { solvedProblems[d.id] = true; });
-      renderProblems();
-      updateProgress();
-    } catch (e) { /* ignore */ }
-  }
-
-  // ===== STUDENT VIEWS =====
-  window.showView = function(name) {
-    document.querySelectorAll("[id^='view-']").forEach(v => v.style.display = "none");
-    const el = document.getElementById("view-" + name);
-    if (el) el.style.display = "block";
-
-    document.querySelectorAll("#studentSidebar .sidebar-item").forEach(i => i.classList.remove("active"));
-    const items = document.querySelectorAll("#studentSidebar .sidebar-item");
-    if (name === "problems") items[0] && items[0].classList.add("active");
-    if (name === "mySubmissions") { items[1] && items[1].classList.add("active"); loadMySubmissions(); }
-  };
-
-  // ===== SECTION TABS =====
-  function renderSectionTabs() {
-    const sections = [...new Set(allProblems.map(p => p.section))];
-    const all = ["All", ...sections];
-    const row = document.getElementById("sectionTabsRow");
-    row.innerHTML = "";
-    const icons = { "Numbers & Math": "🔢", "Strings": "🔤", "Lists": "📋", "Tuples & Sets": "🔗", "Dictionaries": "📖", "Functions & Logic": "⚙️", "Classic Algorithms": "🏆" };
-    all.forEach(sec => {
-      const btn = document.createElement("button");
-      btn.className = `tab-chip ${sec === activeSection ? "active" : ""}`;
-      btn.textContent = `${sec === "All" ? "📚" : (icons[sec] || "📌")} ${sec}`;
-      btn.onclick = () => { activeSection = sec; renderSectionTabs(); renderProblems(); };
-      row.appendChild(btn);
-    });
-  }
-
-  // ===== RENDER PROBLEMS =====
-  function renderProblems() {
-    const list = document.getElementById("problemsList");
-    list.innerHTML = "";
-    const filtered = activeSection === "All" ? allProblems : allProblems.filter(p => p.section === activeSection);
-
-    if (filtered.length === 0) {
-      list.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No problems in this section yet.</p></div>`;
-      return;
-    }
-
-    filtered.forEach((prob, idx) => {
-      const isSolved = !!solvedProblems[prob.id];
-      const isExpanded = !!expandedCards[prob.id];
-      const card = document.createElement("div");
-      card.className = `problem-card ${isSolved ? "solved" : ""}`;
-
-      card.innerHTML = `
-        <div class="card-row">
-          <div class="card-check ${isSolved ? "checked" : ""}" data-id="${prob.id}" onclick="toggleSolved(event,'${prob.id}')">
-            ${isSolved ? "✓" : ""}
-          </div>
-          <span class="card-num">#${idx + 1}</span>
-          <span class="card-title ${isSolved ? "solved-title" : ""}">${prob.title}</span>
-          <span class="diff-badge diff-${(prob.difficulty || "Easy").toLowerCase()}">${prob.difficulty || "Easy"}</span>
-          <span class="card-arrow" style="transform:${isExpanded ? "rotate(180deg)" : "rotate(0)"}"">▼</span>
-        </div>
-        ${isExpanded ? buildCardBody(prob) : ""}
-      `;
-
-      card.addEventListener("click", (e) => {
-        if (e.target.closest(".card-check")) return;
-        expandedCards[prob.id] = !expandedCards[prob.id];
-        renderProblems();
-      });
-
-      list.appendChild(card);
-    });
-  }
-
-  function buildCardBody(prob) {
-    return `
-      <div class="card-body">
-        <div class="card-inner">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span style="font-family:var(--mono);font-size:11px;background:#1e1e4a;color:var(--accent);padding:3px 10px;border-radius:99px">🧠 ${prob.concept || ""}</span>
-            <span style="font-size:11px;color:var(--text3)">${prob.section}</span>
-          </div>
-          <div class="block block-problem">
-            <div class="block-label">Problem</div>
-            <p class="block-text">${prob.problem || ""}</p>
-          </div>
-          <div class="block block-example">
-            <div class="block-label">Example</div>
-            <pre class="block-pre">${prob.example || ""}</pre>
-          </div>
-          <div class="block block-hint">
-            <div class="block-label">💡 Hint</div>
-            <p class="block-text" style="font-family:var(--mono);font-size:13px;color:#fed7aa">${prob.hint || ""}</p>
-          </div>
-          <div class="block block-code">
-            <div class="block-label">✏️ Your Solution</div>
-            <textarea class="code-textarea" id="code_${prob.id}" placeholder="# Write your Python solution here..."></textarea>
-            <div style="margin-top:10px">
-              <img id="imgPreview_${prob.id}" class="img-preview">
-            </div>
-            <div class="submit-row" style="margin-top:10px">
-              <button class="btn-submit" onclick="submitSolution(event,'${prob.id}')">Submit Solution</button>
-              <button class="btn-img" onclick="openImagePicker('${prob.id}')">📷 Add Image</button>
-              <span class="submitted-badge" id="submittedBadge_${prob.id}">✓ Submitted</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    // HEAD — clicking check or the row toggles expand/check
+    const head=mk("div","pcard-head");
+    head.innerHTML=`
+      <div class="pcard-check${done?" on":""}" id="chk_${prob.id}">${done?"✓":""}</div>
+      <span class="pcard-num">#${i+1}</span>
+      <span class="pcard-title${done?" done":""}">${prob.title}</span>
+      <span class="diff diff-${(prob.difficulty||"easy").toLowerCase()}">${prob.difficulty||"Easy"}</span>
+      <span class="pcard-arr" style="transform:${open?"rotate(180deg)":"none"}">▾</span>
     `;
-  }
 
-  function updateProgress() {
-    const total = allProblems.length;
-    const count = Object.keys(solvedProblems).length;
-    const pct = total ? (count / total) * 100 : 0;
-    document.getElementById("progressFill").style.width = pct + "%";
-    document.getElementById("progressCounter").textContent = `${count}/${total}`;
-  }
+    // Checkbox click
+    head.querySelector(".pcard-check").addEventListener("click",e=>{
+      e.stopPropagation();
+      toggleSolved(prob.id);
+    });
 
-  // ===== SOLVED TOGGLE =====
-  window.toggleSolved = async function(e, probId) {
-    e.stopPropagation();
-    const uid = currentUser.uid;
-    if (solvedProblems[probId]) {
-      delete solvedProblems[probId];
-      await deleteDoc(doc(db, "users", uid, "solved", probId));
-    } else {
-      solvedProblems[probId] = true;
-      await setDoc(doc(db, "users", uid, "solved", probId), { solvedAt: serverTimestamp() });
+    // Row click = toggle open
+    head.addEventListener("click",e=>{
+      if(e.target.closest(".pcard-check"))return;
+      expandedCards[prob.id]=!expandedCards[prob.id];
+      renderProblems();
+    });
+
+    card.appendChild(head);
+
+    if(open){
+      const body=mk("div","pcard-body");
+      // CRITICAL: stop ALL clicks inside body from reaching the head
+      body.addEventListener("click",e=>e.stopPropagation());
+      body.addEventListener("mousedown",e=>e.stopPropagation());
+      body.innerHTML=buildBody(prob);
+      card.appendChild(body);
+      // Load existing sub after DOM insert
+      setTimeout(()=>loadExistingSub(prob.id),0);
     }
+
+    list.appendChild(card);
+  });
+}
+
+function buildBody(prob){
+  return `<div class="pcard-inner">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      ${prob.concept?`<span style="font-size:11px;font-family:var(--mono);background:#4f8ef715;color:var(--blue);padding:2px 10px;border-radius:99px">🧠 ${prob.concept}</span>`:""}
+      <span style="font-size:11px;color:var(--mute)">${prob.sectionName||""}</span>
+    </div>
+    ${prob.problem?`<div class="blk blk-prob"><div class="blk-label">Problem</div><p class="blk-text">${prob.problem}</p></div>`:""}
+    ${prob.example?`<div class="blk blk-ex"><div class="blk-label">Example</div><pre class="blk-pre">${esc(prob.example)}</pre></div>`:""}
+    ${prob.hint?`<div class="blk blk-hint"><div class="blk-label">💡 Hint</div><p class="blk-text">${prob.hint}</p></div>`:""}
+    <div class="blk blk-code">
+      <div class="blk-label">✏️ Your Solution</div>
+      <div id="existSub_${prob.id}"><div class="spinner" style="width:20px;height:20px;margin:10px auto"></div></div>
+      <textarea class="code-area" id="codeArea_${prob.id}" placeholder="# Write your solution here…"></textarea>
+      <div id="imgPrev_${prob.id}" style="margin-top:8px"></div>
+      <div class="sub-actions">
+        <button class="btn btn-green btn-sm" onclick="submitSol('${prob.id}','${prob.sectionId}')">Submit</button>
+        <button class="btn btn-ghost btn-sm" onclick="openImgPicker('${prob.id}')">📷 Add Image</button>
+        <span id="subStat_${prob.id}"></span>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadExistingSub(probId){
+  const el=$("existSub_"+probId);if(!el)return;
+  try{
+    const snap=await getDocs(query(collection(db,"submissions"),where("userId","==",me.uid),where("problemId","==",probId),orderBy("submittedAt","desc")));
+    if(snap.empty){el.innerHTML="";return;}
+    const s=snap.docs[0].data();
+    const ta=$("codeArea_"+probId);if(ta&&s.code)ta.value=s.code;
+    if(s.imageUrl){
+      const pw=$("imgPrev_"+probId);
+      if(pw)pw.innerHTML=`<img src="${s.imageUrl}" style="max-width:200px;max-height:140px;border-radius:8px;border:1px solid var(--line2)">`;
+    }
+    const stat=$("subStat_"+probId);
+    if(s.score!=null){
+      el.innerHTML=`<div class="grade-box"><div class="grade-score">${s.score}/10</div><div class="grade-comment">${s.comment||""}</div></div>`;
+      if(stat)stat.innerHTML=`<span class="sub-status s-graded">✓ Graded ${s.score}/10</span>`;
+    }else{
+      el.innerHTML=`<div style="font-size:12px;font-family:var(--mono);color:var(--amber);margin-bottom:6px">⏳ Awaiting evaluation</div>`;
+      if(stat)stat.innerHTML=`<span class="sub-status s-pending">⏳ Pending</span>`;
+    }
+  }catch(_){const el=$("existSub_"+probId);if(el)el.innerHTML="";}
+}
+
+// ─── SOLVED TOGGLE ───
+async function toggleSolved(probId){
+  if(solvedMap[probId]){
+    delete solvedMap[probId];
+    try{await deleteDoc(doc(db,"users",me.uid,"solved",probId));}catch(_){}
+  }else{
+    solvedMap[probId]=true;
+    try{await setDoc(doc(db,"users",me.uid,"solved",probId),{at:serverTimestamp()});}catch(_){}
+  }
+  renderProblems();
+}
+
+// ─── IMAGE ───
+let _imgProbId=null;
+window.openImgPicker=probId=>{_imgProbId=probId;$("fileInp").click();};
+
+window.handleImg=async e=>{
+  const file=e.target.files[0];if(!file)return;
+  e.target.value="";
+  showToast("Uploading image…");
+  try{
+    const fd=new FormData();fd.append("image",file);
+    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`,{method:"POST",body:fd});
+    const json=await res.json();
+    if(!json.success)throw new Error("Upload failed. Check your imgbb key.");
+    pendingImgUrl=json.data.url;pendingImgProbId=_imgProbId;
+    const pw=$("imgPrev_"+_imgProbId);
+    if(pw)pw.innerHTML=`<img src="${pendingImgUrl}" style="max-width:200px;max-height:140px;border-radius:8px;border:1px solid var(--line2)">`;
+    showToast("Image ready ✓");
+  }catch(err){showToast("Image upload failed: "+err.message,"err");}
+};
+
+// ─── SUBMIT ───
+window.submitSol=async(probId,secId)=>{
+  const ta=$("codeArea_"+probId);
+  const code=ta?ta.value.trim():"";
+  const imgUrl=pendingImgProbId===probId?pendingImgUrl:null;
+  if(!code&&!imgUrl){showToast("Write a solution or attach an image first.","err");return;}
+  const prob=allProblems.find(p=>p.id===probId);
+  try{
+    const existing=await getDocs(query(collection(db,"submissions"),where("userId","==",me.uid),where("problemId","==",probId)));
+    const data={userId:me.uid,userName:me.displayName||me.email,problemId:probId,problemTitle:prob?.title||probId,sectionId:secId,sectionName:prob?.sectionName||"",code:code||null,imageUrl:imgUrl||null,status:"pending",score:null,comment:null,submittedAt:serverTimestamp()};
+    if(!existing.empty){await updateDoc(doc(db,"submissions",existing.docs[0].id),{...data,updatedAt:serverTimestamp()});}
+    else{await addDoc(collection(db,"submissions"),data);}
+    if(!solvedMap[probId]){solvedMap[probId]=true;await setDoc(doc(db,"users",me.uid,"solved",probId),{at:serverTimestamp()});}
+    if(pendingImgProbId===probId){pendingImgUrl=null;pendingImgProbId=null;}
+    showToast("✓ Solution submitted!");
+    const stat=$("subStat_"+probId);if(stat)stat.innerHTML=`<span class="sub-status s-pending">⏳ Pending</span>`;
+    const ex=$("existSub_"+probId);if(ex)ex.innerHTML=`<div style="font-size:12px;font-family:var(--mono);color:var(--amber);margin-bottom:6px">⏳ Awaiting evaluation</div>`;
     updateProgress();
-    renderProblems();
-  };
+  }catch(err){showToast(err.message,"err");}
+};
 
-  // ===== IMAGE =====
-  window.openImagePicker = function(probId) {
-    pendingImageProblemId = probId;
-    document.getElementById("imgFileInput").click();
-  };
-
-  window.handleImageSelect = function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 500000) { showToast("Image too large! Max 500KB please.", "error"); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      pendingImageBase64 = ev.target.result;
-      const preview = document.getElementById("imgPreview_" + pendingImageProblemId);
-      if (preview) {
-        preview.src = pendingImageBase64;
-        preview.classList.add("visible");
-      }
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
-  // ===== SUBMIT SOLUTION =====
-  window.submitSolution = async function(e, probId) {
-    e.stopPropagation();
-    const codeEl = document.getElementById("code_" + probId);
-    const code = codeEl ? codeEl.value.trim() : "";
-
-    if (!code && !pendingImageBase64) {
-      showToast("Please write a solution or add an image.", "error");
-      return;
-    }
-
-    const prob = allProblems.find(p => p.id === probId);
-    const name = currentUser.displayName || currentUser.email;
-
-    try {
-      await addDoc(collection(db, "submissions"), {
-        userId: currentUser.uid,
-        userName: name,
-        problemId: probId,
-        problemTitle: prob ? prob.title : probId,
-        section: prob ? prob.section : "",
-        code: code || null,
-        imageBase64: (pendingImageProblemId === probId && pendingImageBase64) ? pendingImageBase64 : null,
-        sessionId: currentSessionId || null,
-        sessionName: currentSessionName || null,
-        submittedAt: serverTimestamp()
-      });
-
-      // Mark solved
-      if (!solvedProblems[probId]) {
-        solvedProblems[probId] = true;
-        await setDoc(doc(db, "users", currentUser.uid, "solved", probId), { solvedAt: serverTimestamp() });
-        updateProgress();
-      }
-
-      showToast("✓ Solution submitted!");
-      const badge = document.getElementById("submittedBadge_" + probId);
-      if (badge) badge.classList.add("visible");
-
-      if (pendingImageProblemId === probId) {
-        pendingImageBase64 = null;
-        pendingImageProblemId = null;
-      }
-    } catch (err) {
-      showToast("Submit failed: " + err.message, "error");
-    }
-  };
-
-  // ===== MY SUBMISSIONS =====
-  async function loadMySubmissions() {
-    const list = document.getElementById("mySubsList");
-    list.innerHTML = `<div style="color:var(--text3);font-family:var(--mono);font-size:13px">Loading...</div>`;
-    try {
-      const q = query(collection(db, "submissions"), where("userId", "==", currentUser.uid), orderBy("submittedAt", "desc"));
-      const snap = await getDocs(q);
-      list.innerHTML = "";
-      if (snap.empty) {
-        list.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No submissions yet. Solve some problems!</p></div>`;
-        return;
-      }
-      snap.forEach(d => {
-        const s = d.data();
-        const ts = s.submittedAt ? new Date(s.submittedAt.seconds * 1000).toLocaleString() : "—";
-        const card = document.createElement("div");
-        card.className = "sub-card";
-        card.innerHTML = `
-          <div class="sub-header">
-            <div>
-              <div style="font-size:14px;font-weight:700;color:var(--text)">${s.problemTitle}</div>
-              <div class="sub-meta">${s.section} · ${ts}${s.sessionName ? " · 🏫 " + s.sessionName : ""}</div>
-            </div>
-          </div>
-          ${s.code ? `<div class="sub-code-block">${escapeHtml(s.code)}</div>` : ""}
-          ${s.imageBase64 ? `<img class="sub-img" src="${s.imageBase64}">` : ""}
-        `;
-        list.appendChild(card);
-      });
-    } catch (err) {
-      list.innerHTML = `<div style="color:#ff6584;font-family:var(--mono);font-size:12px">Error: ${err.message}</div>`;
-    }
-  }
-
-  // ===== SESSION JOIN =====
-  window.joinSession = async function() {
-    const code = document.getElementById("joinCodeInput").value.trim().toUpperCase();
-    if (!code) return;
-    try {
-      const snap = await getDocs(query(collection(db, "sessions"), where("code", "==", code)));
-      if (snap.empty) { showToast("Session not found!", "error"); return; }
-      const sd = snap.docs[0].data();
-      currentSessionId = snap.docs[0].id;
-      currentSessionName = sd.name;
-      document.getElementById("activeSessionBox").textContent = "🟢 " + sd.name;
-      document.getElementById("activeSessionBox").classList.add("visible");
-      document.getElementById("sessionBanner").classList.add("visible");
-      document.getElementById("sessionBannerText").textContent = `You are in session: ${sd.name}. Submissions will be visible to your teacher.`;
-      showToast("Joined session: " + sd.name);
-      document.getElementById("joinCodeInput").value = "";
-    } catch (e) {
-      showToast("Error joining session.", "error");
-    }
-  };
-
-  // ===== TEACHER VIEWS =====
-  window.showTeacherView = function(name) {
-    document.querySelectorAll("[id^='view-']").forEach(v => v.style.display = "none");
-    const map = { manageProblems: "view-teacherProblems", manageSessions: "view-teacherSessions", viewSubmissions: "view-teacherSubmissions" };
-    const el = document.getElementById(map[name]);
-    if (el) el.style.display = "block";
-
-    document.querySelectorAll("#teacherSidebar .sidebar-item").forEach(i => i.classList.remove("active"));
-    const items = document.querySelectorAll("#teacherSidebar .sidebar-item");
-    if (name === "manageProblems") { items[0] && items[0].classList.add("active"); renderTeacherProblems(); }
-    if (name === "manageSessions") { items[1] && items[1].classList.add("active"); loadSessions(); }
-    if (name === "viewSubmissions") { items[2] && items[2].classList.add("active"); loadTeacherSubmissions(); }
-  };
-
-  // ===== ADD QUESTION =====
-  window.addQuestion = async function() {
-    const title = document.getElementById("qTitle").value.trim();
-    const section = document.getElementById("qSection").value.trim();
-    const difficulty = document.getElementById("qDifficulty").value;
-    const concept = document.getElementById("qConcept").value.trim();
-    const problem = document.getElementById("qProblem").value.trim();
-    const example = document.getElementById("qExample").value.trim();
-    const hint = document.getElementById("qHint").value.trim();
-
-    if (!title || !section || !problem) { showToast("Title, section & problem are required.", "error"); return; }
-
-    try {
-      await addDoc(collection(db, "problems"), {
-        title, section, difficulty, concept, problem, example, hint,
-        order: Date.now(),
-        createdAt: serverTimestamp()
-      });
-      showToast("Problem added!");
-      ["qTitle","qSection","qConcept","qProblem","qExample","qHint"].forEach(id => document.getElementById(id).value = "");
-      await loadProblems();
-      renderTeacherProblems();
-    } catch (e) {
-      showToast("Error: " + e.message, "error");
-    }
-  };
-
-  function renderTeacherProblems() {
-    const list = document.getElementById("teacherProblemsList");
-    if (!list) return;
-    list.innerHTML = "";
-    if (allProblems.length === 0) {
-      list.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No problems yet. Add one above!</p></div>`;
-      return;
-    }
-    allProblems.forEach((prob, idx) => {
-      const card = document.createElement("div");
-      card.className = "sub-card";
-      card.style.cursor = "default";
-      card.innerHTML = `
-        <div class="sub-header">
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text)">#${idx + 1} ${prob.title}</div>
-            <div class="sub-meta">${prob.section} · <span class="diff-badge diff-${(prob.difficulty||"easy").toLowerCase()}" style="display:inline">${prob.difficulty}</span></div>
-          </div>
-          <button onclick="deleteQuestion('${prob.id}')" style="background:#ff658420;border:1px solid #ff658440;color:#ff6584;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700">Delete</button>
+// ─── MY SUBS ───
+async function loadMySubs(){
+  const list=$("mySubsList");list.innerHTML=`<div class="spinner"></div>`;
+  try{
+    const snap=await getDocs(query(collection(db,"submissions"),where("userId","==",me.uid),orderBy("submittedAt","desc")));
+    list.innerHTML="";
+    if(snap.empty){list.innerHTML=`<div class="empty"><div class="ei">📭</div><p>No submissions yet. Solve some problems!</p></div>`;return;}
+    snap.forEach(d=>{
+      const s=d.data();
+      const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleDateString():"";
+      const graded=s.score!=null;
+      const card=mk("div","msub");
+      card.innerHTML=`
+        <div class="msub-top">
+          <div><div class="msub-title">${s.problemTitle||"Untitled"}</div><div class="msub-meta">${s.sectionName||""} · ${ts}</div></div>
+          ${graded?`<span class="sub-status s-graded">✓ ${s.score}/10</span>`:`<span class="sub-status s-pending">⏳ Pending</span>`}
         </div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.6">${prob.problem}</div>
+        ${s.code?`<div class="code-blk">${esc(s.code)}</div>`:""}
+        ${s.imageUrl?`<img src="${s.imageUrl}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--line2)">`:""}
+        ${graded?`<div class="grade-box"><div class="grade-score">${s.score}/10</div><div class="grade-comment">${s.comment||""}</div></div>`:""}
       `;
       list.appendChild(card);
     });
-  }
+  }catch(e){list.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+}
 
-  window.deleteQuestion = async function(id) {
-    if (!confirm("Delete this problem?")) return;
-    try {
-      await deleteDoc(doc(db, "problems", id));
-      showToast("Problem deleted.");
-      await loadProblems();
-      renderTeacherProblems();
-    } catch (e) { showToast("Error deleting.", "error"); }
-  };
+// ═══════════════════════════════════
+// TEACHER: SECTIONS
+// ═══════════════════════════════════
+function randCode(){
+  const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join("");
+}
 
-  // ===== SESSIONS =====
-  function generateCode() {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-  }
+window.createSection=async()=>{
+  const name=$("tSecName").value.trim(),desc=$("tSecDesc").value.trim();
+  if(!name){showToast("Enter a section name.","err");return;}
+  const code=randCode();
+  try{
+    await addDoc(collection(db,"sections"),{name,desc,code,createdAt:serverTimestamp()});
+    $("tSecName").value="";$("tSecDesc").value="";
+    showToast("Section created! Code: "+code);
+    await loadTSections();
+  }catch(e){showToast(e.message,"err");}
+};
 
-  window.createSession = async function() {
-    const name = document.getElementById("sessionName").value.trim();
-    if (!name) { showToast("Enter a session name.", "error"); return; }
-    try {
-      const code = generateCode();
-      await addDoc(collection(db, "sessions"), { name, code, createdBy: currentUser.uid, createdAt: serverTimestamp(), active: true });
-      document.getElementById("sessionName").value = "";
-      showToast(`Session created! Code: ${code}`);
-      loadSessions();
-    } catch (e) { showToast("Error creating session.", "error"); }
-  };
+async function loadTSections(){
+  const list=$("secList");list.innerHTML=`<div class="spinner"></div>`;
+  const fSec=$("filterSec");
+  try{
+    const snap=await getDocs(query(collection(db,"sections"),orderBy("createdAt","asc")));
+    list.innerHTML="";tSections=[];
+    while(fSec.options.length>1)fSec.remove(1);
+    if(snap.empty){list.innerHTML=`<div class="empty"><div class="ei">📁</div><p>No sections yet. Create one above.</p></div>`;return;}
+    for(const d of snap.docs){
+      const s={id:d.id,...d.data()};tSections.push(s);
+      fSec.appendChild(new Option(s.name,s.id));
+      const card=await buildSecCard(s);
+      list.appendChild(card);
+    }
+  }catch(e){list.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+}
 
-  async function loadSessions() {
-    const list = document.getElementById("sessionsList");
-    list.innerHTML = "";
-    try {
-      const snap = await getDocs(query(collection(db, "sessions"), where("createdBy", "==", currentUser.uid), orderBy("createdAt", "desc")));
-      if (snap.empty) {
-        list.innerHTML = `<div class="empty-state"><div class="es-icon">🏫</div><p>No sessions yet.</p></div>`;
-        return;
-      }
-      snap.forEach(d => {
-        const s = d.data();
-        const card = document.createElement("div");
-        card.className = "session-card";
-        card.innerHTML = `
-          <div class="session-info">
-            <h4>${s.name}</h4>
-            <div class="session-code-chip">Code: ${s.code}</div>
+async function buildSecCard(sec){
+  const pSnap=await getDocs(query(collection(db,"sections",sec.id,"problems"),orderBy("order","asc")));
+  const probs=[];pSnap.forEach(d=>probs.push({id:d.id,...d.data()}));
+  const open=!!expandedSecs[sec.id];
+  const card=mk("div","sec-card");
+  card.innerHTML=`
+    <div class="sec-head" onclick="toggleSec('${sec.id}')">
+      <div class="sec-info"><h4>📂 ${sec.name}</h4><p>${sec.desc||""} · ${probs.length} problem${probs.length!==1?"s":""}</p></div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="sec-code-badge">🔑 ${sec.code}</div>
+        <span style="color:var(--mute);font-size:12px">${open?"▲":"▼"}</span>
+      </div>
+    </div>
+    ${open?buildSecBody(sec,probs):""}
+  `;
+  return card;
+}
+
+function buildSecBody(sec,probs){
+  const rows=probs.map((p,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--mute)">#${i+1}</span>
+      <span style="flex:1;font-size:13px;font-weight:600">${p.title}</span>
+      <span class="diff diff-${(p.difficulty||"easy").toLowerCase()}">${p.difficulty||"Easy"}</span>
+      <button class="btn btn-red btn-xs" onclick="event.stopPropagation();deleteProb('${sec.id}','${p.id}')">✕</button>
+    </div>`).join("");
+  return `<div class="sec-body">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteSection('${sec.id}')">🗑 Delete Section</button>
+    </div>
+    <div style="background:var(--ink3);border:1px solid var(--line2);border-radius:var(--r);padding:14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">➕ Add Problem</div>
+      <div class="form-grid">
+        <div class="field" style="margin:0"><label>Title</label><input class="inp" id="pt_${sec.id}" placeholder="Problem title"></div>
+        <div class="field" style="margin:0"><label>Difficulty</label>
+          <select class="inp" id="pd_${sec.id}"><option>Easy</option><option>Medium</option><option>Hard</option></select>
+        </div>
+        <div class="field full" style="margin:0"><label>Concept / Tag</label><input class="inp" id="pc_${sec.id}" placeholder="e.g. Loops + Arithmetic"></div>
+        <div class="field full" style="margin:0"><label>Problem Statement</label><textarea class="inp" id="pp_${sec.id}" placeholder="Describe the problem…"></textarea></div>
+        <div class="field full" style="margin:0"><label>Example</label><textarea class="inp" id="pe_${sec.id}" placeholder="Input → Output examples…" style="min-height:60px"></textarea></div>
+        <div class="field full" style="margin:0"><label>Hint</label><input class="inp" id="ph_${sec.id}" placeholder="Hint for students…"></div>
+      </div>
+      <div style="margin-top:12px"><button class="btn btn-green btn-sm" onclick="event.stopPropagation();addProb('${sec.id}')">Add Problem</button></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;font-family:var(--mono);color:var(--mute);margin-bottom:6px;letter-spacing:.08em">PROBLEMS (${probs.length})</div>
+    ${probs.length?rows:`<div style="font-size:13px;color:var(--mute)">No problems yet.</div>`}
+  </div>`;
+}
+
+window.toggleSec=async id=>{expandedSecs[id]=!expandedSecs[id];await loadTSections();};
+
+window.addProb=async secId=>{
+  const title=$("pt_"+secId)?.value.trim();
+  const diff=$("pd_"+secId)?.value;
+  const concept=$("pc_"+secId)?.value.trim();
+  const problem=$("pp_"+secId)?.value.trim();
+  const example=$("pe_"+secId)?.value.trim();
+  const hint=$("ph_"+secId)?.value.trim();
+  if(!title||!problem){showToast("Title and problem statement are required.","err");return;}
+  const sec=tSections.find(s=>s.id===secId);
+  const pSnap=await getDocs(collection(db,"sections",secId,"problems"));
+  try{
+    await addDoc(collection(db,"sections",secId,"problems"),{title,difficulty:diff,concept,problem,example,hint,sectionId:secId,sectionName:sec?.name||"",order:pSnap.size+1,createdAt:serverTimestamp()});
+    showToast("Problem added!");await loadTSections();
+  }catch(e){showToast(e.message,"err");}
+};
+
+window.deleteProb=async(secId,probId)=>{
+  if(!confirm("Delete this problem?"))return;
+  try{await deleteDoc(doc(db,"sections",secId,"problems",probId));showToast("Problem deleted.");await loadTSections();}
+  catch(e){showToast(e.message,"err");}
+};
+
+window.deleteSection=async secId=>{
+  if(!confirm("Delete this ENTIRE section and all its problems? Students will lose access."))return;
+  try{
+    const snap=await getDocs(collection(db,"sections",secId,"problems"));
+    for(const d of snap.docs)await deleteDoc(doc(db,"sections",secId,"problems",d.id));
+    await deleteDoc(doc(db,"sections",secId));
+    delete expandedSecs[secId];
+    showToast("Section deleted.");await loadTSections();
+  }catch(e){showToast(e.message,"err");}
+};
+
+// ═══════════════════════════════════
+// TEACHER: SUBMISSIONS (live)
+// ═══════════════════════════════════
+window.loadTSubs=async()=>{
+  const list=$("tSubsList");list.innerHTML=`<div class="spinner"></div>`;
+  if(unsubLive){unsubLive();unsubLive=null;}
+  const secF=$("filterSec").value,statF=$("filterStatus").value;
+  let q=secF
+    ?query(collection(db,"submissions"),where("sectionId","==",secF),orderBy("submittedAt","desc"))
+    :query(collection(db,"submissions"),orderBy("submittedAt","desc"));
+  unsubLive=onSnapshot(q,snap=>{
+    list.innerHTML="";
+    let docs=[...snap.docs];
+    if(statF)docs=docs.filter(d=>d.data().status===statF);
+    if(!docs.length){list.innerHTML=`<div class="empty"><div class="ei">📭</div><p>No submissions match the filter.</p></div>`;return;}
+    docs.forEach(d=>{
+      const s=d.data(),sid=d.id;
+      const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleString():"";
+      const graded=s.score!=null;
+      const card=mk("div","tsub");
+      card.innerHTML=`
+        <div class="tsub-head">
+          <div><div class="tsub-name">${s.userName||"Unknown"}</div><div class="tsub-meta">${s.problemTitle||""} · ${s.sectionName||""} · ${ts}</div></div>
+          ${graded?`<span class="sub-status s-graded">✓ ${s.score}/10</span>`:`<span class="sub-status s-pending">⏳ Pending</span>`}
+        </div>
+        <div class="tsub-body">
+          ${s.code?`<div class="code-blk">${esc(s.code)}</div>`:""}
+          ${s.imageUrl?`<img src="${s.imageUrl}" style="max-width:100%;max-height:240px;border-radius:8px;border:1px solid var(--line2)">`:""}
+          ${graded?`<div class="grade-box"><div class="grade-score">${s.score}/10</div><div class="grade-comment">${s.comment||""}</div></div>`:""}
+          <div class="grade-form">
+            <input class="score-inp" id="sc_${sid}" type="number" min="0" max="10" placeholder="0-10" value="${s.score!=null?s.score:""}">
+            <input class="comment-inp" id="cm_${sid}" placeholder="Feedback for student…" value="${s.comment||""}">
+            <button class="btn btn-green btn-sm" onclick="gradeIt('${sid}')">Grade</button>
+            <button class="btn btn-red btn-sm" onclick="deleteSub('${sid}')">Delete</button>
           </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn-view-subs" onclick="viewSessionSubs('${d.id}','${s.name}')">View Submissions</button>
-            <button onclick="deleteSession('${d.id}')" style="background:#ff658420;border:1px solid #ff658440;color:#ff6584;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700">Delete</button>
-          </div>
-        `;
-        list.appendChild(card);
-      });
-    } catch (e) { console.error(e); }
+        </div>`;
+      list.appendChild(card);
+    });
+  });
+};
+
+window.gradeIt=async sid=>{
+  const score=parseInt($("sc_"+sid)?.value);
+  const comment=$("cm_"+sid)?.value.trim()||"";
+  if(isNaN(score)||score<0||score>10){showToast("Score must be 0–10.","err");return;}
+  try{await updateDoc(doc(db,"submissions",sid),{score,comment,status:"graded",gradedAt:serverTimestamp()});showToast("✓ Graded!");}
+  catch(e){showToast(e.message,"err");}
+};
+
+window.deleteSub=async sid=>{
+  if(!confirm("Delete this submission? The student will lose their grade."))return;
+  try{await deleteDoc(doc(db,"submissions",sid));showToast("Submission deleted.");}
+  catch(e){showToast(e.message,"err");}
+};
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+(function init(){
+  if(isTeacherURL){
+    if(sessionStorage.getItem("cr_t")==="1"){
+      isTeacher=true;me={uid:"teacher_master",displayName:"Teacher",email:"teacher@coderoom"};
+      bootApp();
+    }else showPage("teacherAuthPage");
+  }else{
+    showPage("authPage");
   }
-
-  window.deleteSession = async function(id) {
-    if (!confirm("Delete this session?")) return;
-    await deleteDoc(doc(db, "sessions", id));
-    loadSessions();
-    showToast("Session deleted.");
-  };
-
-  window.viewSessionSubs = function(sessionId, sessionName) {
-    showTeacherView("viewSubmissions");
-    const sel = document.getElementById("filterSession");
-    // Set value or add option
-    let opt = Array.from(sel.options).find(o => o.value === sessionId);
-    if (!opt) {
-      opt = new Option(sessionName, sessionId);
-      sel.appendChild(opt);
-    }
-    sel.value = sessionId;
-    loadTeacherSubmissions();
-  };
-
-  // ===== TEACHER SUBMISSIONS =====
-  window.loadTeacherSubmissions = async function() {
-    const list = document.getElementById("allSubsList");
-    list.innerHTML = `<div style="color:var(--text3);font-family:var(--mono);font-size:13px">Loading...</div>`;
-    const sessionFilter = document.getElementById("filterSession").value;
-    const problemFilter = document.getElementById("filterProblem").value;
-
-    try {
-      // Populate problem filter
-      const probSel = document.getElementById("filterProblem");
-      if (probSel.options.length <= 1) {
-        allProblems.forEach(p => {
-          const opt = new Option(p.title, p.id);
-          probSel.appendChild(opt);
-        });
-      }
-
-      // Populate session filter if empty
-      const sesSel = document.getElementById("filterSession");
-      if (sesSel.options.length <= 1) {
-        const sSnap = await getDocs(query(collection(db, "sessions"), where("createdBy", "==", currentUser.uid)));
-        sSnap.forEach(d => {
-          const s = d.data();
-          if (!Array.from(sesSel.options).find(o => o.value === d.id)) {
-            sesSel.appendChild(new Option(s.name, d.id));
-          }
-        });
-      }
-
-      let q;
-      if (sessionFilter && problemFilter) {
-        q = query(collection(db, "submissions"), where("sessionId", "==", sessionFilter), where("problemId", "==", problemFilter), orderBy("submittedAt", "desc"));
-      } else if (sessionFilter) {
-        q = query(collection(db, "submissions"), where("sessionId", "==", sessionFilter), orderBy("submittedAt", "desc"));
-      } else if (problemFilter) {
-        q = query(collection(db, "submissions"), where("problemId", "==", problemFilter), orderBy("submittedAt", "desc"));
-      } else {
-        q = query(collection(db, "submissions"), orderBy("submittedAt", "desc"));
-      }
-
-      // Use real-time listener
-      if (subsUnsubscribe) subsUnsubscribe();
-      subsUnsubscribe = onSnapshot(q, (snap) => {
-        list.innerHTML = "";
-        if (snap.empty) {
-          list.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No submissions yet.</p></div>`;
-          return;
-        }
-        snap.forEach(d => {
-          const s = d.data();
-          const ts = s.submittedAt ? new Date(s.submittedAt.seconds * 1000).toLocaleString() : "—";
-          const card = document.createElement("div");
-          card.className = "sub-card";
-          card.innerHTML = `
-            <div class="sub-header">
-              <div>
-                <div style="font-size:14px;font-weight:700;color:var(--text)">${s.userName || "Unknown"}</div>
-                <div class="sub-meta">${s.problemTitle} · ${ts}${s.sessionName ? " · 🏫 " + s.sessionName : ""}</div>
-              </div>
-            </div>
-            ${s.code ? `<div class="sub-code-block">${escapeHtml(s.code)}</div>` : ""}
-            ${s.imageBase64 ? `<img class="sub-img" src="${s.imageBase64}">` : ""}
-          `;
-          list.appendChild(card);
-        });
-      });
-    } catch (e) {
-      list.innerHTML = `<div style="color:#ff6584;font-family:var(--mono);font-size:12px">Error: ${e.message}</div>`;
-    }
-  };
-
-  function escapeHtml(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  // ===== SEED DEFAULT PROBLEMS (if Firestore is empty) =====
-  async function seedDefaultProblems() {
-    const snap = await getDocs(collection(db, "problems"));
-    if (!snap.empty) return; // Already has problems
-
-    const defaults = [
-      { section: "Numbers & Math", title: "Sum of Digits", difficulty: "Easy", concept: "Loops + Arithmetic", problem: "Given an integer N, find the sum of all its digits.", example: "Input: 1234 → Output: 10  (1+2+3+4)", hint: "Convert to string and iterate, or use modulo (%) and floor division (//).", order: 1 },
-      { section: "Numbers & Math", title: "Palindrome Number", difficulty: "Easy", concept: "String / Arithmetic", problem: "Check if a number reads the same forwards and backwards.", example: "Input: 121 → Output: Yes\nInput: 123 → Output: No", hint: "Reverse the digits (string slice [::-1] or math) and compare.", order: 2 },
-      { section: "Numbers & Math", title: "Prime Check", difficulty: "Easy", concept: "Loops + Conditionals", problem: "Given N, print 'Prime' if it is a prime number, otherwise 'Not Prime'.", example: "Input: 7 → Output: Prime\nInput: 9 → Output: Not Prime", hint: "Only check divisors up to √N (use N**0.5).", order: 3 },
-      { section: "Numbers & Math", title: "Factorial", difficulty: "Easy", concept: "Loops / Recursion", problem: "Compute N! (factorial of N). Solve it both iteratively and recursively.", example: "Input: 5 → Output: 120", hint: "Recursive: fact(n) = n * fact(n-1), base case fact(0) = 1.", order: 4 },
-      { section: "Numbers & Math", title: "GCD & LCM", difficulty: "Easy", concept: "Euclidean Algorithm", problem: "Given two integers A and B, find their GCD and LCM without any library.", example: "Input: 12 18 → GCD: 6, LCM: 36", hint: "GCD(a,b) = GCD(b, a%b). LCM = (a*b) // GCD(a,b).", order: 5 },
-      { section: "Strings", title: "Reverse a String", difficulty: "Easy", concept: "String Slicing", problem: "Reverse a given string without using any built-in reverse function.", example: "Input: 'hello' → Output: 'olleh'", hint: "Use a loop or slicing s[::-1].", order: 6 },
-      { section: "Strings", title: "Anagram Check", difficulty: "Easy", concept: "Sorting / Dict", problem: "Given two strings, check if they are anagrams of each other.", example: "Input: 'listen' 'silent' → Output: Yes", hint: "Sort both strings and compare, or count character frequencies with a dict.", order: 7 },
-      { section: "Strings", title: "Caesar Cipher", difficulty: "Medium", concept: "String + ord/chr", problem: "Encrypt a lowercase string using Caesar Cipher with a given shift K. Only shift alphabet characters.", example: "Input: 'abc' K=3 → Output: 'def'\nInput: 'xyz' K=3 → Output: 'abc'", hint: "Use ord() and chr(). Wrap around with % 26.", order: 8 },
-      { section: "Lists", title: "Second Largest", difficulty: "Easy", concept: "List Traversal", problem: "Find the second largest distinct element in a list.", example: "Input: [3, 1, 4, 1, 5, 9, 2, 6] → Output: 6", hint: "Sort and pick, or do it in one pass with two variables (max1, max2).", order: 9 },
-      { section: "Lists", title: "Two Sum", difficulty: "Medium", concept: "Dict / Brute Force", problem: "Given a list of integers and a target T, find two indices such that the numbers at those indices add up to T.", example: "Input: [2,7,11,15] T=9 → Output: [0,1]", hint: "Brute force O(n²) or use a dict for O(n).", order: 10 },
-      { section: "Classic Algorithms", title: "Binary Search", difficulty: "Medium", concept: "Divide & Conquer", problem: "Given a SORTED list and a target T, find its index using binary search. Return -1 if not found.", example: "Input: [1,3,5,7,9,11] T=7 → Output: 3", hint: "Keep low and high pointers. mid = (low+high)//2.", order: 11 },
-      { section: "Classic Algorithms", title: "Bubble Sort", difficulty: "Medium", concept: "Nested Loops + Swap", problem: "Sort a list using Bubble Sort (implement it yourself, don't use .sort()).", example: "Input: [5,3,1,4,2] → Output: [1,2,3,4,5]", hint: "Repeatedly swap adjacent elements if they are in wrong order.", order: 12 },
-    ];
-
-    for (const p of defaults) {
-      await addDoc(collection(db, "problems"), { ...p, createdAt: serverTimestamp() });
-    }
-  }
-
-  // ===== INITIAL ROUTING based on URL =====
-  (function init() {
-    const isTeacherPage = window.location.search.includes("teacher");
-
-    // If teacher session already authenticated this browser session
-    if (isTeacherPage && sessionStorage.getItem("coderoom_teacher") === "true") {
-      isTeacher = true;
-      currentUser = { uid: "teacher_master", displayName: "Teacher", email: "teacher@coderoom" };
-      showScreen("appScreen");
-      setupUI();
-      loadData();
-      return;
-    }
-
-    // Show teacher password screen
-    if (isTeacherPage) {
-      showScreen("teacherAuthScreen");
-    } else {
-      // Student screen — onAuthStateChanged will handle redirect if already logged in
-      showScreen("authScreen");
-    }
-  })();
+})();
 </script>
 </body>
 </html>
