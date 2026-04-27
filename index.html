@@ -2,989 +2,1286 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>CodeRoom</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#0a0a12;--ink2:#12121e;--ink3:#1a1a2e;
-  --line:#ffffff0f;--line2:#ffffff18;--line3:#ffffff28;
-  --dim:#ffffff30;--mute:#8b8ba8;--soft:#c4c4d8;--text:#eeeef4;
-  --blue:#4f8ef7;--blue2:#3a7aef;
-  --green:#22c55e;--green2:#16a34a;
-  --amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
-  --mono:'IBM Plex Mono',monospace;--sans:'Outfit',sans-serif;
-  --r:12px;--r2:8px;--sh:0 4px 24px #00000040;--sh2:0 8px 40px #00000060;
+  --bg:#07080f;--s1:#0e1020;--s2:#141728;--s3:#1c2035;
+  --b1:#252a45;--b2:#2f3555;--b3:#3d4470;
+  --mu:#5a6285;--so:#8b93c0;--tx:#dde0f5;--t2:#b0b8d8;
+  --ac:#5c6df5;--ah:#7b88ff;--gr:#20c65a;--am:#f5a623;--rd:#f04f4f;
+  --r:14px;--r2:10px;--r3:8px;
+  --fn:'Plus Jakarta Sans',sans-serif;--mo:'IBM Plex Mono',monospace;
+  --sh:0 4px 24px rgba(0,0,0,.5);--shl:0 8px 48px rgba(0,0,0,.65);
 }
-html{scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--ink);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.55;overflow-x:hidden}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--line3);border-radius:99px}
-button{cursor:pointer;font-family:var(--sans);border:none;outline:none}
-input,textarea,select{font-family:var(--sans);outline:none;border:none}
-a{text-decoration:none;color:inherit}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:99px}
+button,input,textarea,select{font-family:var(--fn)}
+img{max-width:100%}
 
-/* PAGES */
-.page{display:none;min-height:100vh;animation:fadeIn .25s ease}
-.page.show{display:flex}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* ── PAGE SYSTEM ─────────────────────────────────── */
+.pg{display:none!important}
+.pg.on{display:flex!important}
+.pg.blk.on{display:block!important}
 
-/* AUTH */
-.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;min-height:100vh;position:relative;overflow:hidden}
-.auth-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 30% 20%,#4f8ef720 0%,transparent 65%),radial-gradient(ellipse 50% 60% at 80% 80%,#a855f715 0%,transparent 65%)}
-.auth-dots{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#ffffff07 1px,transparent 1px);background-size:28px 28px}
-.auth-card{width:100%;max-width:400px;position:relative;z-index:1;background:var(--ink2);border:1px solid var(--line2);border-radius:20px;padding:36px 32px;box-shadow:var(--sh2)}
-@media(max-width:480px){.auth-card{padding:28px 20px;border-radius:16px}}
-.auth-brand{text-align:center;margin-bottom:28px}
-.auth-brand .logo{font-size:36px;margin-bottom:8px}
-.auth-brand h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
-.auth-brand h1 .hi{color:var(--blue)}
-.auth-brand p{font-size:12px;font-family:var(--mono);color:var(--mute);margin-top:4px}
-.auth-tabs{display:flex;border-bottom:1px solid var(--line2);margin-bottom:24px}
-.auth-tab{flex:1;padding:10px 8px;background:none;border:none;color:var(--mute);font-size:14px;font-weight:600;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s}
-.auth-tab.on{color:var(--blue);border-bottom-color:var(--blue)}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:11px;font-weight:700;color:var(--mute);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);margin-bottom:6px}
-.inp{width:100%;background:var(--ink3);border:1px solid var(--line2);border-radius:var(--r2);padding:11px 14px;color:var(--text);font-size:14px;transition:.2s}
-.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px #4f8ef720;outline:none}
-.inp::placeholder{color:var(--dim)}
-textarea.inp{resize:vertical;min-height:90px;font-family:var(--mono);font-size:13px;line-height:1.6}
-select.inp{cursor:pointer;-webkit-appearance:none;appearance:none}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:var(--r2);font-size:14px;font-weight:700;transition:.18s;white-space:nowrap;cursor:pointer;border:none;font-family:var(--sans)}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:var(--blue);color:#fff;width:100%;margin-top:6px}
-.btn-primary:hover{background:var(--blue2)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-sm{padding:7px 14px;font-size:12px;border-radius:6px}
-.btn-xs{padding:5px 10px;font-size:11px;border-radius:5px}
-.btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--soft)}
-.btn-ghost:hover{border-color:var(--line3);color:var(--text);background:var(--line)}
-.btn-green{background:var(--green);color:#fff}
-.btn-green:hover{background:var(--green2)}
-.btn-red{background:#ef444418;border:1px solid #ef444430;color:var(--red)}
-.btn-red:hover{background:#ef444430}
-.btn-purple{background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;width:100%;margin-top:6px}
-.btn-purple:hover{opacity:.9}
-.alert{display:none;padding:10px 14px;border-radius:var(--r2);font-size:13px;font-family:var(--mono);margin-bottom:12px}
-.alert.show{display:block}
-.alert-err{background:#ef444418;border:1px solid #ef444430;color:var(--red)}
-.alert-ok{background:#22c55e18;border:1px solid #22c55e30;color:var(--green)}
-.t-link{text-align:center;margin-top:18px}
-.t-link a{font-size:11px;font-family:var(--mono);color:var(--line3);transition:.2s}
-.t-link a:hover{color:var(--mute)}
-
-/* APP LAYOUT */
-#appPage{flex-direction:column}
-.topbar{height:56px;background:var(--ink2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:200;flex-shrink:0}
-.topbar-brand{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:800;letter-spacing:-.3px}
-.topbar-brand .hi{color:var(--blue)}
-.topbar-brand .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
-.user-pill{display:flex;align-items:center;gap:7px;padding:5px 10px;background:var(--ink3);border:1px solid var(--line2);border-radius:99px;font-size:12px;font-weight:600}
-.role-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.role-student{background:var(--green)}
-.role-teacher{background:var(--purple)}
-.topbar-logout{padding:5px 12px;background:none;border:1px solid var(--line2);border-radius:6px;color:var(--mute);font-size:12px;font-weight:600;transition:.2s}
-.topbar-logout:hover{color:var(--text);border-color:var(--line3)}
-.hamburger{display:none;flex-direction:column;gap:4px;padding:7px;background:none;border:1px solid var(--line2);border-radius:6px;cursor:pointer}
-.hamburger span{display:block;width:16px;height:2px;background:var(--mute);border-radius:2px}
-@media(max-width:700px){.hamburger{display:flex}}
-
-/* BODY SPLIT */
-.app-body{display:flex;flex:1;min-height:0;height:calc(100vh - 56px)}
-
-/* SIDEBAR */
-.sidebar{width:210px;background:var(--ink2);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;overflow-y:auto;flex-shrink:0;transition:transform .25s ease}
-@media(max-width:700px){
-  .sidebar{position:fixed;top:56px;left:0;bottom:0;z-index:150;transform:translateX(-100%);width:230px;box-shadow:var(--sh2)}
-  .sidebar.open{transform:none}
-  .sb-overlay{display:none;position:fixed;inset:0;top:56px;background:#00000060;z-index:140}
-  .sb-overlay.show{display:block}
+/* ── AUTH ────────────────────────────────────────── */
+.auth-shell{
+  min-height:100vh;align-items:center;justify-content:center;padding:20px;
+  position:relative;overflow:hidden;flex-direction:column;
+  background:radial-gradient(ellipse 90% 60% at 50% -10%,#1a214a 0%,var(--bg) 65%);
 }
-.nav-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);color:var(--line3);padding:10px 8px 4px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r2);color:var(--mute);font-size:13px;font-weight:600;transition:.15s;border:1px solid transparent;cursor:pointer;user-select:none}
-.nav-item:hover{background:var(--line);color:var(--soft)}
-.nav-item.on{background:#4f8ef715;color:var(--blue);border-color:#4f8ef720}
-.nav-item .ni{font-size:15px;flex-shrink:0}
-.nav-sep{height:1px;background:var(--line);margin:6px 2px}
+.auth-shell::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,var(--b1) 1px,transparent 1px);
+  background-size:30px 30px;opacity:.2;
+}
+.auth-card{
+  background:var(--s1);border:1.5px solid var(--b1);border-radius:22px;
+  padding:clamp(24px,5vw,44px);width:100%;max-width:420px;
+  position:relative;z-index:1;box-shadow:var(--shl);
+  animation:slideUp .3s ease both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-/* MAIN */
-.main{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column}
-@media(max-width:480px){.main{padding:14px}}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .ico{font-size:38px;display:block;margin-bottom:10px}
+.auth-logo h1{font-size:26px;font-weight:900;letter-spacing:-.5px}
+.auth-logo p{font-size:12px;color:var(--mu);margin-top:4px;font-family:var(--mo)}
+.grad-text{background:linear-gradient(135deg,var(--ac),var(--ah));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-/* PANELS */
-.panel{display:none;flex-direction:column;gap:16px;animation:fadeIn .2s ease}
-.panel.show{display:flex}
+/* tabs */
+.atabs{display:flex;border-bottom:1.5px solid var(--b1);margin-bottom:22px;gap:0}
+.atab{flex:1;padding:10px 8px;background:none;border:none;
+  border-bottom:2.5px solid transparent;color:var(--mu);
+  font-size:14px;font-weight:700;cursor:pointer;transition:.2s;margin-bottom:-1.5px}
+.atab.on{color:var(--ac);border-bottom-color:var(--ac)}
 
-/* PAGE HEADER */
-.ptitle{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.2}
-.psub{font-size:13px;color:var(--mute);margin-top:3px}
+/* fields */
+.fld{margin-bottom:15px}
+.fld label{display:block;font-size:10px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--mu);margin-bottom:6px;font-family:var(--mo)}
+.inp{width:100%;background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r2);
+  padding:11px 13px;color:var(--tx);font-size:14px;outline:none;transition:.18s}
+.inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px #5c6df518}
+.inp::placeholder{color:var(--mu)}
+select.inp{appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M0 0l5 7 5-7z' fill='%235a6285'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13px}
 
-/* PROGRESS */
-.prog-wrap{display:flex;align-items:center;gap:10px}
-.prog-bar{flex:1;height:6px;background:var(--ink3);border-radius:99px;overflow:hidden;min-width:80px}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px;transition:width .4s ease;width:0%}
-.prog-label{font-family:var(--mono);font-size:12px;color:var(--blue);font-weight:700;white-space:nowrap}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:none;border-radius:var(--r2);font-weight:700;cursor:pointer;
+  transition:all .18s;white-space:nowrap;font-family:var(--fn)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+.btn-p{background:var(--ac);color:#fff;padding:12px 20px;font-size:14px;width:100%}
+.btn-p:hover:not(:disabled){background:var(--ah);transform:translateY(-1px)}
+.btn-s{background:var(--s2);border:1.5px solid var(--b2);color:var(--so);padding:8px 14px;font-size:12px}
+.btn-s:hover{border-color:var(--ac);color:var(--tx)}
+.btn-g{background:var(--gr);color:#000;padding:9px 18px;font-size:13px}
+.btn-g:hover{opacity:.88}
+.btn-d{background:#f04f4f14;border:1.5px solid #f04f4f28;color:var(--rd);padding:7px 12px;font-size:11px}
+.btn-d:hover{background:#f04f4f22}
+.btn-sm{padding:7px 13px;font-size:12px}
+.btn-block{width:100%}
 
-/* PILLS */
-.pill-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-.pill-row::-webkit-scrollbar{display:none}
-.pill{padding:5px 13px;border-radius:99px;border:1px solid var(--line2);background:transparent;color:var(--mute);font-size:12px;font-weight:600;font-family:var(--sans);white-space:nowrap;transition:.15s;cursor:pointer}
-.pill:hover{border-color:var(--line3);color:var(--soft)}
-.pill.on{background:var(--blue);border-color:var(--blue);color:#fff}
+/* alert strip */
+.alert{border-radius:var(--r2);padding:10px 13px;font-size:13px;
+  font-family:var(--mo);margin-bottom:13px;display:none}
+.alert.on{display:block}
+.alert-e{background:#f04f4f12;border:1px solid #f04f4f28;color:var(--rd)}
+.alert-s{background:#20c65a12;border:1px solid #20c65a28;color:var(--gr)}
 
-/* PROBLEM CARD */
-.pcard{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color .2s,box-shadow .2s}
-.pcard:hover{border-color:var(--line2)}
-.pcard.done{border-color:#22c55e25;background:#22c55e06}
-.pcard-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none}
-.pcard-check{width:20px;height:20px;border-radius:5px;border:2px solid var(--line2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:11px;font-weight:900;cursor:pointer}
-.pcard-check.on{background:var(--green);border-color:var(--green);color:#fff}
-.pcard-num{font-family:var(--mono);font-size:11px;color:var(--line3);font-weight:700;min-width:22px;flex-shrink:0}
-.pcard-title{flex:1;font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
-.pcard-title.done{text-decoration:line-through;color:var(--green)}
-.diff{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0}
-.diff-easy{background:#22c55e18;color:var(--green);border:1px solid #22c55e25}
-.diff-medium{background:#f59e0b18;color:var(--amber);border:1px solid #f59e0b25}
-.diff-hard{background:#ef444418;color:var(--red);border:1px solid #ef444425}
-.pcard-arr{color:var(--line3);font-size:12px;transition:transform .2s;flex-shrink:0}
+/* ── APP SHELL ───────────────────────────────────── */
+#app{flex-direction:column;height:100vh;overflow:hidden}
 
-/* CARD BODY */
-.pcard-body{border-top:1px solid var(--line);padding:14px}
-.pcard-inner{display:flex;flex-direction:column;gap:12px}
-.blk{border-radius:var(--r2);padding:13px}
-.blk-prob{background:#0d0d1e;border-left:3px solid var(--blue)}
-.blk-ex{background:#071220;border-left:3px solid #38bdf8}
-.blk-hint{background:#140f07;border-left:3px solid var(--amber)}
-.blk-code{background:#071407;border-left:3px solid var(--green)}
-.blk-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);margin-bottom:7px}
-.blk-prob .blk-label{color:var(--blue)}
-.blk-ex .blk-label{color:#38bdf8}
-.blk-hint .blk-label{color:var(--amber)}
-.blk-code .blk-label{color:var(--green)}
-.blk-text{font-size:13px;line-height:1.7;color:var(--soft)}
-.blk-pre{font-family:var(--mono);font-size:12px;color:#7dd3fc;white-space:pre-wrap;line-height:1.6}
-.code-area{width:100%;background:var(--ink);border:1px solid var(--line2);border-radius:var(--r2);padding:12px;color:var(--text);font-family:var(--mono);font-size:13px;resize:vertical;min-height:130px;line-height:1.6;transition:.2s;display:block}
-.code-area:focus{border-color:var(--blue);box-shadow:0 0 0 3px #4f8ef715;outline:none}
-.sub-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-.sub-status{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:99px}
-.s-pending{background:#f59e0b18;color:var(--amber);border:1px solid #f59e0b30}
-.s-graded{background:#22c55e18;color:var(--green);border:1px solid #22c55e30}
-.grade-box{background:var(--ink3);border:1px solid var(--line2);border-radius:var(--r2);padding:12px}
-.grade-score{font-size:24px;font-weight:900;color:var(--green);font-family:var(--mono)}
-.grade-comment{font-size:13px;color:var(--soft);margin-top:4px;line-height:1.5}
+/* topbar */
+.bar{height:56px;background:var(--s1);border-bottom:1.5px solid var(--b1);
+  display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;z-index:200;position:relative}
+.bar-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900;
+  letter-spacing:-.3px;color:var(--tx)}
+.bar-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);
+  box-shadow:0 0 8px var(--ac);flex-shrink:0}
+.bar-sp{flex:1}
+.bar-user{font-size:11px;color:var(--mu);font-family:var(--mo);
+  display:flex;align-items:center;gap:7px}
+.role-chip{font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:.5px}
+.rc-s{background:#20c65a14;color:var(--gr);border:1px solid #20c65a25}
+.rc-t{background:#f04f4f14;color:var(--rd);border:1px solid #f04f4f25}
+.hamburger{display:none;background:none;border:none;color:var(--tx);font-size:20px;cursor:pointer;padding:4px}
 
-/* UNLOCK */
-.unlock-section-chip{background:var(--ink2);border:1px solid #22c55e25;border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
-.unlock-section-chip:hover{border-color:#22c55e40;background:#22c55e08}
-.usc-name{font-size:14px;font-weight:700}
-.usc-meta{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:2px}
+/* body */
+.shell{display:flex;flex:1;overflow:hidden;height:calc(100vh - 56px)}
+.sidebar{width:240px;flex-shrink:0;background:var(--s1);border-right:1.5px solid var(--b1);
+  overflow-y:auto;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.content{flex:1;overflow-y:auto;background:var(--bg);padding:0}
 
-/* TEACHER SECTION CARD */
-.sec-card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
-.sec-card:hover{border-color:var(--line2)}
-.sec-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;gap:10px;flex-wrap:wrap}
-.sec-info h4{font-size:15px;font-weight:800}
-.sec-info p{font-size:12px;color:var(--mute);font-family:var(--mono);margin-top:2px}
-.sec-code-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#4f8ef715;border:1px solid #4f8ef730;border-radius:6px;font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:700;letter-spacing:.05em}
-.sec-body{border-top:1px solid var(--line);padding:16px}
+/* sidebar nav */
+.nl{font-size:9px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--mu);padding:12px 10px 5px;font-family:var(--mo)}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r2);
+  color:var(--so);font-size:13px;font-weight:600;cursor:pointer;transition:.14s;
+  border:1.5px solid transparent;user-select:none}
+.ni:hover{background:var(--s2);color:var(--tx)}
+.ni.on{background:#5c6df510;color:var(--ac);border-color:#5c6df520}
+.ni-ic{font-size:14px}
 
-/* TEACHER SUBMISSION CARD */
-.tsub{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.tsub-head{display:flex;align-items:flex-start;justify-content:space-between;padding:14px;gap:10px;flex-wrap:wrap}
-.tsub-name{font-size:14px;font-weight:700}
-.tsub-meta{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:2px}
-.tsub-body{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
-.code-blk{background:var(--ink);border-radius:var(--r2);padding:12px;font-family:var(--mono);font-size:12px;color:var(--green);white-space:pre-wrap;max-height:200px;overflow-y:auto;line-height:1.6;border:1px solid var(--line)}
-.grade-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:4px}
-.score-inp{width:68px;background:var(--ink3);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:13px;text-align:center;transition:.2s}
-.score-inp:focus{border-color:var(--blue);outline:none}
-.comment-inp{flex:1;min-width:130px;background:var(--ink3);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;transition:.2s}
-.comment-inp:focus{border-color:var(--blue);outline:none}
-.comment-inp::placeholder{color:var(--dim)}
+/* join box */
+.jbox{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:12px;margin:6px 0}
+.jbox-lbl{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--mu);font-family:var(--mo);display:block;margin-bottom:8px}
+.jrow{display:flex;gap:5px}
+.jinp{flex:1;background:var(--bg);border:1.5px solid var(--b1);border-radius:7px;
+  padding:8px 9px;color:var(--tx);font-size:13px;font-family:var(--mo);font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;outline:none;min-width:0}
+.jinp:focus{border-color:var(--ac)}
+.jbtn{background:var(--ac);border:none;border-radius:7px;padding:8px 11px;
+  color:#fff;font-size:11px;font-weight:800;cursor:pointer;transition:.18s;font-family:var(--fn)}
+.jbtn:hover{background:var(--ah)}
 
-/* MY SUBS */
-.msub{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px}
-.msub-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:6px}
-.msub-title{font-size:14px;font-weight:700}
-.msub-meta{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:2px}
+/* ── VIEW SYSTEM ─────────────────────────────────── */
+.view{display:none;padding:20px;max-width:820px;margin:0 auto;
+  animation:fadeIn .2s ease both}
+.view.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink2);border:1px solid var(--line2);border-radius:10px;padding:10px 18px;font-size:13px;font-family:var(--mono);z-index:9999;opacity:0;transition:.3s;white-space:nowrap;box-shadow:var(--sh2);pointer-events:none;max-width:90vw;text-align:center}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.toast.ok{border-color:#22c55e40;color:var(--green)}
-.toast.err{border-color:#ef444440;color:var(--red)}
+.vh{margin-bottom:18px}
+.vt{font-size:19px;font-weight:900;letter-spacing:-.3px}
+.vs{font-size:12px;color:var(--mu);margin-top:3px}
 
-/* SPINNER */
-.spinner{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:30px auto}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ── FORM CARD ───────────────────────────────────── */
+.fcard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:18px 20px;margin-bottom:14px}
+.fcard-title{font-size:14px;font-weight:800;margin-bottom:14px;color:var(--tx)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.g2 .span2{grid-column:1/-1}
+.frow{display:flex;gap:9px;align-items:flex-end}
 
-/* EMPTY */
-.empty{text-align:center;padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:8px}
-.empty .ei{font-size:42px}
-.empty p{font-size:13px;color:var(--mute);line-height:1.6}
+/* ── SECTION / PROBLEM CARDS ────────────────────── */
+.scard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:15px 17px;margin-bottom:9px;transition:border-color .18s,box-shadow .18s}
+.scard:hover{border-color:var(--b2);box-shadow:var(--sh)}
+.scard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.scard-title{font-size:14px;font-weight:700;color:var(--tx)}
+.scard-meta{font-size:11px;color:var(--mu);margin-top:3px;font-family:var(--mo)}
+.scard-btns{display:flex;gap:6px;flex-shrink:0}
 
-/* CARD UTIL */
-.card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r);padding:18px}
-.card-title{font-size:15px;font-weight:800;margin-bottom:14px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-grid .full{grid-column:1/-1}
-@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+/* code chip */
+.code-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mo);
+  font-size:12px;font-weight:700;letter-spacing:2px;
+  background:var(--ac);color:#fff;padding:4px 12px;border-radius:7px}
 
-/* TEACHER AUTH PAGE */
-#teacherAuthPage .auth-glow{background:radial-gradient(ellipse 70% 50% at 30% 20%,#a855f720,transparent 65%)}
-#teacherAuthPage .auth-card{border-color:#a855f730}
-#teacherAuthPage .auth-brand .hi{color:var(--purple)}
+/* ── PROBLEM CARD ────────────────────────────────── */
+.pcard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  margin-bottom:8px;overflow:hidden;transition:border-color .18s}
+.pcard:hover{border-color:var(--b2)}
+.pcard.solved{border-color:#20c65a28;background:#20c65a05}
+.ph{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;
+  user-select:none;-webkit-user-select:none}
+.pchk{width:21px;height:21px;border-radius:6px;border:2px solid var(--b2);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;
+  cursor:pointer;transition:.18s;color:transparent}
+.pchk.on{background:var(--gr);border-color:var(--gr);color:#000}
+.pnum{font-family:var(--mo);font-size:10px;color:var(--mu);font-weight:700;min-width:22px}
+.ptit{flex:1;font-size:14px;font-weight:700;color:var(--tx);min-width:0}
+.ptit.done{text-decoration:line-through;color:var(--gr)}
+.diff{font-size:9px;font-weight:800;padding:3px 9px;border-radius:99px;flex-shrink:0;
+  letter-spacing:.3px}
+.dE{background:#20c65a12;color:var(--gr);border:1px solid #20c65a22}
+.dM{background:#f5a62312;color:var(--am);border:1px solid #f5a62322}
+.dH{background:#f04f4f12;color:var(--rd);border:1px solid #f04f4f22}
+.chev{color:var(--mu);font-size:10px;transition:transform .2s;flex-shrink:0}
+
+/* card body */
+.pb{border-top:1.5px solid var(--b1);padding:14px;display:none;
+  flex-direction:column;gap:11px}
+.pb.open{display:flex}
+
+.blk{border-radius:var(--r2);padding:12px}
+.b-prob{background:#090c1c;border-left:3px solid var(--ac)}
+.b-ex{background:#080f1e;border-left:3px solid #38bdf8}
+.b-hint{background:#130e03;border-left:3px solid var(--am)}
+.b-code{background:#050e07;border-left:3px solid var(--gr)}
+.blk-l{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  font-family:var(--mo);margin-bottom:7px}
+.b-prob .blk-l{color:var(--ac)}
+.b-ex .blk-l{color:#38bdf8}
+.b-hint .blk-l{color:var(--am)}
+.b-code .blk-l{color:var(--gr)}
+.blk-p{font-size:13px;color:var(--t2);line-height:1.7}
+.blk-pre{font-family:var(--mo);font-size:12px;color:#7dd3fc;white-space:pre-wrap;line-height:1.6}
+
+/* code editor */
+.codearea{
+  width:100%;background:var(--bg);border:1.5px solid var(--b1);border-radius:var(--r2);
+  padding:11px 13px;color:var(--tx);font-family:var(--mo);font-size:13px;
+  resize:vertical;min-height:130px;line-height:1.7;outline:none;tab-size:2;
+  transition:border-color .18s;
+}
+.codearea:focus{border-color:var(--ac)}
+
+.sub-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.sub-done{font-family:var(--mo);font-size:11px;color:var(--gr);
+  background:#20c65a12;border:1px solid #20c65a25;padding:4px 10px;
+  border-radius:99px;display:none}
+.sub-done.on{display:inline-flex;align-items:center;gap:4px}
+
+/* image preview */
+.img-pre{margin-top:8px;display:none}
+.img-pre.on{display:block}
+.img-pre img{max-height:100px;border-radius:7px;border:1px solid var(--b2)}
+
+/* result strip */
+.res-strip{border-radius:var(--r2);padding:11px 13px;margin-top:4px}
+.res-ok{background:#20c65a10;border:1.5px solid #20c65a25}
+.res-pend{background:#f5a62310;border:1.5px solid #f5a62322}
+.score-badge{display:inline-flex;align-items:center;font-family:var(--mo);font-size:12px;
+  font-weight:700;background:var(--ac);color:#fff;padding:3px 10px;border-radius:99px}
+.pend-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mo);font-size:11px;
+  color:var(--am);background:#f5a62310;border:1px solid #f5a62322;padding:3px 10px;border-radius:99px}
+
+/* ── TEACHER SUBMISSIONS ──────────────────────────── */
+.sub-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:9px}
+.sub-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  margin-bottom:10px}
+.sub-user{font-size:13px;font-weight:700;color:var(--tx)}
+.sub-info{font-size:11px;color:var(--mu);margin-top:2px;font-family:var(--mo)}
+.sub-code-view{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r2);
+  padding:11px;font-family:var(--mo);font-size:12px;color:#a5f3a5;
+  white-space:pre-wrap;max-height:160px;overflow-y:auto;line-height:1.6;margin-bottom:8px}
+.sub-img-view{max-width:100%;max-height:160px;border-radius:var(--r2);
+  border:1px solid var(--b2);margin-bottom:8px}
+.eval-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;
+  padding-top:10px;border-top:1px solid var(--b1)}
+.score-inp{width:65px;background:var(--s2);border:1.5px solid var(--b1);border-radius:7px;
+  padding:7px 9px;color:var(--tx);font-family:var(--mo);font-size:14px;font-weight:700;
+  outline:none;text-align:center}
+.score-inp:focus{border-color:var(--ac)}
+.comment-inp{flex:1;min-width:140px;background:var(--s2);border:1.5px solid var(--b1);
+  border-radius:7px;padding:7px 11px;color:var(--tx);font-size:13px;outline:none}
+.comment-inp:focus{border-color:var(--ac)}
+.eval-done{font-family:var(--mo);font-size:12px;color:var(--gr);
+  background:#20c65a10;border:1px solid #20c65a25;padding:5px 12px;border-radius:7px}
+
+/* ── PROGRESS ────────────────────────────────────── */
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.prog-bar{flex:1;height:6px;background:var(--s2);border-radius:99px;overflow:hidden}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--ac),var(--ah));
+  border-radius:99px;transition:width .4s ease}
+.prog-lbl{font-family:var(--mo);font-size:11px;color:var(--ac);font-weight:700;min-width:36px}
+
+/* ── CHIP TABS ───────────────────────────────────── */
+.chips-wrap{overflow-x:auto;scrollbar-width:none;margin-bottom:14px}
+.chips-wrap::-webkit-scrollbar{display:none}
+.chips{display:flex;gap:5px;min-width:max-content}
+.chip{padding:5px 13px;border-radius:99px;border:1.5px solid var(--b1);
+  background:transparent;color:var(--mu);font-size:12px;font-weight:700;
+  cursor:pointer;transition:.16s;font-family:var(--fn)}
+.chip:hover:not(.on){border-color:var(--ac);color:var(--tx)}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast{position:fixed;bottom:18px;right:18px;z-index:9999;
+  background:var(--s1);border:1.5px solid var(--b2);border-radius:var(--r);
+  padding:11px 17px;font-size:13px;font-family:var(--mo);max-width:300px;
+  transform:translateY(50px) scale(.95);opacity:0;
+  transition:all .26s cubic-bezier(.34,1.4,.64,1);pointer-events:none}
+.toast.pop{transform:translateY(0) scale(1);opacity:1}
+.toast.t-ok{border-color:#20c65a35;color:var(--gr)}
+.toast.t-err{border-color:#f04f4f35;color:var(--rd)}
+
+/* ── EMPTY ───────────────────────────────────────── */
+.empty{text-align:center;padding:44px 20px;color:var(--mu)}
+.empty .ei{font-size:38px;margin-bottom:10px}
+.empty p{font-size:13px;line-height:1.6}
+
+/* status chips */
+.chip-pend{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;
+  font-family:var(--mo);color:var(--am);background:#f5a62312;border:1px solid #f5a62322;
+  padding:2px 8px;border-radius:99px}
+.chip-eval{color:var(--gr);background:#20c65a12;border-color:#20c65a22}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media(max-width:660px){
+  .sidebar{
+    position:fixed;left:0;top:56px;bottom:0;z-index:300;
+    transform:translateX(-105%);transition:transform .24s ease;width:260px;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .overlay{position:fixed;inset:0;top:56px;background:rgba(0,0,0,.65);z-index:290;display:none}
+  .overlay.open{display:block}
+  .hamburger{display:flex}
+  .g2{grid-template-columns:1fr}
+  .frow{flex-direction:column}
+  .eval-row{flex-direction:column;align-items:stretch}
+  .score-inp,.comment-inp{width:100%}
+}
 </style>
 </head>
 <body>
 
-<!-- ═══ STUDENT AUTH ═══ -->
-<div id="authPage" class="page">
-  <div class="auth-wrap">
-    <div class="auth-glow"></div>
-    <div class="auth-dots"></div>
-    <div class="auth-card">
-      <div class="auth-brand">
-        <div class="logo">⚡</div>
-        <h1>Code<span class="hi">Room</span></h1>
-        <p>// student login</p>
-      </div>
-      <div class="auth-tabs">
-        <button class="auth-tab on" onclick="authTab('login')">Login</button>
-        <button class="auth-tab" onclick="authTab('register')">Register</button>
-      </div>
-      <div id="authAlert" class="alert alert-err"></div>
-      <div id="loginForm">
-        <div class="field"><label>Email</label><input class="inp" type="email" id="lEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
-        <div class="field"><label>Password</label><input class="inp" type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-        <button class="btn btn-primary" id="lBtn" onclick="doLogin()">Login →</button>
-      </div>
-      <div id="regForm" style="display:none">
-        <div class="field"><label>Your Name</label><input class="inp" type="text" id="rName" placeholder="Full name"></div>
-        <div class="field"><label>Email</label><input class="inp" type="email" id="rEmail" placeholder="you@example.com"></div>
-        <div class="field"><label>Password</label><input class="inp" type="password" id="rPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()"></div>
-        <button class="btn btn-primary" id="rBtn" onclick="doRegister()">Create Account →</button>
-      </div>
-      <div class="t-link"><a href="?teacher">Teacher? →</a></div>
+<!-- ═══════════ STUDENT AUTH ═══════════ -->
+<div id="pgAuth" class="pg on auth-shell">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="ico">⚡</span>
+      <h1 class="grad-text">CodeRoom</h1>
+      <p>// student portal</p>
+    </div>
+    <div class="atabs">
+      <button class="atab on" onclick="authTab('login')">Sign In</button>
+      <button class="atab" onclick="authTab('reg')">Register</button>
+    </div>
+    <div id="authErr" class="alert alert-e"></div>
+    <!-- login -->
+    <div id="loginF">
+      <div class="fld"><label>Email</label>
+        <input id="lEmail" type="email" class="inp" placeholder="you@example.com"
+          onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fld"><label>Password</label>
+        <input id="lPass" type="password" class="inp" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button id="loginBtn" class="btn btn-p" onclick="doLogin()">Sign In →</button>
+    </div>
+    <!-- register -->
+    <div id="regF" style="display:none">
+      <div class="fld"><label>Your Name</label>
+        <input id="rName" type="text" class="inp" placeholder="Full name"></div>
+      <div class="fld"><label>Email</label>
+        <input id="rEmail" type="email" class="inp" placeholder="you@example.com"></div>
+      <div class="fld"><label>Password</label>
+        <input id="rPass" type="password" class="inp" placeholder="Min 6 characters"
+          onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <button id="regBtn" class="btn btn-p" onclick="doRegister()">Create Account →</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ TEACHER AUTH ═══ -->
-<div id="teacherAuthPage" class="page">
-  <div class="auth-wrap">
-    <div class="auth-glow"></div>
-    <div class="auth-dots"></div>
-    <div class="auth-card">
-      <div class="auth-brand">
-        <div class="logo">🔐</div>
-        <h1>Teacher <span class="hi">Panel</span></h1>
-        <p>// restricted access</p>
-      </div>
-      <div id="tAuthAlert" class="alert alert-err"></div>
-      <div class="field"><label>Master Password</label><input class="inp" type="password" id="tPass" placeholder="Enter master password" onkeydown="if(event.key==='Enter')doTeacherAuth()"></div>
-      <button class="btn btn-purple" onclick="doTeacherAuth()">Enter Panel →</button>
-      <div class="t-link"><a href="/">← Student Login</a></div>
+<!-- ═══════════ TEACHER AUTH ═══════════ -->
+<div id="pgTeacher" class="pg auth-shell" style="background:radial-gradient(ellipse 90% 60% at 50% -10%,#2a0f1a 0%,var(--bg) 65%)">
+  <div class="auth-card" style="border-color:#f04f4f25;box-shadow:0 8px 48px #f04f4f10">
+    <div class="auth-logo">
+      <span class="ico">🔐</span>
+      <h1 style="background:linear-gradient(135deg,var(--rd),var(--am));
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
+        Teacher Panel</h1>
+      <p>// restricted access</p>
     </div>
+    <div id="tErr" class="alert alert-e"></div>
+    <div class="fld"><label>Master Password</label>
+      <input id="tPass" type="password" class="inp" placeholder="Enter master password"
+        style="border-color:#f04f4f22" onkeydown="if(event.key==='Enter')doTeacherAuth()"></div>
+    <button class="btn btn-p" style="background:var(--rd)" onclick="doTeacherAuth()">Enter →</button>
+    <div style="text-align:center;margin-top:14px">
+      <a href="/" style="font-size:12px;color:var(--mu);font-family:var(--mo);text-decoration:none">
+        ← Student login</a></div>
   </div>
 </div>
 
-<!-- ═══ APP ═══ -->
-<div id="appPage" class="page" style="flex-direction:column">
+<!-- ═══════════ APP ═══════════ -->
+<div id="pgApp" class="pg" style="flex-direction:column;height:100vh;overflow:hidden">
 
-  <header class="topbar">
-    <button class="hamburger" onclick="toggleSB()"><span></span><span></span><span></span></button>
-    <div class="topbar-brand">⚡ Code<span class="hi">Room</span><div class="dot"></div></div>
-    <div class="topbar-right">
-      <div class="user-pill"><div class="role-dot" id="roleDot"></div><span id="uName"></span></div>
-      <button class="topbar-logout" onclick="doLogout()">Logout</button>
+  <!-- topbar -->
+  <nav class="bar">
+    <button class="hamburger" onclick="toggleSB()">☰</button>
+    <div class="bar-logo"><span class="bar-dot"></span> CodeRoom</div>
+    <div class="bar-sp"></div>
+    <div class="bar-user">
+      <span id="navName"></span>
+      <span id="navRole" class="role-chip rc-s">STUDENT</span>
     </div>
-  </header>
+    <button class="btn btn-s btn-sm" style="margin-left:8px" onclick="doLogout()">Logout</button>
+  </nav>
 
-  <div class="sb-overlay" id="sbOverlay" onclick="toggleSB()"></div>
+  <div class="shell">
+    <div class="overlay" id="overlay" onclick="closeSB()"></div>
 
-  <div class="app-body">
-    <nav class="sidebar" id="sidebar">
-
-      <!-- STUDENT NAV -->
-      <div id="sNav">
-        <div class="nav-label">Student</div>
-        <div class="nav-item on" id="sn-unlock" onclick="gotoS('unlock')"><span class="ni">🔑</span>Join Section</div>
-        <div class="nav-item" id="sn-problems" onclick="gotoS('problems')"><span class="ni">📋</span>Problems</div>
-        <div class="nav-item" id="sn-mysubs" onclick="gotoS('mysubs')"><span class="ni">📨</span>My Submissions</div>
-      </div>
-
-      <!-- TEACHER NAV -->
-      <div id="tNav" style="display:none">
-        <div class="nav-label">Teacher</div>
-        <div class="nav-item on" id="tn-sections" onclick="gotoT('sections')"><span class="ni">📁</span>Sections</div>
-        <div class="nav-item" id="tn-subs" onclick="gotoT('subs')"><span class="ni">👁</span>Submissions</div>
-      </div>
-
-    </nav>
-
-    <main class="main">
-
-      <!-- STUDENT: JOIN SECTION -->
-      <div class="panel show" id="pnl-unlock">
-        <div><div class="ptitle">Join a Section</div><div class="psub">Enter the code your teacher shared with you</div></div>
-        <div id="unlockAlert" class="alert alert-err"></div>
-        <div style="max-width:360px;display:flex;flex-direction:column;gap:10px">
-          <div class="field" style="margin:0"><label>Section Code</label>
-            <input class="inp" type="text" id="secCodeInp" placeholder="e.g. PY2024" maxlength="10" style="text-transform:uppercase;letter-spacing:.12em;font-family:var(--mono);font-size:15px" onkeydown="if(event.key==='Enter')joinSection()">
-          </div>
-          <button class="btn btn-green" onclick="joinSection()">🔓 Unlock Section</button>
-        </div>
-        <div id="unlockedList" style="display:flex;flex-direction:column;gap:8px"></div>
-      </div>
-
-      <!-- STUDENT: PROBLEMS -->
-      <div class="panel" id="pnl-problems">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <div><div class="ptitle">Problems</div><div class="psub" id="probSub">Your unlocked sections</div></div>
-          <div class="prog-wrap" style="min-width:150px"><div class="prog-bar"><div class="prog-fill" id="progFill"></div></div><span class="prog-label" id="progLabel">0/0</span></div>
-        </div>
-        <div class="pill-row" id="pillRow"></div>
-        <div id="probList" style="display:flex;flex-direction:column;gap:8px"></div>
-      </div>
-
-      <!-- STUDENT: MY SUBMISSIONS -->
-      <div class="panel" id="pnl-mysubs">
-        <div><div class="ptitle">My Submissions</div><div class="psub">All your work and evaluation results</div></div>
-        <div id="mySubsList" style="display:flex;flex-direction:column;gap:10px"></div>
-      </div>
-
-      <!-- TEACHER: SECTIONS -->
-      <div class="panel" id="pnl-sections">
-        <div><div class="ptitle">Manage Sections</div><div class="psub">Create sections → add problems → share code with students</div></div>
-        <div class="card">
-          <div class="card-title">➕ Create New Section</div>
-          <div class="form-grid">
-            <div class="field full" style="margin:0"><label>Section Name</label><input class="inp" id="tSecName" placeholder="e.g. Python Basics"></div>
-            <div class="field full" style="margin:0"><label>Description (optional)</label><input class="inp" id="tSecDesc" placeholder="Brief description for students"></div>
-          </div>
-          <div style="margin-top:12px"><button class="btn btn-green btn-sm" onclick="createSection()">Create Section</button></div>
-        </div>
-        <div id="secList" style="display:flex;flex-direction:column;gap:10px"></div>
-      </div>
-
-      <!-- TEACHER: SUBMISSIONS -->
-      <div class="panel" id="pnl-subs">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <div><div class="ptitle">Submissions</div><div class="psub">Live updates — grade student work below</div></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <select class="inp" id="filterSec" style="padding:7px 10px;font-size:12px;min-width:130px" onchange="loadTSubs()">
-              <option value="">All Sections</option>
-            </select>
-            <select class="inp" id="filterStatus" style="padding:7px 10px;font-size:12px" onchange="loadTSubs()">
-              <option value="">All</option>
-              <option value="pending">Pending</option>
-              <option value="graded">Graded</option>
-            </select>
+    <!-- sidebar -->
+    <aside class="sidebar" id="sb">
+      <!-- student -->
+      <div id="snav">
+        <div class="nl">Student</div>
+        <div class="ni on" data-v="browse" onclick="gotoView('browse')">
+          <span class="ni-ic">🏠</span>My Sections</div>
+        <div class="ni" data-v="mywork" onclick="gotoView('mywork')">
+          <span class="ni-ic">📋</span>My Submissions</div>
+        <div class="nl" style="margin-top:10px">Join Section</div>
+        <div class="jbox">
+          <span class="jbox-lbl">Enter Code</span>
+          <div class="jrow">
+            <input id="joinInp" class="jinp" maxlength="8" placeholder="ABC123"
+              onkeydown="if(event.key==='Enter')joinSection()">
+            <button class="jbtn" onclick="joinSection()">Join</button>
           </div>
         </div>
-        <div id="tSubsList" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+      <!-- teacher -->
+      <div id="tnav" style="display:none">
+        <div class="nl">Teacher</div>
+        <div class="ni on" data-v="tSec" onclick="gotoView('tSec')">
+          <span class="ni-ic">🗂️</span>Sections</div>
+        <div class="ni" data-v="tSubs" onclick="gotoView('tSubs')">
+          <span class="ni-ic">👁️</span>Submissions</div>
+      </div>
+    </aside>
+
+    <!-- content -->
+    <main class="content" id="mainContent">
+
+      <!-- ═══ STUDENT: MY SECTIONS ═══ -->
+      <div id="v-browse" class="view on">
+        <div class="vh"><div class="vt">My Sections</div>
+          <div class="vs">Join a section with a code to access problems</div></div>
+        <div id="joinedList"></div>
+      </div>
+
+      <!-- ═══ STUDENT: SECTION PROBLEMS ═══ -->
+      <div id="v-section" class="view">
+        <div id="secHeader" class="vh"></div>
+        <div class="prog"><div class="prog-bar"><div class="prog-f" id="progFill"></div></div>
+          <span class="prog-lbl" id="progLbl">0/0</span></div>
+        <div id="probList"></div>
+      </div>
+
+      <!-- ═══ STUDENT: MY SUBMISSIONS ═══ -->
+      <div id="v-mywork" class="view">
+        <div class="vh"><div class="vt">My Submissions</div>
+          <div class="vs">Your submitted solutions and evaluation results</div></div>
+        <div id="myWorkList"></div>
+      </div>
+
+      <!-- ═══ TEACHER: SECTIONS ═══ -->
+      <div id="v-tSec" class="view" style="display:none">
+        <div class="vh"><div class="vt">Sections</div>
+          <div class="vs">Create sections, generate codes, add problems</div></div>
+        <div class="fcard">
+          <div class="fcard-title">➕ Create New Section</div>
+          <div class="frow">
+            <div class="fld" style="flex:1;margin-bottom:0">
+              <label>Section Name</label>
+              <input id="secName" type="text" class="inp" placeholder="e.g. Python Basics, Arrays Week 3…"
+                onkeydown="if(event.key==='Enter')createSection()"></div>
+            <button class="btn btn-g btn-sm" style="align-self:flex-end" onclick="createSection()">
+              Create</button>
+          </div>
+        </div>
+        <div id="tSecList"></div>
+      </div>
+
+      <!-- ═══ TEACHER: SECTION DETAIL ═══ -->
+      <div id="v-tSecDet" class="view" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <button class="btn btn-s btn-sm" onclick="gotoView('tSec')">← Back</button>
+          <div class="vt" id="tDetTitle"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--mu);font-family:var(--mo)">Section Code:</span>
+          <span class="code-chip" id="tDetCode"></span>
+          <button class="btn btn-s btn-sm" onclick="copyCode()" style="font-size:11px">📋 Copy</button>
+        </div>
+        <div class="fcard">
+          <div class="fcard-title">➕ Add Problem</div>
+          <div class="g2">
+            <div class="fld"><label>Title</label>
+              <input id="qTitle" type="text" class="inp" placeholder="Problem title"></div>
+            <div class="fld"><label>Difficulty</label>
+              <select id="qDiff" class="inp">
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select></div>
+            <div class="fld"><label>Concept / Topic</label>
+              <input id="qConcept" type="text" class="inp" placeholder="e.g. Loops + Arithmetic"></div>
+            <div class="fld span2"><label>Problem Statement</label>
+              <textarea id="qProb" class="inp" rows="3" placeholder="Describe the problem…"></textarea></div>
+            <div class="fld"><label>Example I/O</label>
+              <textarea id="qEx" class="inp" rows="2" placeholder="Input → Output"></textarea></div>
+            <div class="fld"><label>Hint (optional)</label>
+              <textarea id="qHint" class="inp" rows="2" placeholder="Hint for students…"></textarea></div>
+          </div>
+          <button class="btn btn-g" onclick="addProblem()">Add Problem</button>
+        </div>
+        <div id="tProbList"></div>
+      </div>
+
+      <!-- ═══ TEACHER: SUBMISSIONS ═══ -->
+      <div id="v-tSubs" class="view" style="display:none">
+        <div class="vh"><div class="vt">Submissions</div>
+          <div class="vs">Evaluate student submissions — updates live</div></div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+          <select id="filterSec" class="inp" style="max-width:220px;margin:0"
+            onchange="loadTSubs()">
+            <option value="">All Sections</option>
+          </select>
+          <select id="filterStatus" class="inp" style="max-width:160px;margin:0"
+            onchange="loadTSubs()">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="evaluated">Evaluated</option>
+          </select>
+          <button class="btn btn-s btn-sm" onclick="loadTSubs()">🔄 Refresh</button>
+        </div>
+        <div id="tSubsList"></div>
       </div>
 
     </main>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-<input type="file" id="fileInp" accept="image/*" style="display:none" onchange="handleImg(event)">
+<!-- toast -->
+<div class="toast" id="toastEl"></div>
+<!-- file input -->
+<input type="file" id="filePick" accept="image/*" style="display:none" onchange="onFilePick(event)">
 
+<!-- ═══════════════════ SCRIPT ═══════════════════ -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
+  signOut,onAuthStateChanged,updateProfile}
+  from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getFirestore,collection,addDoc,getDocs,getDoc,doc,
+  setDoc,updateDoc,deleteDoc,onSnapshot,
+  query,where,orderBy,serverTimestamp,limit}
+  from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ── CONFIG ──
-const FC={apiKey:"AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",authDomain:"teacher-student-portal-b1fed.firebaseapp.com",projectId:"teacher-student-portal-b1fed",storageBucket:"teacher-student-portal-b1fed.firebasestorage.app",messagingSenderId:"553128972767",appId:"1:553128972767:web:96a77d5907c054bcb2746a"};
-const TPASS="coderoom_teacher_2024"; // ← change this to your desired password
-const IMGBB="YOUR_IMGBB_KEY_HERE";   // ← get free key from imgbb.com/api
+/* ── CONFIG ─────────────────────────────────── */
+const FBCFG={
+  apiKey:"AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",
+  authDomain:"teacher-student-portal-b1fed.firebaseapp.com",
+  projectId:"teacher-student-portal-b1fed",
+  storageBucket:"teacher-student-portal-b1fed.firebasestorage.app",
+  messagingSenderId:"553128972767",
+  appId:"1:553128972767:web:96a77d5907c054bcb2746a"
+};
+const TEACHER_PASS="coderoom2024!";          // ← change this
+const IMGBB="YOUR_IMGBB_KEY";                // ← imgbb.com free key
 
-const app=initializeApp(FC);
-const auth=getAuth(app);
-const db=getFirestore(app);
+const fb  = initializeApp(FBCFG);
+const auth= getAuth(fb);
+const db  = getFirestore(fb);
 
-// ── STATE ──
-let me=null,isTeacher=false;
-let unsubLive=null;
-let pendingImgUrl=null,pendingImgProbId=null;
-let expandedCards={},expandedSecs={};
-let solvedMap={};
-let unlockedSecIds=[];
-let allProblems=[];  // flat list from all unlocked sections
-let activePill="all";
-let tSections=[];
+/* ── STATE ──────────────────────────────────── */
+let me=null, isTeacher=false;
+let joinedSecs=[];          // [{id,name,code}]
+let activeSec=null;         // {id,name,code}
+let activeProbs=[];         // problems for active section
+let solvedMap={};           // probId→true
+let currentTSecId=null;     // teacher editing this section id
+let currentTSecCode="";
+let pendingImgProbId=null;
+let imgStore={};            // probId→{url}
+let tSubsUnsub=null;
 
-// ── UTILS ──
-const $=id=>document.getElementById(id);
-const mk=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html)e.innerHTML=html;return e;};
-const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+/* ── HELPERS ────────────────────────────────── */
+const $  = id=>document.getElementById(id);
+const esc= s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-window.showToast=(msg,type="ok")=>{
-  const t=$("toast");t.textContent=msg;t.className=`toast ${type} show`;
-  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),3000);
+window.toast=function(msg,t='ok'){
+  const el=$('toastEl');
+  el.textContent=msg; el.className=`toast t-${t} pop`;
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('pop'),3000);
 };
 
-function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("show"));$(id).classList.add("show");}
+function setAlert(id,msg,type='e'){
+  const el=$(id); if(!el)return;
+  el.textContent=msg; el.className=`alert alert-${type} ${msg?'on':''}`;
+}
 
-const isTeacherURL=location.search.includes("teacher");
+function showPg(id){
+  ['pgAuth','pgTeacher','pgApp'].forEach(p=>{
+    const el=$(p); el.classList.remove('on');
+    el.style.display='none';
+  });
+  const el=$(id); el.classList.add('on');
+  el.style.display=id==='pgApp'?'flex':'flex';
+}
 
-// ── AUTH TABS ──
-window.authTab=tab=>{
-  document.querySelectorAll(".auth-tab").forEach(b=>b.classList.toggle("on",b.textContent.trim().toLowerCase()===tab));
-  $("loginForm").style.display=tab==="login"?"block":"none";
-  $("regForm").style.display=tab==="register"?"block":"none";
-  $("authAlert").classList.remove("show");
+/* ── MOBILE SIDEBAR ─────────────────────────── */
+window.toggleSB=()=>{$('sb').classList.toggle('open');$('overlay').classList.toggle('open')};
+window.closeSB=()=>{$('sb').classList.remove('open');$('overlay').classList.remove('open')};
+
+/* ── AUTH TABS ──────────────────────────────── */
+window.authTab=function(t){
+  document.querySelectorAll('.atab').forEach((b,i)=>b.classList.toggle('on',
+    (t==='login'&&i===0)||(t==='reg'&&i===1)));
+  $('loginF').style.display=t==='login'?'block':'none';
+  $('regF').style.display=t==='reg'?'block':'none';
+  setAlert('authErr','');
 };
 
-function authErr(msg){const a=$("authAlert");a.textContent=msg;a.classList.add("show");}
+/* ── ROUTE ON LOAD ───────────────────────────── */
+(function route(){
+  const isTP=location.search.includes('teacher');
+  if(isTP){
+    if(sessionStorage.getItem('cr_t')==='1'){
+      isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
+      showPg('pgApp'); initApp();
+    } else { showPg('pgTeacher'); }
+  } else { showPg('pgAuth'); }
+})();
 
-window.doLogin=async()=>{
-  const email=$("lEmail").value.trim(),pass=$("lPass").value;
-  $("authAlert").classList.remove("show");
-  if(!email||!pass){authErr("Please fill in all fields.");return;}
-  const btn=$("lBtn");btn.disabled=true;btn.textContent="Logging in…";
-  try{await signInWithEmailAndPassword(auth,email,pass);}
-  catch(e){authErr(e.message.replace("Firebase: ","").replace(/\(.*\)/,"").trim());btn.disabled=false;btn.textContent="Login →";}
+/* ── TEACHER AUTH ────────────────────────────── */
+window.doTeacherAuth=function(){
+  const p=$('tPass').value;
+  setAlert('tErr','');
+  if(p===TEACHER_PASS){
+    sessionStorage.setItem('cr_t','1');
+    isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
+    showPg('pgApp'); initApp(); $('tPass').value='';
+  } else { setAlert('tErr','Wrong password.'); $('tPass').value=''; }
 };
 
-window.doRegister=async()=>{
-  const name=$("rName").value.trim(),email=$("rEmail").value.trim(),pass=$("rPass").value;
-  $("authAlert").classList.remove("show");
-  if(!name||!email||!pass){authErr("Please fill in all fields.");return;}
-  if(pass.length<6){authErr("Password must be at least 6 characters.");return;}
-  const btn=$("rBtn");btn.disabled=true;btn.textContent="Creating…";
+/* ── STUDENT AUTH ────────────────────────────── */
+window.doLogin=async function(){
+  const email=$('lEmail').value.trim(), pass=$('lPass').value;
+  setAlert('authErr','');
+  if(!email||!pass){setAlert('authErr','Fill in all fields.');return;}
+  const btn=$('loginBtn'); btn.disabled=true; btn.textContent='Signing in…';
+  try{ await signInWithEmailAndPassword(auth,email,pass); }
+  catch(e){
+    setAlert('authErr',friendlyErr(e.code));
+    btn.disabled=false; btn.textContent='Sign In →';
+  }
+};
+
+window.doRegister=async function(){
+  const name=$('rName').value.trim(),email=$('rEmail').value.trim(),pass=$('rPass').value;
+  setAlert('authErr','');
+  if(!name||!email||!pass){setAlert('authErr','Fill in all fields.');return;}
+  if(pass.length<6){setAlert('authErr','Password needs 6+ characters.');return;}
+  const btn=$('regBtn'); btn.disabled=true; btn.textContent='Creating…';
   try{
     const c=await createUserWithEmailAndPassword(auth,email,pass);
     await updateProfile(c.user,{displayName:name});
-    await setDoc(doc(db,"users",c.user.uid),{name,email,role:"student",createdAt:serverTimestamp()});
-    showToast("Welcome, "+name+"! 🎉");
-  }catch(e){authErr(e.message.replace("Firebase: ","").replace(/\(.*\)/,"").trim());btn.disabled=false;btn.textContent="Create Account →";}
-};
-
-window.doTeacherAuth=()=>{
-  const pass=$("tPass").value;
-  $("tAuthAlert").classList.remove("show");
-  if(pass===TPASS){
-    sessionStorage.setItem("cr_t","1");
-    isTeacher=true;
-    me={uid:"teacher_master",displayName:"Teacher",email:"teacher@coderoom"};
-    bootApp();
-  }else{
-    const a=$("tAuthAlert");a.textContent="Incorrect password.";a.classList.add("show");
-    $("tPass").value="";
+    await setDoc(doc(db,'users',c.user.uid),{name,email,createdAt:serverTimestamp()});
+    toast('Welcome, '+name+'! 🎉');
+  } catch(e){
+    setAlert('authErr',friendlyErr(e.code));
+    btn.disabled=false; btn.textContent='Create Account →';
   }
 };
 
-window.doLogout=async()=>{
-  sessionStorage.removeItem("cr_t");
-  isTeacher=false;me=null;
-  if(unsubLive){unsubLive();unsubLive=null;}
-  try{if(auth.currentUser)await signOut(auth);}catch(_){}
-  location.href=isTeacherURL?"?teacher":"/";
-};
+function friendlyErr(code){
+  const m={'auth/user-not-found':'No account found with that email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/email-already-in-use':'Email already registered.',
+    'auth/invalid-email':'Invalid email address.',
+    'auth/weak-password':'Password too weak.',
+    'auth/too-many-requests':'Too many attempts. Try later.',
+    'auth/invalid-credential':'Wrong email or password.'};
+  return m[code]||'Something went wrong. Try again.';
+}
 
-// ── FIREBASE AUTH ──
 onAuthStateChanged(auth,user=>{
   if(isTeacher)return;
-  if(user){me=user;bootApp();}
-  else if(!isTeacherURL)showPage("authPage");
+  if(user){ me=user; showPg('pgApp'); initApp(); }
+  else {
+    me=null; showPg('pgAuth');
+    const b=$('loginBtn'); if(b){b.disabled=false;b.textContent='Sign In →';}
+  }
 });
 
-// ── BOOT ──
-async function bootApp(){
-  showPage("appPage");
-  $("uName").textContent=me.displayName||me.email?.split("@")[0]||"User";
-  $("roleDot").className="role-dot "+(isTeacher?"role-teacher":"role-student");
+window.doLogout=async()=>{
+  sessionStorage.removeItem('cr_t');
+  isTeacher=false; activeSec=null; activeProbs=[]; solvedMap={};
+  if(tSubsUnsub){tSubsUnsub();tSubsUnsub=null;}
+  if(auth.currentUser) await signOut(auth);
+  showPg(location.search.includes('teacher')?'pgTeacher':'pgAuth');
+};
+
+/* ── INIT APP ────────────────────────────────── */
+function initApp(){
+  $('navName').textContent=me.displayName||me.email||'User';
   if(isTeacher){
-    $("tNav").style.display="block";$("sNav").style.display="none";
-    gotoT("sections");
-    await loadTSections();
-  }else{
-    $("tNav").style.display="none";$("sNav").style.display="block";
-    gotoS("unlock");
-    await loadStudentData();
+    $('navRole').textContent='TEACHER'; $('navRole').className='role-chip rc-t';
+    $('snav').style.display='none'; $('tnav').style.display='block';
+    gotoView('tSec');
+  } else {
+    $('navRole').textContent='STUDENT'; $('navRole').className='role-chip rc-s';
+    $('snav').style.display='block'; $('tnav').style.display='none';
+    loadJoined(); gotoView('browse');
   }
 }
 
-// ── SIDEBAR ──
-window.toggleSB=()=>{$("sidebar").classList.toggle("open");$("sbOverlay").classList.toggle("show");};
-function closeSB(){$("sidebar").classList.remove("open");$("sbOverlay").classList.remove("show");}
-
-// ── STUDENT NAV ──
-window.gotoS=id=>{
-  document.querySelectorAll("#sNav .nav-item").forEach(n=>n.classList.remove("on"));
-  $("sn-"+id)?.classList.add("on");
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("show"));
-  $("pnl-"+id)?.classList.add("show");
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+window.gotoView=function(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  const el=$('v-'+name);
+  if(!el)return;
+  el.classList.add('on');
+  el.style.display='block';
+  // sidebar active
+  document.querySelectorAll('.ni[data-v]').forEach(n=>n.classList.remove('on'));
+  const ni=document.querySelector(`.ni[data-v="${name}"]`);
+  if(ni)ni.classList.add('on');
   closeSB();
-  if(id==="problems"){renderPills();renderProblems();}
-  if(id==="mysubs")loadMySubs();
-  if(id==="unlock")renderUnlockedList();
+  if(name==='mywork') loadMyWork();
+  if(name==='tSec')   loadTSecs();
+  if(name==='tSubs')  loadTSubs();
 };
 
-// ── TEACHER NAV ──
-window.gotoT=id=>{
-  document.querySelectorAll("#tNav .nav-item").forEach(n=>n.classList.remove("on"));
-  $("tn-"+id)?.classList.add("on");
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("show"));
-  $("pnl-"+id)?.classList.add("show");
-  closeSB();
-  if(id==="subs")loadTSubs();
-  if(id==="sections")loadTSections();
-};
-
-// ═══════════════════════════════════
-// STUDENT DATA LOAD
-// ═══════════════════════════════════
-async function loadStudentData(){
-  unlockedSecIds=[];allProblems=[];solvedMap={};
-  const uSnap=await getDocs(collection(db,"users",me.uid,"unlocked"));
-  uSnap.forEach(d=>unlockedSecIds.push(d.id));
-  for(const sid of unlockedSecIds){
-    const secDoc=await getDoc(doc(db,"sections",sid));
-    const secName=secDoc.exists()?secDoc.data().name:"";
-    const pSnap=await getDocs(query(collection(db,"sections",sid,"problems"),orderBy("order","asc")));
-    pSnap.forEach(d=>allProblems.push({id:d.id,sectionId:sid,sectionName:secName,...d.data()}));
-  }
-  const sSnap=await getDocs(collection(db,"users",me.uid,"solved"));
-  sSnap.forEach(d=>{solvedMap[d.id]=true;});
-}
-
-// ─── UNLOCK SECTION ───
-window.joinSection=async()=>{
-  const code=$("secCodeInp").value.trim().toUpperCase();
-  const alert=$("unlockAlert");alert.classList.remove("show");
-  if(!code){alert.textContent="Enter a code first.";alert.classList.add("show");return;}
+/* ══════════════════════════════════
+   STUDENT — JOINED SECTIONS
+══════════════════════════════════ */
+async function loadJoined(){
   try{
-    const snap=await getDocs(query(collection(db,"sections"),where("code","==",code)));
-    if(snap.empty){alert.textContent="No section found with that code.";alert.classList.add("show");return;}
-    const secId=snap.docs[0].id;
-    const secName=snap.docs[0].data().name;
-    if(unlockedSecIds.includes(secId)){alert.textContent="You already have this section.";alert.classList.add("show");return;}
-    await setDoc(doc(db,"users",me.uid,"unlocked",secId),{sectionId:secId,at:serverTimestamp()});
-    unlockedSecIds.push(secId);
-    const pSnap=await getDocs(query(collection(db,"sections",secId,"problems"),orderBy("order","asc")));
-    pSnap.forEach(d=>allProblems.push({id:d.id,sectionId:secId,sectionName:secName,...d.data()}));
-    $("secCodeInp").value="";
-    showToast("🔓 Unlocked: "+secName);
-    renderUnlockedList();
-  }catch(e){alert.textContent=e.message;alert.classList.add("show");}
+    const snap=await getDocs(collection(db,'users',me.uid,'joinedSections'));
+    joinedSecs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderJoined();
+  }catch(e){console.error(e);}
+}
+
+function renderJoined(){
+  const el=$('joinedList');
+  if(!joinedSecs.length){
+    el.innerHTML=`<div class="empty"><div class="ei">🔒</div>
+      <p>No sections joined yet.<br>Use the sidebar to enter a section code.</p></div>`;return;
+  }
+  el.innerHTML='';
+  joinedSecs.forEach(s=>{
+    const c=document.createElement('div');
+    c.className='scard'; c.style.cursor='pointer';
+    c.innerHTML=`<div class="scard-head">
+      <div><div class="scard-title">📂 ${esc(s.name)}</div>
+        <div class="scard-meta">Tap to open</div></div>
+      <span style="color:var(--mu);font-size:18px">›</span>
+    </div>`;
+    c.onclick=()=>openSection(s);
+    el.appendChild(c);
+  });
+}
+
+window.joinSection=async function(){
+  const code=$('joinInp').value.trim().toUpperCase();
+  if(!code){toast('Enter a section code','err');return;}
+  try{
+    const snap=await getDocs(query(collection(db,'sections'),where('code','==',code)));
+    if(snap.empty){toast('Section not found!','err');return;}
+    const sd=snap.docs[0]; const data=sd.data();
+    if(joinedSecs.find(s=>s.id===sd.id)){
+      toast('Already joined!'); openSection({id:sd.id,...data}); return;}
+    await setDoc(doc(db,'users',me.uid,'joinedSections',sd.id),
+      {name:data.name,code:data.code,joinedAt:serverTimestamp()});
+    joinedSecs.push({id:sd.id,name:data.name,code:data.code});
+    renderJoined(); $('joinInp').value='';
+    toast('Joined: '+data.name+' 🎉');
+    openSection({id:sd.id,...data});
+  }catch(e){toast('Error: '+e.message,'err');}
 };
 
-function renderUnlockedList(){
-  const wrap=$("unlockedList");wrap.innerHTML="";
-  if(unlockedSecIds.length===0){
-    wrap.innerHTML=`<div class="empty"><div class="ei">🔒</div><p>No sections unlocked yet.<br>Enter a code above to get started.</p></div>`;
-    return;
-  }
-  unlockedSecIds.forEach(sid=>{
-    const probs=allProblems.filter(p=>p.sectionId===sid);
-    const name=probs[0]?.sectionName||sid;
-    const done=probs.filter(p=>solvedMap[p.id]).length;
-    const chip=mk("div","unlock-section-chip");
-    chip.innerHTML=`<span style="font-size:22px">📂</span><div><div class="usc-name">${name}</div><div class="usc-meta">${probs.length} problems · ${done} solved</div></div>`;
-    chip.onclick=()=>gotoS("problems");
-    wrap.appendChild(chip);
+/* ══════════════════════════════════
+   STUDENT — SECTION VIEW
+══════════════════════════════════ */
+async function openSection(sec){
+  activeSec=sec;
+  $('secHeader').innerHTML=`<div class="vt">📂 ${esc(sec.name)}</div>
+    <div class="vs">Solve problems and submit your solutions</div>`;
+  solvedMap={}; imgStore={};
+  await loadSolved(sec.id);
+  await loadProbs(sec.id);
+  gotoView('section');
+}
+
+async function loadSolved(secId){
+  try{
+    const snap=await getDocs(collection(db,'users',me.uid,'solved'));
+    snap.forEach(d=>{if(d.data().sectionId===secId)solvedMap[d.id]=true;});
+  }catch(e){}
+}
+
+async function loadProbs(secId){
+  try{
+    const snap=await getDocs(
+      query(collection(db,'sections',secId,'problems'),orderBy('createdAt','asc')));
+    activeProbs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    buildProbList();
+    updateProg();
+  }catch(e){console.error(e);}
+}
+
+function updateProg(){
+  const tot=activeProbs.length, done=Object.keys(solvedMap).length;
+  $('progFill').style.width=(tot?Math.round(done/tot*100):0)+'%';
+  $('progLbl').textContent=`${done}/${tot}`;
+}
+
+/* Build problem list — only adds NEW cards, never re-renders existing ones
+   so typing in textarea is never interrupted */
+function buildProbList(){
+  const list=$('probList');
+  // remove cards no longer in list
+  const ids=new Set(activeProbs.map(p=>p.id));
+  list.querySelectorAll('.pcard').forEach(c=>{
+    if(!ids.has(c.dataset.pid)) c.remove();
   });
-}
-
-// ─── PROBLEMS ───
-function renderPills(){
-  const row=$("pillRow");row.innerHTML="";
-  const sectionMap={};
-  allProblems.forEach(p=>{if(!sectionMap[p.sectionId])sectionMap[p.sectionId]=p.sectionName||p.sectionId;});
-  const all=mk("button","pill on","All");
-  all.onclick=()=>{activePill="all";document.querySelectorAll(".pill").forEach(p=>p.classList.remove("on"));all.classList.add("on");renderProblems();};
-  row.appendChild(all);
-  Object.entries(sectionMap).forEach(([sid,name])=>{
-    const p=mk("button","pill",name);
-    p.onclick=()=>{activePill=sid;document.querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));p.classList.add("on");renderProblems();};
-    if(activePill===sid)p.classList.add("on");
-    row.appendChild(p);
-  });
-  if(activePill!=="all")all.classList.remove("on");
-}
-
-function updateProgress(){
-  const total=allProblems.length,done=allProblems.filter(p=>solvedMap[p.id]).length;
-  const pct=total?(done/total*100):0;
-  $("progFill").style.width=pct+"%";
-  $("progLabel").textContent=`${done}/${total}`;
-}
-
-function renderProblems(){
-  const list=$("probList");list.innerHTML="";
-  updateProgress();
-  const probs=activePill==="all"?allProblems:allProblems.filter(p=>p.sectionId===activePill);
-  if(probs.length===0){
-    list.innerHTML=`<div class="empty"><div class="ei">📭</div><p>${allProblems.length===0?"Unlock a section first using Join Section.":"No problems in this section yet."}</p></div>`;
-    return;
-  }
-  probs.forEach((prob,i)=>{
-    const done=!!solvedMap[prob.id];
-    const open=!!expandedCards[prob.id];
-    const card=mk("div",`pcard${done?" done":""}`);
-
-    // HEAD — clicking check or the row toggles expand/check
-    const head=mk("div","pcard-head");
-    head.innerHTML=`
-      <div class="pcard-check${done?" on":""}" id="chk_${prob.id}">${done?"✓":""}</div>
-      <span class="pcard-num">#${i+1}</span>
-      <span class="pcard-title${done?" done":""}">${prob.title}</span>
-      <span class="diff diff-${(prob.difficulty||"easy").toLowerCase()}">${prob.difficulty||"Easy"}</span>
-      <span class="pcard-arr" style="transform:${open?"rotate(180deg)":"none"}">▾</span>
-    `;
-
-    // Checkbox click
-    head.querySelector(".pcard-check").addEventListener("click",e=>{
-      e.stopPropagation();
-      toggleSolved(prob.id);
-    });
-
-    // Row click = toggle open
-    head.addEventListener("click",e=>{
-      if(e.target.closest(".pcard-check"))return;
-      expandedCards[prob.id]=!expandedCards[prob.id];
-      renderProblems();
-    });
-
-    card.appendChild(head);
-
-    if(open){
-      const body=mk("div","pcard-body");
-      // CRITICAL: stop ALL clicks inside body from reaching the head
-      body.addEventListener("click",e=>e.stopPropagation());
-      body.addEventListener("mousedown",e=>e.stopPropagation());
-      body.innerHTML=buildBody(prob);
-      card.appendChild(body);
-      // Load existing sub after DOM insert
-      setTimeout(()=>loadExistingSub(prob.id),0);
-    }
-
+  activeProbs.forEach((p,i)=>{
+    if(document.getElementById('pc-'+p.id)) return; // already rendered
+    const card=makeProbCard(p,i);
     list.appendChild(card);
   });
 }
 
-function buildBody(prob){
-  return `<div class="pcard-inner">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      ${prob.concept?`<span style="font-size:11px;font-family:var(--mono);background:#4f8ef715;color:var(--blue);padding:2px 10px;border-radius:99px">🧠 ${prob.concept}</span>`:""}
-      <span style="font-size:11px;color:var(--mute)">${prob.sectionName||""}</span>
-    </div>
-    ${prob.problem?`<div class="blk blk-prob"><div class="blk-label">Problem</div><p class="blk-text">${prob.problem}</p></div>`:""}
-    ${prob.example?`<div class="blk blk-ex"><div class="blk-label">Example</div><pre class="blk-pre">${esc(prob.example)}</pre></div>`:""}
-    ${prob.hint?`<div class="blk blk-hint"><div class="blk-label">💡 Hint</div><p class="blk-text">${prob.hint}</p></div>`:""}
-    <div class="blk blk-code">
-      <div class="blk-label">✏️ Your Solution</div>
-      <div id="existSub_${prob.id}"><div class="spinner" style="width:20px;height:20px;margin:10px auto"></div></div>
-      <textarea class="code-area" id="codeArea_${prob.id}" placeholder="# Write your solution here…"></textarea>
-      <div id="imgPrev_${prob.id}" style="margin-top:8px"></div>
-      <div class="sub-actions">
-        <button class="btn btn-green btn-sm" onclick="submitSol('${prob.id}','${prob.sectionId}')">Submit</button>
-        <button class="btn btn-ghost btn-sm" onclick="openImgPicker('${prob.id}')">📷 Add Image</button>
-        <span id="subStat_${prob.id}"></span>
-      </div>
-    </div>
-  </div>`;
-}
+function makeProbCard(p,idx){
+  const solved=!!solvedMap[p.id];
+  const card=document.createElement('div');
+  card.className='pcard'+(solved?' solved':'');
+  card.id='pc-'+p.id; card.dataset.pid=p.id;
 
-async function loadExistingSub(probId){
-  const el=$("existSub_"+probId);if(!el)return;
-  try{
-    const snap=await getDocs(query(collection(db,"submissions"),where("userId","==",me.uid),where("problemId","==",probId),orderBy("submittedAt","desc")));
-    if(snap.empty){el.innerHTML="";return;}
-    const s=snap.docs[0].data();
-    const ta=$("codeArea_"+probId);if(ta&&s.code)ta.value=s.code;
-    if(s.imageUrl){
-      const pw=$("imgPrev_"+probId);
-      if(pw)pw.innerHTML=`<img src="${s.imageUrl}" style="max-width:200px;max-height:140px;border-radius:8px;border:1px solid var(--line2)">`;
-    }
-    const stat=$("subStat_"+probId);
-    if(s.score!=null){
-      el.innerHTML=`<div class="grade-box"><div class="grade-score">${s.score}/10</div><div class="grade-comment">${s.comment||""}</div></div>`;
-      if(stat)stat.innerHTML=`<span class="sub-status s-graded">✓ Graded ${s.score}/10</span>`;
-    }else{
-      el.innerHTML=`<div style="font-size:12px;font-family:var(--mono);color:var(--amber);margin-bottom:6px">⏳ Awaiting evaluation</div>`;
-      if(stat)stat.innerHTML=`<span class="sub-status s-pending">⏳ Pending</span>`;
-    }
-  }catch(_){const el=$("existSub_"+probId);if(el)el.innerHTML="";}
-}
-
-// ─── SOLVED TOGGLE ───
-async function toggleSolved(probId){
-  if(solvedMap[probId]){
-    delete solvedMap[probId];
-    try{await deleteDoc(doc(db,"users",me.uid,"solved",probId));}catch(_){}
-  }else{
-    solvedMap[probId]=true;
-    try{await setDoc(doc(db,"users",me.uid,"solved",probId),{at:serverTimestamp()});}catch(_){}
-  }
-  renderProblems();
-}
-
-// ─── IMAGE ───
-let _imgProbId=null;
-window.openImgPicker=probId=>{_imgProbId=probId;$("fileInp").click();};
-
-window.handleImg=async e=>{
-  const file=e.target.files[0];if(!file)return;
-  e.target.value="";
-  showToast("Uploading image…");
-  try{
-    const fd=new FormData();fd.append("image",file);
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`,{method:"POST",body:fd});
-    const json=await res.json();
-    if(!json.success)throw new Error("Upload failed. Check your imgbb key.");
-    pendingImgUrl=json.data.url;pendingImgProbId=_imgProbId;
-    const pw=$("imgPrev_"+_imgProbId);
-    if(pw)pw.innerHTML=`<img src="${pendingImgUrl}" style="max-width:200px;max-height:140px;border-radius:8px;border:1px solid var(--line2)">`;
-    showToast("Image ready ✓");
-  }catch(err){showToast("Image upload failed: "+err.message,"err");}
-};
-
-// ─── SUBMIT ───
-window.submitSol=async(probId,secId)=>{
-  const ta=$("codeArea_"+probId);
-  const code=ta?ta.value.trim():"";
-  const imgUrl=pendingImgProbId===probId?pendingImgUrl:null;
-  if(!code&&!imgUrl){showToast("Write a solution or attach an image first.","err");return;}
-  const prob=allProblems.find(p=>p.id===probId);
-  try{
-    const existing=await getDocs(query(collection(db,"submissions"),where("userId","==",me.uid),where("problemId","==",probId)));
-    const data={userId:me.uid,userName:me.displayName||me.email,problemId:probId,problemTitle:prob?.title||probId,sectionId:secId,sectionName:prob?.sectionName||"",code:code||null,imageUrl:imgUrl||null,status:"pending",score:null,comment:null,submittedAt:serverTimestamp()};
-    if(!existing.empty){await updateDoc(doc(db,"submissions",existing.docs[0].id),{...data,updatedAt:serverTimestamp()});}
-    else{await addDoc(collection(db,"submissions"),data);}
-    if(!solvedMap[probId]){solvedMap[probId]=true;await setDoc(doc(db,"users",me.uid,"solved",probId),{at:serverTimestamp()});}
-    if(pendingImgProbId===probId){pendingImgUrl=null;pendingImgProbId=null;}
-    showToast("✓ Solution submitted!");
-    const stat=$("subStat_"+probId);if(stat)stat.innerHTML=`<span class="sub-status s-pending">⏳ Pending</span>`;
-    const ex=$("existSub_"+probId);if(ex)ex.innerHTML=`<div style="font-size:12px;font-family:var(--mono);color:var(--amber);margin-bottom:6px">⏳ Awaiting evaluation</div>`;
-    updateProgress();
-  }catch(err){showToast(err.message,"err");}
-};
-
-// ─── MY SUBS ───
-async function loadMySubs(){
-  const list=$("mySubsList");list.innerHTML=`<div class="spinner"></div>`;
-  try{
-    const snap=await getDocs(query(collection(db,"submissions"),where("userId","==",me.uid),orderBy("submittedAt","desc")));
-    list.innerHTML="";
-    if(snap.empty){list.innerHTML=`<div class="empty"><div class="ei">📭</div><p>No submissions yet. Solve some problems!</p></div>`;return;}
-    snap.forEach(d=>{
-      const s=d.data();
-      const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleDateString():"";
-      const graded=s.score!=null;
-      const card=mk("div","msub");
-      card.innerHTML=`
-        <div class="msub-top">
-          <div><div class="msub-title">${s.problemTitle||"Untitled"}</div><div class="msub-meta">${s.sectionName||""} · ${ts}</div></div>
-          ${graded?`<span class="sub-status s-graded">✓ ${s.score}/10</span>`:`<span class="sub-status s-pending">⏳ Pending</span>`}
-        </div>
-        ${s.code?`<div class="code-blk">${esc(s.code)}</div>`:""}
-        ${s.imageUrl?`<img src="${s.imageUrl}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--line2)">`:""}
-        ${graded?`<div class="grade-box"><div class="grade-score">${s.score}/10</div><div class="grade-comment">${s.comment||""}</div></div>`:""}
-      `;
-      list.appendChild(card);
-    });
-  }catch(e){list.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
-}
-
-// ═══════════════════════════════════
-// TEACHER: SECTIONS
-// ═══════════════════════════════════
-function randCode(){
-  const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join("");
-}
-
-window.createSection=async()=>{
-  const name=$("tSecName").value.trim(),desc=$("tSecDesc").value.trim();
-  if(!name){showToast("Enter a section name.","err");return;}
-  const code=randCode();
-  try{
-    await addDoc(collection(db,"sections"),{name,desc,code,createdAt:serverTimestamp()});
-    $("tSecName").value="";$("tSecDesc").value="";
-    showToast("Section created! Code: "+code);
-    await loadTSections();
-  }catch(e){showToast(e.message,"err");}
-};
-
-async function loadTSections(){
-  const list=$("secList");list.innerHTML=`<div class="spinner"></div>`;
-  const fSec=$("filterSec");
-  try{
-    const snap=await getDocs(query(collection(db,"sections"),orderBy("createdAt","asc")));
-    list.innerHTML="";tSections=[];
-    while(fSec.options.length>1)fSec.remove(1);
-    if(snap.empty){list.innerHTML=`<div class="empty"><div class="ei">📁</div><p>No sections yet. Create one above.</p></div>`;return;}
-    for(const d of snap.docs){
-      const s={id:d.id,...d.data()};tSections.push(s);
-      fSec.appendChild(new Option(s.name,s.id));
-      const card=await buildSecCard(s);
-      list.appendChild(card);
-    }
-  }catch(e){list.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
-}
-
-async function buildSecCard(sec){
-  const pSnap=await getDocs(query(collection(db,"sections",sec.id,"problems"),orderBy("order","asc")));
-  const probs=[];pSnap.forEach(d=>probs.push({id:d.id,...d.data()}));
-  const open=!!expandedSecs[sec.id];
-  const card=mk("div","sec-card");
   card.innerHTML=`
-    <div class="sec-head" onclick="toggleSec('${sec.id}')">
-      <div class="sec-info"><h4>📂 ${sec.name}</h4><p>${sec.desc||""} · ${probs.length} problem${probs.length!==1?"s":""}</p></div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <div class="sec-code-badge">🔑 ${sec.code}</div>
-        <span style="color:var(--mute);font-size:12px">${open?"▲":"▼"}</span>
+  <div class="ph">
+    <div class="pchk${solved?' on':''}">${solved?'✓':''}</div>
+    <span class="pnum">#${idx+1}</span>
+    <span class="ptit${solved?' done':''}">${esc(p.title)}</span>
+    <span class="diff d${(p.difficulty||'Easy')[0]}">${p.difficulty||'Easy'}</span>
+    <span class="chev">▼</span>
+  </div>
+  <div class="pb">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-family:var(--mo);font-size:10px;background:var(--s2);color:var(--ac);
+        padding:3px 9px;border-radius:99px;border:1px solid var(--b2)">🧠 ${esc(p.concept||'')}</span>
+    </div>
+    <div class="blk b-prob">
+      <div class="blk-l">Problem</div>
+      <p class="blk-p">${esc(p.problem||'').replace(/\n/g,'<br>')}</p>
+    </div>
+    ${p.example?`<div class="blk b-ex">
+      <div class="blk-l">Example</div>
+      <pre class="blk-pre">${esc(p.example)}</pre>
+    </div>`:''}
+    ${p.hint?`<div class="blk b-hint">
+      <div class="blk-l">💡 Hint</div>
+      <p class="blk-p" style="font-family:var(--mo);font-size:12px;color:#fcd34d">${esc(p.hint)}</p>
+    </div>`:''}
+    <div class="blk b-code">
+      <div class="blk-l">✏️ Your Solution</div>
+      <textarea class="codearea" id="ca-${p.id}"
+        placeholder="# Write your solution here…"
+        onclick="event.stopPropagation()"
+        onkeydown="tabKey(event)"
+        rows="7"></textarea>
+      <div class="img-pre" id="ip-${p.id}">
+        <img id="ipr-${p.id}" src="" alt="">
+        <button class="btn btn-d btn-sm" style="margin-top:5px"
+          onclick="rmImg('${p.id}')">✕ Remove image</button>
+      </div>
+      <div class="sub-row">
+        <button class="btn btn-p btn-sm" style="width:auto"
+          onclick="submitSol('${p.id}')">Submit →</button>
+        <button class="btn btn-s btn-sm"
+          onclick="pickImg('${p.id}')">📷 Image</button>
+        <span class="sub-done" id="sd-${p.id}">✓ Submitted</span>
       </div>
     </div>
-    ${open?buildSecBody(sec,probs):""}
-  `;
+    <div id="rb-${p.id}"></div>
+  </div>`;
+
+  // header click — toggle body
+  const ph=card.querySelector('.ph');
+  const pb=card.querySelector('.pb');
+  const chev=card.querySelector('.chev');
+  ph.addEventListener('click',e=>{
+    if(e.target.closest('.pchk'))return;
+    const open=pb.classList.contains('open');
+    pb.classList.toggle('open',!open);
+    chev.style.transform=open?'':'rotate(180deg)';
+  });
+
+  // check click
+  card.querySelector('.pchk').addEventListener('click',e=>{
+    e.stopPropagation(); toggleSolved(p.id);
+  });
+
   return card;
 }
 
-function buildSecBody(sec,probs){
-  const rows=probs.map((p,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap">
-      <span style="font-family:var(--mono);font-size:11px;color:var(--mute)">#${i+1}</span>
-      <span style="flex:1;font-size:13px;font-weight:600">${p.title}</span>
-      <span class="diff diff-${(p.difficulty||"easy").toLowerCase()}">${p.difficulty||"Easy"}</span>
-      <button class="btn btn-red btn-xs" onclick="event.stopPropagation();deleteProb('${sec.id}','${p.id}')">✕</button>
-    </div>`).join("");
-  return `<div class="sec-body">
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn btn-red btn-sm" onclick="event.stopPropagation();deleteSection('${sec.id}')">🗑 Delete Section</button>
-    </div>
-    <div style="background:var(--ink3);border:1px solid var(--line2);border-radius:var(--r);padding:14px;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;margin-bottom:12px">➕ Add Problem</div>
-      <div class="form-grid">
-        <div class="field" style="margin:0"><label>Title</label><input class="inp" id="pt_${sec.id}" placeholder="Problem title"></div>
-        <div class="field" style="margin:0"><label>Difficulty</label>
-          <select class="inp" id="pd_${sec.id}"><option>Easy</option><option>Medium</option><option>Hard</option></select>
-        </div>
-        <div class="field full" style="margin:0"><label>Concept / Tag</label><input class="inp" id="pc_${sec.id}" placeholder="e.g. Loops + Arithmetic"></div>
-        <div class="field full" style="margin:0"><label>Problem Statement</label><textarea class="inp" id="pp_${sec.id}" placeholder="Describe the problem…"></textarea></div>
-        <div class="field full" style="margin:0"><label>Example</label><textarea class="inp" id="pe_${sec.id}" placeholder="Input → Output examples…" style="min-height:60px"></textarea></div>
-        <div class="field full" style="margin:0"><label>Hint</label><input class="inp" id="ph_${sec.id}" placeholder="Hint for students…"></div>
-      </div>
-      <div style="margin-top:12px"><button class="btn btn-green btn-sm" onclick="event.stopPropagation();addProb('${sec.id}')">Add Problem</button></div>
-    </div>
-    <div style="font-size:11px;font-weight:700;font-family:var(--mono);color:var(--mute);margin-bottom:6px;letter-spacing:.08em">PROBLEMS (${probs.length})</div>
-    ${probs.length?rows:`<div style="font-size:13px;color:var(--mute)">No problems yet.</div>`}
-  </div>`;
+/* Tab key indent */
+window.tabKey=function(e){
+  if(e.key!=='Tab')return;
+  e.preventDefault();
+  const t=e.target,s=t.selectionStart;
+  t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);
+  t.selectionStart=t.selectionEnd=s+2;
+};
+
+/* solved toggle */
+async function toggleSolved(pid){
+  const was=!!solvedMap[pid];
+  if(was){
+    delete solvedMap[pid];
+    try{await deleteDoc(doc(db,'users',me.uid,'solved',pid));}catch(e){}
+  } else {
+    solvedMap[pid]=true;
+    try{await setDoc(doc(db,'users',me.uid,'solved',pid),
+      {sectionId:activeSec.id,solvedAt:serverTimestamp()});}catch(e){}
+  }
+  updateProg();
+  const card=document.getElementById('pc-'+pid); if(!card)return;
+  const chk=card.querySelector('.pchk');
+  const tit=card.querySelector('.ptit');
+  const now=!was;
+  chk.classList.toggle('on',now); chk.textContent=now?'✓':'';
+  tit.classList.toggle('done',now);
+  card.classList.toggle('solved',now);
 }
 
-window.toggleSec=async id=>{expandedSecs[id]=!expandedSecs[id];await loadTSections();};
+/* ── IMAGE ─────────────────────────────────── */
+window.pickImg=function(pid){pendingImgProbId=pid;$('filePick').click();};
+window.rmImg=function(pid){
+  delete imgStore[pid];
+  const t=$('ip-'+pid); if(t)t.classList.remove('on');
+};
 
-window.addProb=async secId=>{
-  const title=$("pt_"+secId)?.value.trim();
-  const diff=$("pd_"+secId)?.value;
-  const concept=$("pc_"+secId)?.value.trim();
-  const problem=$("pp_"+secId)?.value.trim();
-  const example=$("pe_"+secId)?.value.trim();
-  const hint=$("ph_"+secId)?.value.trim();
-  if(!title||!problem){showToast("Title and problem statement are required.","err");return;}
-  const sec=tSections.find(s=>s.id===secId);
-  const pSnap=await getDocs(collection(db,"sections",secId,"problems"));
+window.onFilePick=async function(e){
+  const file=e.target.files[0]; if(!file)return;
+  const pid=pendingImgProbId;
+  toast('Uploading…');
   try{
-    await addDoc(collection(db,"sections",secId,"problems"),{title,difficulty:diff,concept,problem,example,hint,sectionId:secId,sectionName:sec?.name||"",order:pSnap.size+1,createdAt:serverTimestamp()});
-    showToast("Problem added!");await loadTSections();
-  }catch(e){showToast(e.message,"err");}
+    const fd=new FormData(); fd.append('image',file);
+    const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`,{method:'POST',body:fd});
+    const d=await r.json();
+    if(!d.success)throw new Error('Upload failed');
+    imgStore[pid]={url:d.data.url};
+    const pr=$('ipr-'+pid), ip=$('ip-'+pid);
+    if(pr){pr.src=d.data.url;} if(ip)ip.classList.add('on');
+    toast('Image ready ✓');
+  }catch(err){
+    // fallback: store as base64 if imgbb key not set
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      imgStore[pid]={url:ev.target.result,isBase64:true};
+      const pr=$('ipr-'+pid),ip=$('ip-'+pid);
+      if(pr)pr.src=ev.target.result; if(ip)ip.classList.add('on');
+      toast('Image added (base64 fallback)');
+    };
+    reader.readAsDataURL(file);
+  }
+  e.target.value='';
 };
 
-window.deleteProb=async(secId,probId)=>{
-  if(!confirm("Delete this problem?"))return;
-  try{await deleteDoc(doc(db,"sections",secId,"problems",probId));showToast("Problem deleted.");await loadTSections();}
-  catch(e){showToast(e.message,"err");}
-};
-
-window.deleteSection=async secId=>{
-  if(!confirm("Delete this ENTIRE section and all its problems? Students will lose access."))return;
+/* ── SUBMIT ─────────────────────────────────── */
+window.submitSol=async function(pid){
+  const code=($('ca-'+pid)||{}).value||'';
+  const img=imgStore[pid]||null;
+  if(!code.trim()&&!img){toast('Write a solution or add an image.','err');return;}
+  const prob=activeProbs.find(x=>x.id===pid);
   try{
-    const snap=await getDocs(collection(db,"sections",secId,"problems"));
-    for(const d of snap.docs)await deleteDoc(doc(db,"sections",secId,"problems",d.id));
-    await deleteDoc(doc(db,"sections",secId));
-    delete expandedSecs[secId];
-    showToast("Section deleted.");await loadTSections();
-  }catch(e){showToast(e.message,"err");}
+    await addDoc(collection(db,'submissions'),{
+      userId:me.uid,
+      userName:me.displayName||me.email,
+      sectionId:activeSec.id,
+      sectionName:activeSec.name,
+      problemId:pid,
+      problemTitle:prob?prob.title:pid,
+      code:code||null,
+      imageUrl:img?img.url:null,
+      status:'pending',
+      score:null,
+      comment:null,
+      submittedAt:serverTimestamp()
+    });
+    if(!solvedMap[pid]){
+      solvedMap[pid]=true;
+      await setDoc(doc(db,'users',me.uid,'solved',pid),
+        {sectionId:activeSec.id,solvedAt:serverTimestamp()});
+      updateProg();
+      toggleSolvedUI(pid,true);
+    }
+    const sd=$('sd-'+pid); if(sd)sd.classList.add('on');
+    const rb=$('rb-'+pid);
+    if(rb)rb.innerHTML=`<div class="res-strip res-pend">
+      <span class="pend-badge">⏳ Submitted — awaiting evaluation</span></div>`;
+    toast('Submitted! ✓');
+  }catch(err){toast('Submit failed: '+err.message,'err');}
 };
 
-// ═══════════════════════════════════
-// TEACHER: SUBMISSIONS (live)
-// ═══════════════════════════════════
-window.loadTSubs=async()=>{
-  const list=$("tSubsList");list.innerHTML=`<div class="spinner"></div>`;
-  if(unsubLive){unsubLive();unsubLive=null;}
-  const secF=$("filterSec").value,statF=$("filterStatus").value;
-  let q=secF
-    ?query(collection(db,"submissions"),where("sectionId","==",secF),orderBy("submittedAt","desc"))
-    :query(collection(db,"submissions"),orderBy("submittedAt","desc"));
-  unsubLive=onSnapshot(q,snap=>{
-    list.innerHTML="";
-    let docs=[...snap.docs];
-    if(statF)docs=docs.filter(d=>d.data().status===statF);
-    if(!docs.length){list.innerHTML=`<div class="empty"><div class="ei">📭</div><p>No submissions match the filter.</p></div>`;return;}
-    docs.forEach(d=>{
-      const s=d.data(),sid=d.id;
-      const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleString():"";
-      const graded=s.score!=null;
-      const card=mk("div","tsub");
-      card.innerHTML=`
-        <div class="tsub-head">
-          <div><div class="tsub-name">${s.userName||"Unknown"}</div><div class="tsub-meta">${s.problemTitle||""} · ${s.sectionName||""} · ${ts}</div></div>
-          ${graded?`<span class="sub-status s-graded">✓ ${s.score}/10</span>`:`<span class="sub-status s-pending">⏳ Pending</span>`}
-        </div>
-        <div class="tsub-body">
-          ${s.code?`<div class="code-blk">${esc(s.code)}</div>`:""}
-          ${s.imageUrl?`<img src="${s.imageUrl}" style="max-width:100%;max-height:240px;border-radius:8px;border:1px solid var(--line2)">`:""}
-          ${graded?`<div class="grade-box"><div class="grade-score">${s.score}/10</div><div class="grade-comment">${s.comment||""}</div></div>`:""}
-          <div class="grade-form">
-            <input class="score-inp" id="sc_${sid}" type="number" min="0" max="10" placeholder="0-10" value="${s.score!=null?s.score:""}">
-            <input class="comment-inp" id="cm_${sid}" placeholder="Feedback for student…" value="${s.comment||""}">
-            <button class="btn btn-green btn-sm" onclick="gradeIt('${sid}')">Grade</button>
-            <button class="btn btn-red btn-sm" onclick="deleteSub('${sid}')">Delete</button>
+function toggleSolvedUI(pid,on){
+  const card=document.getElementById('pc-'+pid); if(!card)return;
+  card.querySelector('.pchk').classList.toggle('on',on);
+  card.querySelector('.pchk').textContent=on?'✓':'';
+  card.querySelector('.ptit').classList.toggle('done',on);
+  card.classList.toggle('solved',on);
+}
+
+/* ── MY SUBMISSIONS (no composite index needed) ── */
+async function loadMyWork(){
+  const list=$('myWorkList');
+  list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
+  try{
+    // Simple query — only filter by userId, no orderBy to avoid index requirement
+    const snap=await getDocs(
+      query(collection(db,'submissions'),where('userId','==',me.uid)));
+    if(snap.empty){
+      list.innerHTML=`<div class="empty"><div class="ei">📭</div>
+        <p>No submissions yet. Solve some problems!</p></div>`;return;
+    }
+    // Sort client-side
+    const docs=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
+    list.innerHTML='';
+    docs.forEach(s=>{
+      const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleString():'–';
+      const card=document.createElement('div');
+      card.className='sub-card';
+      let evalHtml='';
+      if(s.status==='evaluated'){
+        evalHtml=`<div style="margin-top:10px;padding:10px 12px;background:var(--s2);
+          border-radius:var(--r2);border:1px solid var(--b1)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="score-badge">Score: ${s.score}/10</span>
+            <span class="chip-eval chip-pend">Evaluated</span>
           </div>
+          ${s.comment?`<p style="font-size:13px;color:var(--t2);line-height:1.6;margin-top:6px">${esc(s.comment)}</p>`:''}
         </div>`;
+      } else {
+        evalHtml=`<div style="margin-top:8px"><span class="pend-badge">⏳ Pending evaluation</span></div>`;
+      }
+      card.innerHTML=`
+        <div class="sub-card-head">
+          <div>
+            <div class="sub-user">${esc(s.problemTitle||'')}</div>
+            <div class="sub-info">${esc(s.sectionName||'')} · ${ts}</div>
+          </div>
+        </div>
+        ${s.code?`<div class="sub-code-view">${esc(s.code)}</div>`:''}
+        ${s.imageUrl?`<img class="sub-img-view" src="${s.imageUrl}" alt="solution">`:''}
+        ${evalHtml}`;
       list.appendChild(card);
     });
+  }catch(err){
+    list.innerHTML=`<div class="empty"><p style="color:var(--rd)">${esc(err.message)}</p></div>`;
+  }
+}
+
+/* ══════════════════════════════════
+   TEACHER — SECTIONS
+══════════════════════════════════ */
+window.createSection=async function(){
+  const name=$('secName').value.trim();
+  if(!name){toast('Enter a section name','err');return;}
+  try{
+    const code=genCode();
+    await addDoc(collection(db,'sections'),{name,code,createdAt:serverTimestamp()});
+    $('secName').value=''; toast('Section created! Code: '+code);
+    loadTSecs();
+  }catch(e){toast('Error: '+e.message,'err');}
+};
+
+function genCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s=''; for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)]; return s;
+}
+
+async function loadTSecs(){
+  const list=$('tSecList');
+  list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
+  try{
+    // No orderBy to avoid index issues — sort client side
+    const snap=await getDocs(collection(db,'sections'));
+    if(snap.empty){
+      list.innerHTML=`<div class="empty"><div class="ei">🗂️</div>
+        <p>No sections yet. Create one above.</p></div>`;return;
+    }
+    const docs=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+    // Use a DocumentFragment so we build the list once
+    const frag=document.createDocumentFragment();
+    docs.forEach(s=>{
+      const card=document.createElement('div');
+      card.className='scard';
+      card.innerHTML=`<div class="scard-head">
+        <div>
+          <div class="scard-title">📂 ${esc(s.name)}</div>
+          <div class="scard-meta">Code: <span class="code-chip" style="font-size:11px;padding:3px 9px">${s.code}</span></div>
+        </div>
+        <div class="scard-btns">
+          <button class="btn btn-s btn-sm" onclick="openTSec('${s.id}','${esc(s.name)}','${s.code}')">Open →</button>
+          <button class="btn btn-d btn-sm" onclick="deleteSec('${s.id}')">Delete</button>
+        </div>
+      </div>`;
+      frag.appendChild(card);
+    });
+    list.innerHTML=''; list.appendChild(frag);
+  }catch(e){list.innerHTML=`<div class="empty"><p style="color:var(--rd)">${esc(e.message)}</p></div>`;}
+}
+
+window.openTSec=function(id,name,code){
+  currentTSecId=id; currentTSecCode=code;
+  $('tDetTitle').textContent=name;
+  $('tDetCode').textContent=code;
+  loadTProbs(id);
+  gotoView('tSecDet');
+};
+
+window.copyCode=function(){
+  navigator.clipboard.writeText(currentTSecCode).then(()=>toast('Code copied!'));
+};
+
+window.deleteSec=async function(id){
+  if(!confirm('Delete this section and all its problems?'))return;
+  try{
+    const ps=await getDocs(collection(db,'sections',id,'problems'));
+    for(const p of ps.docs) await deleteDoc(p.ref);
+    await deleteDoc(doc(db,'sections',id));
+    toast('Section deleted.'); loadTSecs();
+  }catch(e){toast('Error: '+e.message,'err');}
+};
+
+/* ── ADD PROBLEM ─────────────────────────────── */
+window.addProblem=async function(){
+  const title=$('qTitle').value.trim(), prob=$('qProb').value.trim();
+  if(!title||!prob){toast('Title and problem are required.','err');return;}
+  try{
+    await addDoc(collection(db,'sections',currentTSecId,'problems'),{
+      title,difficulty:$('qDiff').value,concept:$('qConcept').value.trim(),
+      problem:prob,example:$('qEx').value.trim(),hint:$('qHint').value.trim(),
+      createdAt:serverTimestamp()
+    });
+    ['qTitle','qConcept','qProb','qEx','qHint'].forEach(id=>$(id).value='');
+    toast('Problem added ✓'); loadTProbs(currentTSecId);
+  }catch(e){toast('Error: '+e.message,'err');}
+};
+
+async function loadTProbs(secId){
+  const list=$('tProbList');
+  list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
+  try{
+    const snap=await getDocs(
+      query(collection(db,'sections',secId,'problems'),orderBy('createdAt','asc')));
+    if(snap.empty){
+      list.innerHTML=`<div class="empty"><div class="ei">📭</div>
+        <p>No problems yet. Add one above.</p></div>`;return;
+    }
+    const frag=document.createDocumentFragment();
+    snap.docs.forEach((d,i)=>{
+      const p=d.data();
+      const card=document.createElement('div');
+      card.className='scard';
+      card.innerHTML=`<div class="scard-head">
+        <div style="flex:1;min-width:0">
+          <div class="scard-title">#${i+1} ${esc(p.title)}
+            <span class="diff d${(p.difficulty||'Easy')[0]}" style="margin-left:6px">${p.difficulty||'Easy'}</span>
+          </div>
+          <div class="scard-meta" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${esc((p.problem||'').substring(0,70))}…</div>
+        </div>
+        <button class="btn btn-d btn-sm" style="flex-shrink:0"
+          onclick="deleteProb('${secId}','${d.id}')">Delete</button>
+      </div>`;
+      frag.appendChild(card);
+    });
+    list.innerHTML=''; list.appendChild(frag);
+  }catch(e){}
+}
+
+window.deleteProb=async function(secId,pid){
+  if(!confirm('Delete this problem?'))return;
+  await deleteDoc(doc(db,'sections',secId,'problems',pid));
+  toast('Deleted.'); loadTProbs(secId);
+};
+
+/* ══════════════════════════════════
+   TEACHER — SUBMISSIONS (real-time)
+══════════════════════════════════ */
+window.loadTSubs=async function(){
+  const list=$('tSubsList');
+  list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
+  if(tSubsUnsub){tSubsUnsub();tSubsUnsub=null;}
+
+  // Populate section filter once
+  const secSel=$('filterSec');
+  if(secSel.options.length<=1){
+    try{
+      const snap=await getDocs(collection(db,'sections'));
+      snap.docs.sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0))
+        .forEach(d=>{
+          if(!Array.from(secSel.options).find(o=>o.value===d.id))
+            secSel.appendChild(new Option(d.data().name,d.id));
+        });
+    }catch(e){}
+  }
+
+  const secF=$('filterSec').value;
+  const stF=$('filterStatus').value;
+
+  // Build query — avoid compound index by filtering status client-side
+  let q;
+  if(secF){ q=query(collection(db,'submissions'),where('sectionId','==',secF)); }
+  else     { q=query(collection(db,'submissions')); }
+
+  tSubsUnsub=onSnapshot(q,snap=>{
+    list.innerHTML='';
+    let docs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // client-side status filter
+    if(stF) docs=docs.filter(d=>d.status===stF);
+    // sort newest first
+    docs.sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
+    if(!docs.length){
+      list.innerHTML=`<div class="empty"><div class="ei">📭</div>
+        <p>No submissions match your filters.</p></div>`;return;
+    }
+    const frag=document.createDocumentFragment();
+    docs.forEach(s=>{
+      const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleString():'–';
+      const card=document.createElement('div');
+      card.className='sub-card';
+      const isEval=s.status==='evaluated';
+      card.innerHTML=`
+        <div class="sub-card-head">
+          <div>
+            <div class="sub-user">${esc(s.userName||'?')}</div>
+            <div class="sub-info">${esc(s.problemTitle||'')} · ${esc(s.sectionName||'')} · ${ts}</div>
+          </div>
+          <span class="chip-pend${isEval?' chip-eval':''}">${isEval?'✓ Evaluated':'⏳ Pending'}</span>
+        </div>
+        ${s.code?`<div class="sub-code-view">${esc(s.code)}</div>`:''}
+        ${s.imageUrl?`<img class="sub-img-view" src="${s.imageUrl}" alt="solution">`:''}
+        ${isEval
+          ?`<div class="eval-row">
+              <span class="eval-done">Score: ${s.score}/10 · ${esc(s.comment||'')}</span>
+              <button class="btn btn-d btn-sm" onclick="deleteSub('${s.id}')">🗑 Delete</button>
+            </div>`
+          :`<div class="eval-row">
+              <input type="number" class="score-inp" id="sc-${s.id}" min="0" max="10" placeholder="0–10">
+              <input type="text" class="comment-inp" id="cm-${s.id}" placeholder="Feedback comment…">
+              <button class="btn btn-g btn-sm" onclick="evalSub('${s.id}')">Evaluate ✓</button>
+              <button class="btn btn-d btn-sm" onclick="deleteSub('${s.id}')">🗑 Delete</button>
+            </div>`}`;
+      frag.appendChild(card);
+    });
+    list.appendChild(frag);
+  },err=>{
+    list.innerHTML=`<div class="empty"><p style="color:var(--rd)">${esc(err.message)}</p></div>`;
   });
 };
 
-window.gradeIt=async sid=>{
-  const score=parseInt($("sc_"+sid)?.value);
-  const comment=$("cm_"+sid)?.value.trim()||"";
-  if(isNaN(score)||score<0||score>10){showToast("Score must be 0–10.","err");return;}
-  try{await updateDoc(doc(db,"submissions",sid),{score,comment,status:"graded",gradedAt:serverTimestamp()});showToast("✓ Graded!");}
-  catch(e){showToast(e.message,"err");}
+window.evalSub=async function(sid){
+  const scoreEl=$('sc-'+sid), commentEl=$('cm-'+sid);
+  if(!scoreEl)return;
+  const score=parseInt(scoreEl.value);
+  const comment=(commentEl?.value||'').trim();
+  if(isNaN(score)||score<0||score>10){toast('Enter a score 0–10','err');return;}
+  try{
+    await updateDoc(doc(db,'submissions',sid),
+      {status:'evaluated',score,comment,evaluatedAt:serverTimestamp()});
+    toast('Evaluated ✓');
+  }catch(e){toast('Error: '+e.message,'err');}
 };
 
-window.deleteSub=async sid=>{
-  if(!confirm("Delete this submission? The student will lose their grade."))return;
-  try{await deleteDoc(doc(db,"submissions",sid));showToast("Submission deleted.");}
-  catch(e){showToast(e.message,"err");}
+window.deleteSub=async function(sid){
+  if(!confirm('Delete this submission?'))return;
+  try{await deleteDoc(doc(db,'submissions',sid));toast('Deleted.');}
+  catch(e){toast('Error','err');}
 };
-
-// ═══════════════════════════════════
-// INIT
-// ═══════════════════════════════════
-(function init(){
-  if(isTeacherURL){
-    if(sessionStorage.getItem("cr_t")==="1"){
-      isTeacher=true;me={uid:"teacher_master",displayName:"Teacher",email:"teacher@coderoom"};
-      bootApp();
-    }else showPage("teacherAuthPage");
-  }else{
-    showPage("authPage");
-  }
-})();
 </script>
 </body>
 </html>
