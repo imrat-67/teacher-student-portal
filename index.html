@@ -360,6 +360,7 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
         <input id="rPass" type="password" class="inp" placeholder="Min 6 characters"
           onkeydown="if(event.key==='Enter')doRegister()"></div>
       <button id="regBtn" class="btn btn-p" onclick="doRegister()">Create Account →</button>
+    <div style="text-align:center;margin-top:16px"><a href="?teacher" style="font-size:11px;color:var(--mu);font-family:var(--mo);text-decoration:none">Teacher access →</a></div>
     </div>
   </div>
 </div>
@@ -458,7 +459,7 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
       </div>
 
       <!-- ═══ TEACHER: SECTIONS ═══ -->
-      <div id="v-tSec" class="view" style="display:none">
+      <div id="v-tSec" class="view">
         <div class="vh"><div class="vt">Sections</div>
           <div class="vs">Create sections, generate codes, add problems</div></div>
         <div class="fcard">
@@ -476,7 +477,7 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
       </div>
 
       <!-- ═══ TEACHER: SECTION DETAIL ═══ -->
-      <div id="v-tSecDet" class="view" style="display:none">
+      <div id="v-tSecDet" class="view">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
           <button class="btn btn-s btn-sm" onclick="gotoView('tSec')">← Back</button>
           <div class="vt" id="tDetTitle"></div>
@@ -512,7 +513,7 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
       </div>
 
       <!-- ═══ TEACHER: SUBMISSIONS ═══ -->
-      <div id="v-tSubs" class="view" style="display:none">
+      <div id="v-tSubs" class="view">
         <div class="vh"><div class="vt">Submissions</div>
           <div class="vs">Evaluate student submissions — updates live</div></div>
         <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
@@ -560,7 +561,7 @@ const FBCFG={
   messagingSenderId:"553128972767",
   appId:"1:553128972767:web:96a77d5907c054bcb2746a"
 };
-const TEACHER_PASS="coderoom2024!";          // ← change this
+const TEACHER_PASS="coderoom2024!";          // Teacher password — change this to your own!
 const IMGBB="YOUR_IMGBB_KEY";                // ← imgbb.com free key
 
 const fb  = initializeApp(FBCFG);
@@ -596,11 +597,12 @@ function setAlert(id,msg,type='e'){
 
 function showPg(id){
   ['pgAuth','pgTeacher','pgApp'].forEach(p=>{
-    const el=$(p); el.classList.remove('on');
-    el.style.display='none';
+    const el=$(p); if(!el)return;
+    el.classList.remove('on');
+    el.style.removeProperty('display');
   });
-  const el=$(id); el.classList.add('on');
-  el.style.display=id==='pgApp'?'flex':'flex';
+  const el=$(id); if(!el)return;
+  el.classList.add('on');
 }
 
 /* ── MOBILE SIDEBAR ─────────────────────────── */
@@ -618,7 +620,8 @@ window.authTab=function(t){
 
 /* ── ROUTE ON LOAD ───────────────────────────── */
 (function route(){
-  const isTP=location.search.includes('teacher');
+  const url=location.href.toLowerCase();
+  const isTP=url.includes('?teacher')||url.includes('#teacher')||url.includes('/teacher');
   if(isTP){
     if(sessionStorage.getItem('cr_t')==='1'){
       isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
@@ -974,7 +977,10 @@ window.submitSol=async function(pid){
   if(!code.trim()&&!img){toast('Write a solution or add an image.','err');return;}
   const prob=activeProbs.find(x=>x.id===pid);
   try{
-    await addDoc(collection(db,'submissions'),{
+    // Check for existing submission to update
+    const existSnap=await getDocs(query(collection(db,'submissions'),
+      where('userId','==',me.uid),where('problemId','==',pid)));
+    const subData={
       userId:me.uid,
       userName:me.displayName||me.email,
       sectionId:activeSec.id,
@@ -987,7 +993,12 @@ window.submitSol=async function(pid){
       score:null,
       comment:null,
       submittedAt:serverTimestamp()
-    });
+    };
+    if(!existSnap.empty){
+      await updateDoc(existSnap.docs[0].ref,{...subData,updatedAt:serverTimestamp()});
+    } else {
+      await addDoc(collection(db,'submissions'),subData);
+    }
     if(!solvedMap[pid]){
       solvedMap[pid]=true;
       await setDoc(doc(db,'users',me.uid,'solved',pid),
