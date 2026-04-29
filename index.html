@@ -3,337 +3,480 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CodeRoom</title>
+<title>CodeRoom — Problem Solving Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════
+   TOKENS
+══════════════════════════════════════ */
 :root{
-  --bg:#07080f;--s1:#0e1020;--s2:#141728;--s3:#1c2035;
-  --b1:#252a45;--b2:#2f3555;--b3:#3d4470;
-  --mu:#5a6285;--so:#8b93c0;--tx:#dde0f5;--t2:#b0b8d8;
-  --ac:#5c6df5;--ah:#7b88ff;--gr:#20c65a;--am:#f5a623;--rd:#f04f4f;
-  --r:14px;--r2:10px;--r3:8px;
-  --fn:'Plus Jakarta Sans',sans-serif;--mo:'IBM Plex Mono',monospace;
-  --sh:0 4px 24px rgba(0,0,0,.5);--shl:0 8px 48px rgba(0,0,0,.65);
+  --bg:#07080f; --s1:#0e1020; --s2:#141728; --s3:#1c2035;
+  --b1:#252a45; --b2:#2f3555; --b3:#3d4470;
+  --mu:#5a6285; --so:#8b93c0; --tx:#dde0f5; --t2:#b0b8d8;
+  --ac:#5c6df5; --ah:#7b88ff; --ac2:#3d4fd4;
+  --gr:#20c65a; --am:#f5a623; --rd:#f04f4f;
+  --r:14px; --r2:10px; --r3:8px;
+  --fn:'Plus Jakarta Sans',sans-serif;
+  --mo:'IBM Plex Mono',monospace;
+  --sh:0 4px 24px rgba(0,0,0,.5);
+  --shl:0 10px 60px rgba(0,0,0,.7);
+  --nav-h:56px;
+  --bot-h:60px; /* bottom nav height */
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.55;overflow-x:hidden}
+
+/* ══════════════════════════════════════
+   RESET
+══════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);height:100%;overflow:hidden;
+  line-height:1.55;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:99px}
-button,input,textarea,select{font-family:var(--fn)}
-img{max-width:100%}
+button,input,textarea,select{font-family:var(--fn);outline:none}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
 
-/* ── PAGE SYSTEM ─────────────────────────────────── */
-.pg{display:none!important}
-.pg.on{display:flex!important}
-.pg.blk.on{display:block!important}
+/* ══════════════════════════════════════
+   PAGE SYSTEM — one page visible at a time
+══════════════════════════════════════ */
+.pg{ display:none!important }
+.pg.on{ display:flex!important }
 
-/* ── AUTH ────────────────────────────────────────── */
-.auth-shell{
-  min-height:100vh;align-items:center;justify-content:center;padding:20px;
-  position:relative;overflow:hidden;flex-direction:column;
-  background:radial-gradient(ellipse 90% 60% at 50% -10%,#1a214a 0%,var(--bg) 65%);
+/* ══════════════════════════════════════
+   AUTH PAGES
+══════════════════════════════════════ */
+.auth-wrap{
+  flex:1;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px 16px;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 80% 50% at 50% -5%,#1a214a,var(--bg) 60%);
 }
-.auth-shell::before{
+/* dot grid */
+.auth-wrap::before{
   content:'';position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(circle,var(--b1) 1px,transparent 1px);
-  background-size:30px 30px;opacity:.2;
+  background-size:28px 28px;opacity:.25;
 }
 .auth-card{
-  background:var(--s1);border:1.5px solid var(--b1);border-radius:22px;
-  padding:clamp(24px,5vw,44px);width:100%;max-width:420px;
+  background:var(--s1);border:1.5px solid var(--b1);border-radius:24px;
+  padding:clamp(24px,6vw,44px);width:100%;max-width:420px;
   position:relative;z-index:1;box-shadow:var(--shl);
-  animation:slideUp .3s ease both;
+  animation:slideUp .35s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 
-.auth-logo{text-align:center;margin-bottom:28px}
-.auth-logo .ico{font-size:38px;display:block;margin-bottom:10px}
-.auth-logo h1{font-size:26px;font-weight:900;letter-spacing:-.5px}
-.auth-logo p{font-size:12px;color:var(--mu);margin-top:4px;font-family:var(--mo)}
-.grad-text{background:linear-gradient(135deg,var(--ac),var(--ah));
+/* brand */
+.brand{text-align:center;margin-bottom:28px}
+.brand-ico{font-size:40px;display:block;margin-bottom:10px}
+.brand-name{font-size:26px;font-weight:900;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--ac),var(--ah));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.brand-sub{font-size:12px;color:var(--mu);margin-top:5px;font-family:var(--mo)}
 
-/* tabs */
-.atabs{display:flex;border-bottom:1.5px solid var(--b1);margin-bottom:22px;gap:0}
-.atab{flex:1;padding:10px 8px;background:none;border:none;
-  border-bottom:2.5px solid transparent;color:var(--mu);
-  font-size:14px;font-weight:700;cursor:pointer;transition:.2s;margin-bottom:-1.5px}
+/* auth tabs */
+.atabs{display:flex;border-bottom:1.5px solid var(--b1);margin-bottom:22px}
+.atab{flex:1;padding:10px 6px;background:none;border:none;border-bottom:2.5px solid transparent;
+  color:var(--mu);font-size:14px;font-weight:700;cursor:pointer;transition:.18s;margin-bottom:-1.5px}
 .atab.on{color:var(--ac);border-bottom-color:var(--ac)}
 
-/* fields */
-.fld{margin-bottom:15px}
+/* form elements */
+.fld{margin-bottom:14px}
 .fld label{display:block;font-size:10px;font-weight:700;letter-spacing:1.2px;
-  text-transform:uppercase;color:var(--mu);margin-bottom:6px;font-family:var(--mo)}
+  text-transform:uppercase;color:var(--mu);margin-bottom:7px;font-family:var(--mo)}
 .inp{width:100%;background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r2);
-  padding:11px 13px;color:var(--tx);font-size:14px;outline:none;transition:.18s}
-.inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px #5c6df518}
+  padding:12px 14px;color:var(--tx);font-size:15px;transition:.18s}
+.inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(92,109,245,.12)}
 .inp::placeholder{color:var(--mu)}
-select.inp{appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M0 0l5 7 5-7z' fill='%235a6285'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
-textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13px}
+select.inp{-webkit-appearance:none;appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6285'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+textarea.inp{resize:vertical;line-height:1.65;font-family:var(--mo);font-size:13px;min-height:90px}
 
 /* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  border:none;border-radius:var(--r2);font-weight:700;cursor:pointer;
-  transition:all .18s;white-space:nowrap;font-family:var(--fn)}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
-.btn-p{background:var(--ac);color:#fff;padding:12px 20px;font-size:14px;width:100%}
-.btn-p:hover:not(:disabled){background:var(--ah);transform:translateY(-1px)}
-.btn-s{background:var(--s2);border:1.5px solid var(--b2);color:var(--so);padding:8px 14px;font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;
+  border-radius:var(--r2);font-weight:700;cursor:pointer;transition:all .18s;
+  white-space:nowrap;font-family:var(--fn);font-size:14px;padding:11px 20px;
+  -webkit-user-select:none;user-select:none}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.4;cursor:not-allowed!important;transform:none!important}
+.btn-p{background:var(--ac);color:#fff;width:100%}
+.btn-p:hover:not(:disabled){background:var(--ah)}
+.btn-g{background:var(--gr);color:#000}
+.btn-g:hover:not(:disabled){filter:brightness(1.08)}
+.btn-s{background:var(--s2);border:1.5px solid var(--b2);color:var(--so)}
 .btn-s:hover{border-color:var(--ac);color:var(--tx)}
-.btn-g{background:var(--gr);color:#000;padding:9px 18px;font-size:13px}
-.btn-g:hover{opacity:.88}
-.btn-d{background:#f04f4f14;border:1.5px solid #f04f4f28;color:var(--rd);padding:7px 12px;font-size:11px}
-.btn-d:hover{background:#f04f4f22}
-.btn-sm{padding:7px 13px;font-size:12px}
+.btn-d{background:rgba(240,79,79,.08);border:1.5px solid rgba(240,79,79,.2);color:var(--rd)}
+.btn-d:hover{background:rgba(240,79,79,.14)}
+.btn-sm{padding:7px 13px;font-size:12px;border-radius:var(--r3)}
+.btn-xs{padding:5px 9px;font-size:11px;border-radius:6px}
 .btn-block{width:100%}
+.btn-teacher{background:linear-gradient(135deg,#c44aff,#7c3aed);color:#fff;width:100%}
+.btn-teacher:hover{filter:brightness(1.1)}
 
-/* alert strip */
-.alert{border-radius:var(--r2);padding:10px 13px;font-size:13px;
-  font-family:var(--mo);margin-bottom:13px;display:none}
+/* alert */
+.alert{border-radius:var(--r2);padding:10px 13px;font-size:13px;font-family:var(--mo);
+  margin-bottom:13px;display:none;line-height:1.5}
 .alert.on{display:block}
-.alert-e{background:#f04f4f12;border:1px solid #f04f4f28;color:var(--rd)}
-.alert-s{background:#20c65a12;border:1px solid #20c65a28;color:var(--gr)}
+.alert-e{background:rgba(240,79,79,.08);border:1px solid rgba(240,79,79,.22);color:var(--rd)}
+.alert-s{background:rgba(32,198,90,.08);border:1px solid rgba(32,198,90,.22);color:var(--gr)}
 
-/* ── APP SHELL ───────────────────────────────────── */
-#app{flex-direction:column;height:100vh;overflow:hidden}
+/* teacher link */
+.t-link{text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--b1)}
+.t-link a{font-size:12px;color:var(--mu);font-family:var(--mo);transition:.2s;
+  display:inline-flex;align-items:center;gap:4px}
+.t-link a:hover{color:var(--so)}
 
-/* topbar */
-.bar{height:56px;background:var(--s1);border-bottom:1.5px solid var(--b1);
-  display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;z-index:200;position:relative}
-.bar-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900;
-  letter-spacing:-.3px;color:var(--tx)}
-.bar-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);
-  box-shadow:0 0 8px var(--ac);flex-shrink:0}
-.bar-sp{flex:1}
-.bar-user{font-size:11px;color:var(--mu);font-family:var(--mo);
-  display:flex;align-items:center;gap:7px}
-.role-chip{font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:.5px}
-.rc-s{background:#20c65a14;color:var(--gr);border:1px solid #20c65a25}
-.rc-t{background:#f04f4f14;color:var(--rd);border:1px solid #f04f4f25}
-.hamburger{display:none;background:none;border:none;color:var(--tx);font-size:20px;cursor:pointer;padding:4px}
+/* ══════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════ */
+#pgApp{flex-direction:column;height:100vh;overflow:hidden}
 
-/* body */
-.shell{display:flex;flex:1;overflow:hidden;height:calc(100vh - 56px)}
-.sidebar{width:240px;flex-shrink:0;background:var(--s1);border-right:1.5px solid var(--b1);
-  overflow-y:auto;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
-.content{flex:1;overflow-y:auto;background:var(--bg);padding:0}
+/* ── TOPBAR ── */
+.topbar{
+  height:var(--nav-h);background:var(--s1);border-bottom:1.5px solid var(--b1);
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  flex-shrink:0;z-index:200;position:relative;
+}
+.topbar-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900;
+  letter-spacing:-.3px}
+.topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--ac);
+  box-shadow:0 0 8px var(--ac)}
+.topbar-sp{flex:1}
+.topbar-user{display:flex;align-items:center;gap:8px}
+.role-pill{font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:.5px}
+.rp-s{background:rgba(32,198,90,.1);color:var(--gr);border:1px solid rgba(32,198,90,.2)}
+.rp-t{background:rgba(196,74,255,.1);color:#c44aff;border:1px solid rgba(196,74,255,.2)}
+.topbar-name{font-size:12px;color:var(--so);font-family:var(--mo);
+  max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-logout{background:none;border:1.5px solid var(--b1);border-radius:var(--r3);
+  color:var(--mu);font-size:11px;font-weight:700;padding:6px 11px;cursor:pointer;transition:.18s}
+.btn-logout:hover{border-color:var(--ac);color:var(--tx)}
+/* hamburger — desktop only shows on ≤720px */
+.hamburger{display:none;background:none;border:1.5px solid var(--b1);border-radius:7px;
+  padding:7px;cursor:pointer;flex-direction:column;gap:4px;flex-shrink:0}
+.hamburger span{display:block;width:16px;height:2px;background:var(--so);border-radius:2px;transition:.2s}
 
-/* sidebar nav */
+/* ── BODY SPLIT ── */
+.app-body{display:flex;flex:1;overflow:hidden;height:calc(100vh - var(--nav-h))}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--s1);border-right:1.5px solid var(--b1);
+  overflow-y:auto;padding:10px 8px;display:flex;flex-direction:column;
+  transition:transform .24s cubic-bezier(.25,.8,.25,1);
+}
+.sb-overlay{display:none;position:fixed;inset:0;top:var(--nav-h);
+  background:rgba(0,0,0,.65);z-index:249;backdrop-filter:blur(2px)}
 .nl{font-size:9px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;
   color:var(--mu);padding:12px 10px 5px;font-family:var(--mo)}
-.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r2);
+.ni{display:flex;align-items:center;gap:9px;padding:10px 10px;border-radius:var(--r2);
   color:var(--so);font-size:13px;font-weight:600;cursor:pointer;transition:.14s;
-  border:1.5px solid transparent;user-select:none}
+  border:1.5px solid transparent;user-select:none;-webkit-user-select:none}
 .ni:hover{background:var(--s2);color:var(--tx)}
-.ni.on{background:#5c6df510;color:var(--ac);border-color:#5c6df520}
-.ni-ic{font-size:14px}
+.ni.on{background:rgba(92,109,245,.08);color:var(--ac);border-color:rgba(92,109,245,.18)}
+.ni-ic{font-size:15px;flex-shrink:0;width:20px;text-align:center}
 
-/* join box */
-.jbox{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);padding:12px;margin:6px 0}
+/* join section box in sidebar */
+.jbox{background:var(--s2);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:12px;margin:8px 0}
 .jbox-lbl{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
   color:var(--mu);font-family:var(--mo);display:block;margin-bottom:8px}
 .jrow{display:flex;gap:5px}
-.jinp{flex:1;background:var(--bg);border:1.5px solid var(--b1);border-radius:7px;
-  padding:8px 9px;color:var(--tx);font-size:13px;font-family:var(--mo);font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;outline:none;min-width:0}
+.jinp{flex:1;min-width:0;background:var(--bg);border:1.5px solid var(--b1);border-radius:7px;
+  padding:8px 10px;color:var(--tx);font-size:13px;font-family:var(--mo);font-weight:700;
+  letter-spacing:2px;text-transform:uppercase}
 .jinp:focus{border-color:var(--ac)}
 .jbtn{background:var(--ac);border:none;border-radius:7px;padding:8px 11px;
   color:#fff;font-size:11px;font-weight:800;cursor:pointer;transition:.18s;font-family:var(--fn)}
 .jbtn:hover{background:var(--ah)}
 
-/* ── VIEW SYSTEM ─────────────────────────────────── */
+/* ── MAIN CONTENT ── */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ── VIEWS (pages inside app) ── */
 .view{display:none;padding:20px;max-width:820px;margin:0 auto;
-  animation:fadeIn .2s ease both}
+  animation:fadeUp .22s ease both;min-height:100%}
 .view.on{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-.vh{margin-bottom:18px}
-.vt{font-size:19px;font-weight:900;letter-spacing:-.3px}
-.vs{font-size:12px;color:var(--mu);margin-top:3px}
+/* view header */
+.vh{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;flex-wrap:wrap}
+.vt{font-size:20px;font-weight:900;letter-spacing:-.4px}
+.vs{font-size:12px;color:var(--mu);margin-top:4px}
 
-/* ── FORM CARD ───────────────────────────────────── */
-.fcard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
-  padding:18px 20px;margin-bottom:14px}
-.fcard-title{font-size:14px;font-weight:800;margin-bottom:14px;color:var(--tx)}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.g2 .span2{grid-column:1/-1}
-.frow{display:flex;gap:9px;align-items:flex-end}
+/* ══════════════════════════════════════
+   CARDS
+══════════════════════════════════════ */
+.card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:16px 18px;margin-bottom:12px;transition:border-color .18s,box-shadow .18s}
+.card:hover{border-color:var(--b2)}
+.card-title{font-size:13px;font-weight:800;margin-bottom:14px;color:var(--tx)}
 
-/* ── SECTION / PROBLEM CARDS ────────────────────── */
-.scard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
-  padding:15px 17px;margin-bottom:9px;transition:border-color .18s,box-shadow .18s}
-.scard:hover{border-color:var(--b2);box-shadow:var(--sh)}
-.scard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.scard-title{font-size:14px;font-weight:700;color:var(--tx)}
-.scard-meta{font-size:11px;color:var(--mu);margin-top:3px;font-family:var(--mo)}
-.scard-btns{display:flex;gap:6px;flex-shrink:0}
+/* ── SECTION CARDS (student browse) ── */
+.sec-browse-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:14px}
+.sec-browse-card:hover{border-color:var(--ac);box-shadow:0 4px 20px rgba(92,109,245,.1);
+  transform:translateY(-1px)}
+.sec-browse-card:active{transform:scale(.99)}
+.sec-browse-icon{font-size:28px;flex-shrink:0}
+.sec-browse-info{flex:1;min-width:0}
+.sec-browse-name{font-size:15px;font-weight:800}
+.sec-browse-meta{font-size:11px;color:var(--mu);font-family:var(--mo);margin-top:3px}
+.sec-browse-arr{color:var(--mu);font-size:18px;flex-shrink:0;transition:transform .18s}
+.sec-browse-card:hover .sec-browse-arr{transform:translateX(4px);color:var(--ac)}
 
-/* code chip */
-.code-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mo);
-  font-size:12px;font-weight:700;letter-spacing:2px;
-  background:var(--ac);color:#fff;padding:4px 12px;border-radius:7px}
-
-/* ── PROBLEM CARD ────────────────────────────────── */
+/* ── PROBLEM CARDS ── */
 .pcard{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
-  margin-bottom:8px;overflow:hidden;transition:border-color .18s}
+  margin-bottom:9px;overflow:hidden;transition:border-color .18s}
 .pcard:hover{border-color:var(--b2)}
-.pcard.solved{border-color:#20c65a28;background:#20c65a05}
-.ph{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;
-  user-select:none;-webkit-user-select:none}
-.pchk{width:21px;height:21px;border-radius:6px;border:2px solid var(--b2);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;
-  cursor:pointer;transition:.18s;color:transparent}
-.pchk.on{background:var(--gr);border-color:var(--gr);color:#000}
-.pnum{font-family:var(--mo);font-size:10px;color:var(--mu);font-weight:700;min-width:22px}
-.ptit{flex:1;font-size:14px;font-weight:700;color:var(--tx);min-width:0}
-.ptit.done{text-decoration:line-through;color:var(--gr)}
-.diff{font-size:9px;font-weight:800;padding:3px 9px;border-radius:99px;flex-shrink:0;
-  letter-spacing:.3px}
-.dE{background:#20c65a12;color:var(--gr);border:1px solid #20c65a22}
-.dM{background:#f5a62312;color:var(--am);border:1px solid #f5a62322}
-.dH{background:#f04f4f12;color:var(--rd);border:1px solid #f04f4f22}
-.chev{color:var(--mu);font-size:10px;transition:transform .2s;flex-shrink:0}
+.pcard.solved{border-color:rgba(32,198,90,.25);background:rgba(32,198,90,.03)}
 
-/* card body */
+/* problem header */
+.ph{display:flex;align-items:center;gap:9px;padding:13px 14px;cursor:pointer;
+  user-select:none;-webkit-user-select:none}
+.pchk{width:22px;height:22px;border-radius:6px;border:2px solid var(--b2);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
+  cursor:pointer;transition:.18s;color:transparent;min-width:22px}
+.pchk.on{background:var(--gr);border-color:var(--gr);color:#000}
+.pnum{font-family:var(--mo);font-size:10px;color:var(--mu);font-weight:700;min-width:24px;flex-shrink:0}
+.ptit{flex:1;font-size:14px;font-weight:700;color:var(--tx);min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptit.done{text-decoration:line-through;color:var(--gr)}
+.diff{font-size:9px;font-weight:800;padding:3px 9px;border-radius:99px;flex-shrink:0;letter-spacing:.3px}
+.dE{background:rgba(32,198,90,.1);color:var(--gr);border:1px solid rgba(32,198,90,.2)}
+.dM{background:rgba(245,166,35,.1);color:var(--am);border:1px solid rgba(245,166,35,.2)}
+.dH{background:rgba(240,79,79,.1);color:var(--rd);border:1px solid rgba(240,79,79,.2)}
+.chev{color:var(--mu);font-size:11px;transition:transform .2s;flex-shrink:0}
+
+/* problem body */
 .pb{border-top:1.5px solid var(--b1);padding:14px;display:none;
-  flex-direction:column;gap:11px}
+  flex-direction:column;gap:12px;animation:fadeUp .18s ease}
 .pb.open{display:flex}
 
-.blk{border-radius:var(--r2);padding:12px}
+/* content blocks */
+.blk{border-radius:var(--r2);padding:13px}
 .b-prob{background:#090c1c;border-left:3px solid var(--ac)}
 .b-ex{background:#080f1e;border-left:3px solid #38bdf8}
 .b-hint{background:#130e03;border-left:3px solid var(--am)}
 .b-code{background:#050e07;border-left:3px solid var(--gr)}
 .blk-l{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
-  font-family:var(--mo);margin-bottom:7px}
+  font-family:var(--mo);margin-bottom:8px}
 .b-prob .blk-l{color:var(--ac)}
 .b-ex .blk-l{color:#38bdf8}
 .b-hint .blk-l{color:var(--am)}
 .b-code .blk-l{color:var(--gr)}
-.blk-p{font-size:13px;color:var(--t2);line-height:1.7}
+.blk-p{font-size:13px;color:var(--t2);line-height:1.75}
 .blk-pre{font-family:var(--mo);font-size:12px;color:#7dd3fc;white-space:pre-wrap;line-height:1.6}
 
-/* code editor */
+/* code area */
 .codearea{
   width:100%;background:var(--bg);border:1.5px solid var(--b1);border-radius:var(--r2);
-  padding:11px 13px;color:var(--tx);font-family:var(--mo);font-size:13px;
-  resize:vertical;min-height:130px;line-height:1.7;outline:none;tab-size:2;
-  transition:border-color .18s;
+  padding:12px 13px;color:var(--tx);font-family:var(--mo);font-size:13px;
+  resize:vertical;min-height:140px;line-height:1.7;tab-size:2;transition:border-color .18s;
+  display:block;
 }
-.codearea:focus{border-color:var(--ac)}
+.codearea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(92,109,245,.1)}
 
-.sub-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.sub-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .sub-done{font-family:var(--mo);font-size:11px;color:var(--gr);
-  background:#20c65a12;border:1px solid #20c65a25;padding:4px 10px;
-  border-radius:99px;display:none}
-.sub-done.on{display:inline-flex;align-items:center;gap:4px}
+  background:rgba(32,198,90,.1);border:1px solid rgba(32,198,90,.2);
+  padding:4px 10px;border-radius:99px;display:none;align-items:center;gap:4px}
+.sub-done.on{display:inline-flex}
 
-/* image preview */
-.img-pre{margin-top:8px;display:none}
+/* image preview in card */
+.img-pre{margin-top:9px;display:none}
 .img-pre.on{display:block}
-.img-pre img{max-height:100px;border-radius:7px;border:1px solid var(--b2)}
+.img-pre img{max-height:120px;border-radius:8px;border:1.5px solid var(--b2)}
 
 /* result strip */
-.res-strip{border-radius:var(--r2);padding:11px 13px;margin-top:4px}
-.res-ok{background:#20c65a10;border:1.5px solid #20c65a25}
-.res-pend{background:#f5a62310;border:1.5px solid #f5a62322}
+.res-strip{border-radius:var(--r2);padding:12px 14px;margin-top:6px}
+.res-pend{background:rgba(245,166,35,.06);border:1.5px solid rgba(245,166,35,.18)}
+.res-ok{background:rgba(32,198,90,.06);border:1.5px solid rgba(32,198,90,.18)}
 .score-badge{display:inline-flex;align-items:center;font-family:var(--mo);font-size:12px;
-  font-weight:700;background:var(--ac);color:#fff;padding:3px 10px;border-radius:99px}
+  font-weight:800;background:var(--ac);color:#fff;padding:3px 10px;border-radius:99px}
 .pend-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mo);font-size:11px;
-  color:var(--am);background:#f5a62310;border:1px solid #f5a62322;padding:3px 10px;border-radius:99px}
+  color:var(--am);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);
+  padding:3px 10px;border-radius:99px}
 
-/* ── TEACHER SUBMISSIONS ──────────────────────────── */
-.sub-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
-  padding:14px 16px;margin-bottom:9px}
-.sub-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
-  margin-bottom:10px}
-.sub-user{font-size:13px;font-weight:700;color:var(--tx)}
-.sub-info{font-size:11px;color:var(--mu);margin-top:2px;font-family:var(--mo)}
-.sub-code-view{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r2);
-  padding:11px;font-family:var(--mo);font-size:12px;color:#a5f3a5;
-  white-space:pre-wrap;max-height:160px;overflow-y:auto;line-height:1.6;margin-bottom:8px}
-.sub-img-view{max-width:100%;max-height:160px;border-radius:var(--r2);
-  border:1px solid var(--b2);margin-bottom:8px}
-.eval-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;
-  padding-top:10px;border-top:1px solid var(--b1)}
-.score-inp{width:65px;background:var(--s2);border:1.5px solid var(--b1);border-radius:7px;
-  padding:7px 9px;color:var(--tx);font-family:var(--mo);font-size:14px;font-weight:700;
-  outline:none;text-align:center}
-.score-inp:focus{border-color:var(--ac)}
-.comment-inp{flex:1;min-width:140px;background:var(--s2);border:1.5px solid var(--b1);
-  border-radius:7px;padding:7px 11px;color:var(--tx);font-size:13px;outline:none}
-.comment-inp:focus{border-color:var(--ac)}
-.eval-done{font-family:var(--mo);font-size:12px;color:var(--gr);
-  background:#20c65a10;border:1px solid #20c65a25;padding:5px 12px;border-radius:7px}
-
-/* ── PROGRESS ────────────────────────────────────── */
+/* progress */
 .prog{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .prog-bar{flex:1;height:6px;background:var(--s2);border-radius:99px;overflow:hidden}
 .prog-f{height:100%;background:linear-gradient(90deg,var(--ac),var(--ah));
-  border-radius:99px;transition:width .4s ease}
-.prog-lbl{font-family:var(--mo);font-size:11px;color:var(--ac);font-weight:700;min-width:36px}
+  border-radius:99px;transition:width .5s ease;width:0%}
+.prog-lbl{font-family:var(--mo);font-size:11px;color:var(--ac);font-weight:700;min-width:38px}
 
-/* ── CHIP TABS ───────────────────────────────────── */
-.chips-wrap{overflow-x:auto;scrollbar-width:none;margin-bottom:14px}
-.chips-wrap::-webkit-scrollbar{display:none}
-.chips{display:flex;gap:5px;min-width:max-content}
-.chip{padding:5px 13px;border-radius:99px;border:1.5px solid var(--b1);
-  background:transparent;color:var(--mu);font-size:12px;font-weight:700;
-  cursor:pointer;transition:.16s;font-family:var(--fn)}
-.chip:hover:not(.on){border-color:var(--ac);color:var(--tx)}
-.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+/* back button */
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;
+  color:var(--mu);cursor:pointer;transition:.18s;padding:4px 0;border:none;background:none;
+  margin-bottom:16px;font-family:var(--fn)}
+.back-btn:hover{color:var(--ac)}
 
-/* ── TOAST ───────────────────────────────────────── */
-.toast{position:fixed;bottom:18px;right:18px;z-index:9999;
-  background:var(--s1);border:1.5px solid var(--b2);border-radius:var(--r);
-  padding:11px 17px;font-size:13px;font-family:var(--mo);max-width:300px;
-  transform:translateY(50px) scale(.95);opacity:0;
-  transition:all .26s cubic-bezier(.34,1.4,.64,1);pointer-events:none}
-.toast.pop{transform:translateY(0) scale(1);opacity:1}
-.toast.t-ok{border-color:#20c65a35;color:var(--gr)}
-.toast.t-err{border-color:#f04f4f35;color:var(--rd)}
-
-/* ── EMPTY ───────────────────────────────────────── */
-.empty{text-align:center;padding:44px 20px;color:var(--mu)}
-.empty .ei{font-size:38px;margin-bottom:10px}
-.empty p{font-size:13px;line-height:1.6}
-
-/* status chips */
+/* ══════════════════════════════════════
+   STATUS CHIPS
+══════════════════════════════════════ */
 .chip-pend{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;
-  font-family:var(--mo);color:var(--am);background:#f5a62312;border:1px solid #f5a62322;
-  padding:2px 8px;border-radius:99px}
-.chip-eval{color:var(--gr);background:#20c65a12;border-color:#20c65a22}
+  font-family:var(--mo);color:var(--am);background:rgba(245,166,35,.1);
+  border:1px solid rgba(245,166,35,.2);padding:3px 8px;border-radius:99px;white-space:nowrap}
+.chip-eval{color:var(--gr);background:rgba(32,198,90,.1);border-color:rgba(32,198,90,.2)}
 
-/* ── RESPONSIVE ──────────────────────────────────── */
-@media(max-width:660px){
+/* ══════════════════════════════════════
+   TEACHER — SECTION CARDS
+══════════════════════════════════════ */
+.tsec-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  margin-bottom:10px;overflow:hidden;transition:border-color .18s}
+.tsec-card:hover{border-color:var(--b2)}
+.tsec-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;
+  user-select:none;-webkit-user-select:none}
+.tsec-ico{font-size:20px;flex-shrink:0}
+.tsec-info{flex:1;min-width:0}
+.tsec-name{font-size:15px;font-weight:800}
+.tsec-meta{font-size:11px;color:var(--mu);font-family:var(--mo);margin-top:2px}
+.code-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mo);
+  font-size:11px;font-weight:800;letter-spacing:1.5px;
+  background:var(--ac);color:#fff;padding:4px 10px;border-radius:7px}
+.tsec-body{border-top:1.5px solid var(--b1);padding:16px;animation:fadeUp .18s ease}
+
+/* form grid */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg .w2{grid-column:1/-1}
+
+/* ══════════════════════════════════════
+   TEACHER — SUBMISSION CARDS
+══════════════════════════════════════ */
+.sub-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:15px 16px;margin-bottom:10px;transition:border-color .18s}
+.sub-card.evaluated{border-color:rgba(32,198,90,.2)}
+.sub-card-head{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.sub-user{font-size:13px;font-weight:800}
+.sub-info{font-size:11px;color:var(--mu);font-family:var(--mo);margin-top:3px}
+.sub-code-view{background:var(--bg);border:1px solid var(--b1);border-radius:var(--r2);
+  padding:11px;font-family:var(--mo);font-size:12px;color:#a5f3a5;
+  white-space:pre-wrap;max-height:170px;overflow-y:auto;line-height:1.6;margin-bottom:10px}
+.sub-img-view{max-width:100%;max-height:170px;border-radius:var(--r2);
+  border:1.5px solid var(--b2);margin-bottom:10px}
+.eval-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  padding-top:10px;border-top:1px solid var(--b1)}
+.score-inp{width:68px;background:var(--s2);border:1.5px solid var(--b1);border-radius:7px;
+  padding:8px 10px;color:var(--tx);font-family:var(--mo);font-size:15px;font-weight:800;
+  text-align:center;transition:.18s}
+.score-inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(92,109,245,.1)}
+.comment-inp{flex:1;min-width:130px;background:var(--s2);border:1.5px solid var(--b1);
+  border-radius:7px;padding:8px 11px;color:var(--tx);font-size:13px;transition:.18s}
+.comment-inp:focus{border-color:var(--ac)}
+.comment-inp::placeholder{color:var(--mu)}
+.eval-done-row{background:rgba(32,198,90,.06);border:1px solid rgba(32,198,90,.15);
+  border-radius:var(--r2);padding:10px 12px;margin-top:8px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* ══════════════════════════════════════
+   MY WORK (student submissions)
+══════════════════════════════════════ */
+.mw-card{background:var(--s1);border:1.5px solid var(--b1);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:10px}
+.mw-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+  margin-bottom:10px;flex-wrap:wrap}
+.mw-title{font-size:14px;font-weight:800}
+.mw-meta{font-size:11px;color:var(--mu);font-family:var(--mo);margin-top:3px}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:calc(var(--bot-h) + 12px);left:50%;z-index:9999;
+  transform:translateX(-50%) translateY(20px);opacity:0;
+  background:var(--s1);border:1.5px solid var(--b2);border-radius:var(--r);
+  padding:11px 18px;font-size:13px;font-family:var(--mo);
+  max-width:calc(100vw - 32px);text-align:center;white-space:nowrap;
+  transition:all .28s cubic-bezier(.34,1.4,.64,1);pointer-events:none;
+  box-shadow:var(--sh);
+}
+.toast.pop{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.t-ok{border-color:rgba(32,198,90,.3);color:var(--gr)}
+.toast.t-err{border-color:rgba(240,79,79,.3);color:var(--rd)}
+
+/* ══════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════ */
+.empty{text-align:center;padding:50px 20px;color:var(--mu)}
+.empty .ei{font-size:42px;margin-bottom:12px;display:block}
+.empty p{font-size:13px;line-height:1.7}
+
+/* ══════════════════════════════════════
+   BOTTOM NAV (mobile)
+══════════════════════════════════════ */
+.bot-nav{
+  display:none;height:var(--bot-h);background:var(--s1);
+  border-top:1.5px solid var(--b1);
+  position:fixed;bottom:0;left:0;right:0;z-index:220;
+  safe-area-inset-bottom:env(safe-area-inset-bottom);
+}
+.bot-nav-inner{display:flex;height:100%;align-items:stretch}
+.bot-item{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;cursor:pointer;transition:.14s;
+  border:none;background:none;color:var(--mu);font-size:9px;font-weight:800;
+  letter-spacing:.5px;text-transform:uppercase;font-family:var(--fn);
+  -webkit-user-select:none;user-select:none;padding:6px 4px}
+.bot-item:hover{color:var(--so)}
+.bot-item.on{color:var(--ac)}
+.bot-item-ic{font-size:20px;line-height:1}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:720px){
+  :root{--bot-h:62px}
+
+  /* hide desktop sidebar, show bottom nav */
   .sidebar{
-    position:fixed;left:0;top:56px;bottom:0;z-index:300;
-    transform:translateX(-105%);transition:transform .24s ease;width:260px;
+    position:fixed;left:0;top:var(--nav-h);bottom:0;z-index:250;
+    transform:translateX(-105%);width:260px;
+    box-shadow:var(--shl);
   }
   .sidebar.open{transform:translateX(0)}
-  .overlay{position:fixed;inset:0;top:56px;background:rgba(0,0,0,.65);z-index:290;display:none}
-  .overlay.open{display:block}
+  .sb-overlay.open{display:block}
+  .bot-nav{display:flex}
   .hamburger{display:flex}
-  .g2{grid-template-columns:1fr}
-  .frow{flex-direction:column}
+
+  /* content padding for bottom nav */
+  .main{padding-bottom:var(--bot-h)}
+
+  /* view padding */
+  .view{padding:14px}
+
+  /* forms */
+  .fg{grid-template-columns:1fr}
   .eval-row{flex-direction:column;align-items:stretch}
-  .score-inp,.comment-inp{width:100%}
+  .score-inp,.comment-inp{width:100%;box-sizing:border-box}
+
+  /* topbar */
+  .topbar-name{display:none}
+
+  /* toast above bottom nav */
+  .toast{bottom:calc(var(--bot-h) + 10px)}
+}
+
+@media(min-width:721px){
+  /* on desktop, toast at bottom right */
+  .toast{bottom:18px;right:18px;left:auto;transform:none}
+  .toast.pop{transform:none}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════ STUDENT AUTH ═══════════ -->
-<div id="pgAuth" class="pg on auth-shell">
+<!-- ══════════════════════════════════
+     PAGE 1 — STUDENT AUTH
+══════════════════════════════════ -->
+<div id="pgAuth" class="pg on auth-wrap">
   <div class="auth-card">
-    <div class="auth-logo">
-      <span class="ico">⚡</span>
-      <h1 class="grad-text">CodeRoom</h1>
-      <p>// student portal</p>
+    <div class="brand">
+      <span class="brand-ico">⚡</span>
+      <div class="brand-name">CodeRoom</div>
+      <div class="brand-sub">// student portal</div>
     </div>
     <div class="atabs">
       <button class="atab on" onclick="authTab('login')">Sign In</button>
@@ -360,62 +503,80 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
         <input id="rPass" type="password" class="inp" placeholder="Min 6 characters"
           onkeydown="if(event.key==='Enter')doRegister()"></div>
       <button id="regBtn" class="btn btn-p" onclick="doRegister()">Create Account →</button>
-    <div style="text-align:center;margin-top:16px"><a href="?teacher" style="font-size:11px;color:var(--mu);font-family:var(--mo);text-decoration:none">Teacher access →</a></div>
+    </div>
+    <!-- teacher link -->
+    <div class="t-link">
+      <a href="?teacher">🔐 Teacher login →</a>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ TEACHER AUTH ═══════════ -->
-<div id="pgTeacher" class="pg auth-shell" style="background:radial-gradient(ellipse 90% 60% at 50% -10%,#2a0f1a 0%,var(--bg) 65%)">
-  <div class="auth-card" style="border-color:#f04f4f25;box-shadow:0 8px 48px #f04f4f10">
-    <div class="auth-logo">
-      <span class="ico">🔐</span>
-      <h1 style="background:linear-gradient(135deg,var(--rd),var(--am));
+<!-- ══════════════════════════════════
+     PAGE 2 — TEACHER AUTH
+══════════════════════════════════ -->
+<div id="pgTeacher" class="pg auth-wrap"
+  style="background:radial-gradient(ellipse 80% 50% at 50% -5%,#1a0a2e,var(--bg) 60%)">
+  <div class="auth-card"
+    style="border-color:rgba(196,74,255,.2);box-shadow:0 10px 60px rgba(196,74,255,.1)">
+    <div class="brand">
+      <span class="brand-ico">🔐</span>
+      <div class="brand-name" style="background:linear-gradient(135deg,#c44aff,#7c3aed);
         -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
-        Teacher Panel</h1>
-      <p>// restricted access</p>
+        Teacher Panel</div>
+      <div class="brand-sub">// restricted access</div>
     </div>
     <div id="tErr" class="alert alert-e"></div>
     <div class="fld"><label>Master Password</label>
       <input id="tPass" type="password" class="inp" placeholder="Enter master password"
-        style="border-color:#f04f4f22" onkeydown="if(event.key==='Enter')doTeacherAuth()"></div>
-    <button class="btn btn-p" style="background:var(--rd)" onclick="doTeacherAuth()">Enter →</button>
-    <div style="text-align:center;margin-top:14px">
-      <a href="/" style="font-size:12px;color:var(--mu);font-family:var(--mo);text-decoration:none">
-        ← Student login</a></div>
+        style="border-color:rgba(196,74,255,.2)"
+        onkeydown="if(event.key==='Enter')doTeacherAuth()"></div>
+    <button class="btn btn-teacher" onclick="doTeacherAuth()">Enter Panel →</button>
+    <div class="t-link">
+      <a href="/">← Back to student login</a>
+    </div>
   </div>
 </div>
 
-<!-- ═══════════ APP ═══════════ -->
+<!-- ══════════════════════════════════
+     PAGE 3 — APP
+══════════════════════════════════ -->
 <div id="pgApp" class="pg" style="flex-direction:column;height:100vh;overflow:hidden">
 
   <!-- topbar -->
-  <nav class="bar">
-    <button class="hamburger" onclick="toggleSB()">☰</button>
-    <div class="bar-logo"><span class="bar-dot"></span> CodeRoom</div>
-    <div class="bar-sp"></div>
-    <div class="bar-user">
-      <span id="navName"></span>
-      <span id="navRole" class="role-chip rc-s">STUDENT</span>
+  <nav class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSB()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-logo">
+      <div class="topbar-dot"></div>
+      CodeRoom
     </div>
-    <button class="btn btn-s btn-sm" style="margin-left:8px" onclick="doLogout()">Logout</button>
+    <div class="topbar-sp"></div>
+    <div class="topbar-user">
+      <span class="topbar-name" id="navName"></span>
+      <span class="role-pill" id="navRole">STUDENT</span>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
   </nav>
 
-  <div class="shell">
-    <div class="overlay" id="overlay" onclick="closeSB()"></div>
+  <div class="app-body">
 
-    <!-- sidebar -->
-    <aside class="sidebar" id="sb">
-      <!-- student -->
+    <!-- overlay for mobile sidebar -->
+    <div class="sb-overlay" id="sbOverlay" onclick="closeSB()"></div>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar" id="sidebar">
+
+      <!-- STUDENT NAV -->
       <div id="snav">
         <div class="nl">Student</div>
-        <div class="ni on" data-v="browse" onclick="gotoView('browse')">
+        <div class="ni on" data-v="browse" onclick="goView('browse')">
           <span class="ni-ic">🏠</span>My Sections</div>
-        <div class="ni" data-v="mywork" onclick="gotoView('mywork')">
+        <div class="ni" data-v="mywork" onclick="goView('mywork')">
           <span class="ni-ic">📋</span>My Submissions</div>
-        <div class="nl" style="margin-top:10px">Join Section</div>
+        <div class="nl" style="margin-top:10px">Join a Section</div>
         <div class="jbox">
-          <span class="jbox-lbl">Enter Code</span>
+          <span class="jbox-lbl">Section Code</span>
           <div class="jrow">
             <input id="joinInp" class="jinp" maxlength="8" placeholder="ABC123"
               onkeydown="if(event.key==='Enter')joinSection()">
@@ -423,105 +584,142 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
           </div>
         </div>
       </div>
-      <!-- teacher -->
+
+      <!-- TEACHER NAV -->
       <div id="tnav" style="display:none">
         <div class="nl">Teacher</div>
-        <div class="ni on" data-v="tSec" onclick="gotoView('tSec')">
+        <div class="ni on" data-v="tSec" onclick="goView('tSec')">
           <span class="ni-ic">🗂️</span>Sections</div>
-        <div class="ni" data-v="tSubs" onclick="gotoView('tSubs')">
+        <div class="ni" data-v="tSubs" onclick="goView('tSubs')">
           <span class="ni-ic">👁️</span>Submissions</div>
       </div>
+
     </aside>
 
-    <!-- content -->
-    <main class="content" id="mainContent">
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main" id="mainArea">
 
-      <!-- ═══ STUDENT: MY SECTIONS ═══ -->
+      <!-- ════ STUDENT: MY SECTIONS (browse) ════ -->
       <div id="v-browse" class="view on">
-        <div class="vh"><div class="vt">My Sections</div>
-          <div class="vs">Join a section with a code to access problems</div></div>
+        <div class="vh">
+          <div>
+            <div class="vt">My Sections</div>
+            <div class="vs">Tap a section to view its problems</div>
+          </div>
+        </div>
         <div id="joinedList"></div>
       </div>
 
-      <!-- ═══ STUDENT: SECTION PROBLEMS ═══ -->
+      <!-- ════ STUDENT: SECTION DETAIL (problems) ════ -->
       <div id="v-section" class="view">
+        <button class="back-btn" onclick="goView('browse')">← Back to Sections</button>
         <div id="secHeader" class="vh"></div>
-        <div class="prog"><div class="prog-bar"><div class="prog-f" id="progFill"></div></div>
-          <span class="prog-lbl" id="progLbl">0/0</span></div>
+        <div class="prog">
+          <div class="prog-bar"><div class="prog-f" id="progFill"></div></div>
+          <span class="prog-lbl" id="progLbl">0/0</span>
+        </div>
         <div id="probList"></div>
       </div>
 
-      <!-- ═══ STUDENT: MY SUBMISSIONS ═══ -->
+      <!-- ════ STUDENT: MY SUBMISSIONS ════ -->
       <div id="v-mywork" class="view">
-        <div class="vh"><div class="vt">My Submissions</div>
-          <div class="vs">Your submitted solutions and evaluation results</div></div>
+        <div class="vh">
+          <div>
+            <div class="vt">My Submissions</div>
+            <div class="vs">Your submitted solutions and grades</div>
+          </div>
+        </div>
         <div id="myWorkList"></div>
       </div>
 
-      <!-- ═══ TEACHER: SECTIONS ═══ -->
+      <!-- ════ TEACHER: SECTIONS ════ -->
       <div id="v-tSec" class="view">
-        <div class="vh"><div class="vt">Sections</div>
-          <div class="vs">Create sections, generate codes, add problems</div></div>
-        <div class="fcard">
-          <div class="fcard-title">➕ Create New Section</div>
-          <div class="frow">
-            <div class="fld" style="flex:1;margin-bottom:0">
+        <div class="vh">
+          <div>
+            <div class="vt">Sections</div>
+            <div class="vs">Create sections, add problems, share codes</div>
+          </div>
+        </div>
+        <!-- create form -->
+        <div class="card">
+          <div class="card-title">➕ Create New Section</div>
+          <div style="display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap">
+            <div class="fld" style="flex:1;margin:0;min-width:160px">
               <label>Section Name</label>
-              <input id="secName" type="text" class="inp" placeholder="e.g. Python Basics, Arrays Week 3…"
-                onkeydown="if(event.key==='Enter')createSection()"></div>
-            <button class="btn btn-g btn-sm" style="align-self:flex-end" onclick="createSection()">
-              Create</button>
+              <input id="secName" type="text" class="inp"
+                placeholder="e.g. Python Basics"
+                onkeydown="if(event.key==='Enter')createSection()">
+            </div>
+            <button class="btn btn-g btn-sm" style="align-self:flex-end;margin-bottom:0"
+              onclick="createSection()">Create</button>
           </div>
         </div>
         <div id="tSecList"></div>
       </div>
 
-      <!-- ═══ TEACHER: SECTION DETAIL ═══ -->
+      <!-- ════ TEACHER: SECTION DETAIL ════ -->
       <div id="v-tSecDet" class="view">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-          <button class="btn btn-s btn-sm" onclick="gotoView('tSec')">← Back</button>
+        <button class="back-btn" onclick="goView('tSec');loadTSecs()">← Back to Sections</button>
+        <div style="margin-bottom:18px">
           <div class="vt" id="tDetTitle"></div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:8px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--mu);font-family:var(--mo)">Section code:</span>
+            <span class="code-badge" id="tDetCode">—</span>
+            <button class="btn btn-s btn-sm" onclick="copyCode()">📋 Copy</button>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-          <span style="font-size:11px;color:var(--mu);font-family:var(--mo)">Section Code:</span>
-          <span class="code-chip" id="tDetCode"></span>
-          <button class="btn btn-s btn-sm" onclick="copyCode()" style="font-size:11px">📋 Copy</button>
-        </div>
-        <div class="fcard">
-          <div class="fcard-title">➕ Add Problem</div>
-          <div class="g2">
-            <div class="fld"><label>Title</label>
-              <input id="qTitle" type="text" class="inp" placeholder="Problem title"></div>
-            <div class="fld"><label>Difficulty</label>
+        <!-- add problem form -->
+        <div class="card">
+          <div class="card-title">➕ Add Problem</div>
+          <div class="fg">
+            <div class="fld w2" style="margin:0 0 12px">
+              <label>Title</label>
+              <input id="qTitle" type="text" class="inp" placeholder="Problem title">
+            </div>
+            <div class="fld" style="margin:0 0 12px">
+              <label>Difficulty</label>
               <select id="qDiff" class="inp">
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
-              </select></div>
-            <div class="fld"><label>Concept / Topic</label>
-              <input id="qConcept" type="text" class="inp" placeholder="e.g. Loops + Arithmetic"></div>
-            <div class="fld span2"><label>Problem Statement</label>
-              <textarea id="qProb" class="inp" rows="3" placeholder="Describe the problem…"></textarea></div>
-            <div class="fld"><label>Example I/O</label>
-              <textarea id="qEx" class="inp" rows="2" placeholder="Input → Output"></textarea></div>
-            <div class="fld"><label>Hint (optional)</label>
-              <textarea id="qHint" class="inp" rows="2" placeholder="Hint for students…"></textarea></div>
+              </select>
+            </div>
+            <div class="fld" style="margin:0 0 12px">
+              <label>Concept / Topic</label>
+              <input id="qConcept" type="text" class="inp" placeholder="e.g. Loops + Arithmetic">
+            </div>
+            <div class="fld w2" style="margin:0 0 12px">
+              <label>Problem Statement</label>
+              <textarea id="qProb" class="inp" rows="3" placeholder="Describe the problem…"></textarea>
+            </div>
+            <div class="fld" style="margin:0 0 12px">
+              <label>Example I/O</label>
+              <textarea id="qEx" class="inp" rows="2" placeholder="Input → Output"></textarea>
+            </div>
+            <div class="fld" style="margin:0 0 12px">
+              <label>Hint (optional)</label>
+              <textarea id="qHint" class="inp" rows="2" placeholder="Hint for students…"></textarea>
+            </div>
           </div>
-          <button class="btn btn-g" onclick="addProblem()">Add Problem</button>
+          <button class="btn btn-g" onclick="addProblem()">Add Problem ✓</button>
         </div>
         <div id="tProbList"></div>
       </div>
 
-      <!-- ═══ TEACHER: SUBMISSIONS ═══ -->
+      <!-- ════ TEACHER: SUBMISSIONS ════ -->
       <div id="v-tSubs" class="view">
-        <div class="vh"><div class="vt">Submissions</div>
-          <div class="vs">Evaluate student submissions — updates live</div></div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
-          <select id="filterSec" class="inp" style="max-width:220px;margin:0"
+        <div class="vh">
+          <div>
+            <div class="vt">Submissions</div>
+            <div class="vs">Live updates · evaluate student work</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px">
+          <select id="filterSec" class="inp" style="max-width:200px;padding:9px 12px"
             onchange="loadTSubs()">
             <option value="">All Sections</option>
           </select>
-          <select id="filterStatus" class="inp" style="max-width:160px;margin:0"
+          <select id="filterStatus" class="inp" style="max-width:150px;padding:9px 12px"
             onchange="loadTSubs()">
             <option value="">All Status</option>
             <option value="pending">Pending</option>
@@ -534,25 +732,54 @@ textarea.inp{resize:vertical;line-height:1.6;font-family:var(--mo);font-size:13p
 
     </main>
   </div>
-</div>
 
-<!-- toast -->
+  <!-- ── BOTTOM NAV (mobile) ── -->
+  <nav class="bot-nav" id="botNavStudent">
+    <div class="bot-nav-inner">
+      <button class="bot-item on" data-v="browse" onclick="goView('browse');setBotActive('browse')">
+        <span class="bot-item-ic">🏠</span>Sections
+      </button>
+      <button class="bot-item" data-v="section" onclick="goView('section');setBotActive('section')"
+        id="botSection" style="display:none">
+        <span class="bot-item-ic">📋</span>Problems
+      </button>
+      <button class="bot-item" data-v="mywork" onclick="goView('mywork');setBotActive('mywork')">
+        <span class="bot-item-ic">📨</span>Submissions
+      </button>
+    </div>
+  </nav>
+  <nav class="bot-nav" id="botNavTeacher" style="display:none">
+    <div class="bot-nav-inner">
+      <button class="bot-item on" data-v="tSec" onclick="goView('tSec');setTBotActive('tSec')">
+        <span class="bot-item-ic">🗂️</span>Sections
+      </button>
+      <button class="bot-item" data-v="tSubs" onclick="goView('tSubs');setTBotActive('tSubs')">
+        <span class="bot-item-ic">👁️</span>Submissions
+      </button>
+    </div>
+  </nav>
+
+</div><!-- end pgApp -->
+
+<!-- toast & file input -->
 <div class="toast" id="toastEl"></div>
-<!-- file input -->
 <input type="file" id="filePick" accept="image/*" style="display:none" onchange="onFilePick(event)">
 
-<!-- ═══════════════════ SCRIPT ═══════════════════ -->
+<!-- ══════════════════════════════════════════
+     FIREBASE + APP SCRIPT
+══════════════════════════════════════════ -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
   signOut,onAuthStateChanged,updateProfile}
   from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import{getFirestore,collection,addDoc,getDocs,getDoc,doc,
-  setDoc,updateDoc,deleteDoc,onSnapshot,
-  query,where,orderBy,serverTimestamp,limit}
+import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,
+  updateDoc,deleteDoc,onSnapshot,query,where,orderBy,serverTimestamp}
   from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ── CONFIG ─────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONFIG — do not change
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const FBCFG={
   apiKey:"AIzaSyAYs4AbrHJRLaGqCG7-BpJmrB99uajRYtM",
   authDomain:"teacher-student-portal-b1fed.firebaseapp.com",
@@ -561,243 +788,365 @@ const FBCFG={
   messagingSenderId:"553128972767",
   appId:"1:553128972767:web:96a77d5907c054bcb2746a"
 };
-const TEACHER_PASS="coderoom2024!";          // Teacher password — change this to your own!
-const IMGBB="YOUR_IMGBB_KEY";                // ← imgbb.com free key
+const TEACHER_PASS = "coderoom2024!";   /* ← change to your own password */
+const IMGBB_KEY    = "YOUR_IMGBB_KEY";  /* ← get free key at imgbb.com/api */
 
-const fb  = initializeApp(FBCFG);
-const auth= getAuth(fb);
-const db  = getFirestore(fb);
+const fb   = initializeApp(FBCFG);
+const auth = getAuth(fb);
+const db   = getFirestore(fb);
 
-/* ── STATE ──────────────────────────────────── */
-let me=null, isTeacher=false;
-let joinedSecs=[];          // [{id,name,code}]
-let activeSec=null;         // {id,name,code}
-let activeProbs=[];         // problems for active section
-let solvedMap={};           // probId→true
-let currentTSecId=null;     // teacher editing this section id
-let currentTSecCode="";
-let pendingImgProbId=null;
-let imgStore={};            // probId→{url}
-let tSubsUnsub=null;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+let me          = null;       // firebase user or {uid,displayName} for teacher
+let isTeacher   = false;
+let joinedSecs  = [];         // [{id,name,code}] — sections student joined
+let activeSec   = null;       // {id,name,code}  — currently open section
+let activeProbs = [];         // problems for active section
+let solvedMap   = {};         // probId → true
+let currentSecId   = null;    // teacher: section currently editing
+let currentSecCode = "";      // teacher: code for that section
+let pendingImgProbId = null;
+let imgStore    = {};         // probId → {url}
+let tSubsUnsub  = null;       // real-time listener cleanup
 
-/* ── HELPERS ────────────────────────────────── */
-const $  = id=>document.getElementById(id);
-const esc= s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-window.toast=function(msg,t='ok'){
-  const el=$('toastEl');
-  el.textContent=msg; el.className=`toast t-${t} pop`;
-  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('pop'),3000);
+window.toast = function(msg, type='ok'){
+  const el = $('toastEl');
+  el.textContent = msg;
+  el.className = `toast t-${type} pop`;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('pop'), 3200);
 };
 
-function setAlert(id,msg,type='e'){
-  const el=$(id); if(!el)return;
-  el.textContent=msg; el.className=`alert alert-${type} ${msg?'on':''}`;
+function setAlert(id, msg, type='e'){
+  const el = $(id); if(!el) return;
+  el.textContent = msg;
+  el.className   = `alert alert-${type}${msg?' on':''}`;
 }
 
+/* show/hide pages */
 function showPg(id){
   ['pgAuth','pgTeacher','pgApp'].forEach(p=>{
-    const el=$(p); if(!el)return;
+    const el=$(p); if(!el) return;
     el.classList.remove('on');
     el.style.removeProperty('display');
   });
-  const el=$(id); if(!el)return;
+  const el=$(id); if(!el) return;
   el.classList.add('on');
 }
 
-/* ── MOBILE SIDEBAR ─────────────────────────── */
-window.toggleSB=()=>{$('sb').classList.toggle('open');$('overlay').classList.toggle('open')};
-window.closeSB=()=>{$('sb').classList.remove('open');$('overlay').classList.remove('open')};
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VIEW NAVIGATION
+   Each "view" is a distinct page inside the app
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.goView = function(name){
+  /* hide all views */
+  document.querySelectorAll('.view').forEach(v=>{
+    v.classList.remove('on');
+    v.style.removeProperty('display');
+  });
 
-/* ── AUTH TABS ──────────────────────────────── */
-window.authTab=function(t){
-  document.querySelectorAll('.atab').forEach((b,i)=>b.classList.toggle('on',
-    (t==='login'&&i===0)||(t==='reg'&&i===1)));
-  $('loginF').style.display=t==='login'?'block':'none';
-  $('regF').style.display=t==='reg'?'block':'none';
-  setAlert('authErr','');
-};
-
-/* ── ROUTE ON LOAD ───────────────────────────── */
-(function route(){
-  const url=location.href.toLowerCase();
-  const isTP=url.includes('?teacher')||url.includes('#teacher')||url.includes('/teacher');
-  if(isTP){
-    if(sessionStorage.getItem('cr_t')==='1'){
-      isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
-      showPg('pgApp'); initApp();
-    } else { showPg('pgTeacher'); }
-  } else { showPg('pgAuth'); }
-})();
-
-/* ── TEACHER AUTH ────────────────────────────── */
-window.doTeacherAuth=function(){
-  const p=$('tPass').value;
-  setAlert('tErr','');
-  if(p===TEACHER_PASS){
-    sessionStorage.setItem('cr_t','1');
-    isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
-    showPg('pgApp'); initApp(); $('tPass').value='';
-  } else { setAlert('tErr','Wrong password.'); $('tPass').value=''; }
-};
-
-/* ── STUDENT AUTH ────────────────────────────── */
-window.doLogin=async function(){
-  const email=$('lEmail').value.trim(), pass=$('lPass').value;
-  setAlert('authErr','');
-  if(!email||!pass){setAlert('authErr','Fill in all fields.');return;}
-  const btn=$('loginBtn'); btn.disabled=true; btn.textContent='Signing in…';
-  try{ await signInWithEmailAndPassword(auth,email,pass); }
-  catch(e){
-    setAlert('authErr',friendlyErr(e.code));
-    btn.disabled=false; btn.textContent='Sign In →';
-  }
-};
-
-window.doRegister=async function(){
-  const name=$('rName').value.trim(),email=$('rEmail').value.trim(),pass=$('rPass').value;
-  setAlert('authErr','');
-  if(!name||!email||!pass){setAlert('authErr','Fill in all fields.');return;}
-  if(pass.length<6){setAlert('authErr','Password needs 6+ characters.');return;}
-  const btn=$('regBtn'); btn.disabled=true; btn.textContent='Creating…';
-  try{
-    const c=await createUserWithEmailAndPassword(auth,email,pass);
-    await updateProfile(c.user,{displayName:name});
-    await setDoc(doc(db,'users',c.user.uid),{name,email,createdAt:serverTimestamp()});
-    toast('Welcome, '+name+'! 🎉');
-  } catch(e){
-    setAlert('authErr',friendlyErr(e.code));
-    btn.disabled=false; btn.textContent='Create Account →';
-  }
-};
-
-function friendlyErr(code){
-  const m={'auth/user-not-found':'No account found with that email.',
-    'auth/wrong-password':'Incorrect password.',
-    'auth/email-already-in-use':'Email already registered.',
-    'auth/invalid-email':'Invalid email address.',
-    'auth/weak-password':'Password too weak.',
-    'auth/too-many-requests':'Too many attempts. Try later.',
-    'auth/invalid-credential':'Wrong email or password.'};
-  return m[code]||'Something went wrong. Try again.';
-}
-
-onAuthStateChanged(auth,user=>{
-  if(isTeacher)return;
-  if(user){ me=user; showPg('pgApp'); initApp(); }
-  else {
-    me=null; showPg('pgAuth');
-    const b=$('loginBtn'); if(b){b.disabled=false;b.textContent='Sign In →';}
-  }
-});
-
-window.doLogout=async()=>{
-  sessionStorage.removeItem('cr_t');
-  isTeacher=false; activeSec=null; activeProbs=[]; solvedMap={};
-  if(tSubsUnsub){tSubsUnsub();tSubsUnsub=null;}
-  if(auth.currentUser) await signOut(auth);
-  showPg(location.search.includes('teacher')?'pgTeacher':'pgAuth');
-};
-
-/* ── INIT APP ────────────────────────────────── */
-function initApp(){
-  $('navName').textContent=me.displayName||me.email||'User';
-  if(isTeacher){
-    $('navRole').textContent='TEACHER'; $('navRole').className='role-chip rc-t';
-    $('snav').style.display='none'; $('tnav').style.display='block';
-    gotoView('tSec');
-  } else {
-    $('navRole').textContent='STUDENT'; $('navRole').className='role-chip rc-s';
-    $('snav').style.display='block'; $('tnav').style.display='none';
-    loadJoined(); gotoView('browse');
-  }
-}
-
-/* ══════════════════════════════════
-   NAVIGATION
-══════════════════════════════════ */
-window.gotoView=function(name){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
-  const el=$('v-'+name);
-  if(!el)return;
+  /* show target */
+  const el = $('v-'+name);
+  if(!el) return;
   el.classList.add('on');
-  el.style.display='block';
-  // sidebar active
+  el.style.display = 'block';
+
+  /* scroll to top */
+  $('mainArea').scrollTop = 0;
+
+  /* sidebar active state */
   document.querySelectorAll('.ni[data-v]').forEach(n=>n.classList.remove('on'));
-  const ni=document.querySelector(`.ni[data-v="${name}"]`);
-  if(ni)ni.classList.add('on');
+  const ni = document.querySelector(`.ni[data-v="${name}"]`);
+  if(ni) ni.classList.add('on');
+
+  /* close mobile sidebar */
   closeSB();
+
+  /* load data for each view */
   if(name==='mywork') loadMyWork();
   if(name==='tSec')   loadTSecs();
   if(name==='tSubs')  loadTSubs();
 };
 
-/* ══════════════════════════════════
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBILE SIDEBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.toggleSB = ()=>{
+  $('sidebar').classList.toggle('open');
+  $('sbOverlay').classList.toggle('open');
+};
+window.closeSB = ()=>{
+  $('sidebar').classList.remove('open');
+  $('sbOverlay').classList.remove('open');
+};
+
+/* BOTTOM NAV helpers */
+window.setBotActive = (v)=>{
+  document.querySelectorAll('#botNavStudent .bot-item').forEach(b=>b.classList.remove('on'));
+  const el = document.querySelector(`#botNavStudent [data-v="${v}"]`);
+  if(el) el.classList.add('on');
+};
+window.setTBotActive = (v)=>{
+  document.querySelectorAll('#botNavTeacher .bot-item').forEach(b=>b.classList.remove('on'));
+  const el = document.querySelector(`#botNavTeacher [data-v="${v}"]`);
+  if(el) el.classList.add('on');
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AUTH TABS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.authTab = function(t){
+  document.querySelectorAll('.atab').forEach((b,i)=>
+    b.classList.toggle('on',(t==='login'&&i===0)||(t==='reg'&&i===1)));
+  $('loginF').style.display = t==='login'?'block':'none';
+  $('regF').style.display   = t==='reg'  ?'block':'none';
+  setAlert('authErr','');
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ROUTING — detect ?teacher in URL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+(function route(){
+  const url = location.href.toLowerCase();
+  const isTP = url.includes('?teacher') || url.includes('#teacher');
+  if(isTP){
+    if(sessionStorage.getItem('cr_t')==='1'){
+      isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
+      showPg('pgApp'); initApp();
+    } else {
+      showPg('pgTeacher');
+    }
+  } else {
+    showPg('pgAuth');
+  }
+})();
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TEACHER AUTH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.doTeacherAuth = function(){
+  const p = $('tPass').value;
+  setAlert('tErr','');
+  if(p === TEACHER_PASS){
+    sessionStorage.setItem('cr_t','1');
+    isTeacher=true; me={uid:'teacher',displayName:'Teacher'};
+    showPg('pgApp'); initApp();
+    $('tPass').value='';
+  } else {
+    setAlert('tErr','Incorrect password. Try again.');
+    $('tPass').value='';
+    $('tPass').focus();
+  }
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STUDENT AUTH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.doLogin = async function(){
+  const email=$('lEmail').value.trim(), pass=$('lPass').value;
+  setAlert('authErr','');
+  if(!email||!pass){ setAlert('authErr','Please fill in all fields.'); return; }
+  const btn=$('loginBtn'); btn.disabled=true; btn.textContent='Signing in…';
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+  }catch(e){
+    setAlert('authErr', friendlyErr(e.code));
+    btn.disabled=false; btn.textContent='Sign In →';
+  }
+};
+
+window.doRegister = async function(){
+  const name=$('rName').value.trim(), email=$('rEmail').value.trim(), pass=$('rPass').value;
+  setAlert('authErr','');
+  if(!name||!email||!pass){ setAlert('authErr','Please fill in all fields.'); return; }
+  if(pass.length<6){ setAlert('authErr','Password needs at least 6 characters.'); return; }
+  const btn=$('regBtn'); btn.disabled=true; btn.textContent='Creating…';
+  try{
+    const c = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(c.user,{displayName:name});
+    await setDoc(doc(db,'users',c.user.uid),{name,email,createdAt:serverTimestamp()});
+    toast('Welcome, '+name+'! 🎉');
+  }catch(e){
+    setAlert('authErr', friendlyErr(e.code));
+    btn.disabled=false; btn.textContent='Create Account →';
+  }
+};
+
+function friendlyErr(code){
+  const m={
+    'auth/user-not-found':'No account with that email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/email-already-in-use':'Email already registered.',
+    'auth/invalid-email':'Invalid email address.',
+    'auth/weak-password':'Password is too weak.',
+    'auth/too-many-requests':'Too many attempts. Please wait.',
+    'auth/invalid-credential':'Wrong email or password.'
+  };
+  return m[code]||'Something went wrong. Please try again.';
+}
+
+onAuthStateChanged(auth, user=>{
+  if(isTeacher) return;
+  if(user){
+    me=user; showPg('pgApp'); initApp();
+  } else {
+    me=null;
+    if(!location.href.toLowerCase().includes('teacher')) showPg('pgAuth');
+    const b=$('loginBtn'); if(b){ b.disabled=false; b.textContent='Sign In →'; }
+  }
+});
+
+window.doLogout = async function(){
+  sessionStorage.removeItem('cr_t');
+  isTeacher=false; activeSec=null; activeProbs=[]; solvedMap={};
+  joinedSecs=[];
+  if(tSubsUnsub){ tSubsUnsub(); tSubsUnsub=null; }
+  try{ if(auth.currentUser) await signOut(auth); }catch(_){}
+  showPg(location.href.toLowerCase().includes('teacher')?'pgTeacher':'pgAuth');
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INIT APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function initApp(){
+  const name = me.displayName || me.email || 'User';
+  $('navName').textContent = name;
+
+  if(isTeacher){
+    $('navRole').textContent='TEACHER'; $('navRole').className='role-pill rp-t';
+    $('snav').style.display='none';  $('tnav').style.display='block';
+    $('botNavStudent').style.display='none'; $('botNavTeacher').style.display='flex';
+    goView('tSec');
+  } else {
+    $('navRole').textContent='STUDENT'; $('navRole').className='role-pill rp-s';
+    $('snav').style.display='block'; $('tnav').style.display='none';
+    $('botNavStudent').style.display='flex'; $('botNavTeacher').style.display='none';
+    loadJoined(); goView('browse');
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    STUDENT — JOINED SECTIONS
-══════════════════════════════════ */
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 async function loadJoined(){
   try{
-    const snap=await getDocs(collection(db,'users',me.uid,'joinedSections'));
-    joinedSecs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const snap = await getDocs(collection(db,'users',me.uid,'joinedSections'));
+    joinedSecs = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderJoined();
-  }catch(e){console.error(e);}
+  }catch(e){ console.error('loadJoined',e); }
 }
 
 function renderJoined(){
-  const el=$('joinedList');
+  const el = $('joinedList');
   if(!joinedSecs.length){
-    el.innerHTML=`<div class="empty"><div class="ei">🔒</div>
-      <p>No sections joined yet.<br>Use the sidebar to enter a section code.</p></div>`;return;
+    el.innerHTML=`<div class="empty">
+      <span class="ei">🔒</span>
+      <p>No sections joined yet.<br>Enter a section code in the sidebar<br>or use the input below.</p>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <input id="joinInp2" class="jinp" style="max-width:160px;text-align:center"
+          maxlength="8" placeholder="ABC123"
+          onkeydown="if(event.key==='Enter')joinSection2()">
+        <button class="btn btn-g btn-sm" onclick="joinSection2()">🔓 Join</button>
+      </div>
+    </div>`;
+    return;
   }
   el.innerHTML='';
-  joinedSecs.forEach(s=>{
-    const c=document.createElement('div');
-    c.className='scard'; c.style.cursor='pointer';
-    c.innerHTML=`<div class="scard-head">
-      <div><div class="scard-title">📂 ${esc(s.name)}</div>
-        <div class="scard-meta">Tap to open</div></div>
-      <span style="color:var(--mu);font-size:18px">›</span>
-    </div>`;
-    c.onclick=()=>openSection(s);
-    el.appendChild(c);
+  joinedSecs.forEach((s,i)=>{
+    const icons=['📘','📗','📙','📕','📓','📔'];
+    const ic = icons[i % icons.length];
+    const div = document.createElement('div');
+    div.className='sec-browse-card';
+    div.innerHTML=`
+      <span class="sec-browse-icon">${ic}</span>
+      <div class="sec-browse-info">
+        <div class="sec-browse-name">${esc(s.name)}</div>
+        <div class="sec-browse-meta">Tap to open problems</div>
+      </div>
+      <span class="sec-browse-arr">›</span>`;
+    div.onclick=()=>openSection(s);
+    el.appendChild(div);
   });
+  /* join another box */
+  const more = document.createElement('div');
+  more.innerHTML=`<div style="margin-top:8px;padding:12px 14px;background:var(--s2);
+    border:1.5px dashed var(--b2);border-radius:var(--r);display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+    <span style="font-size:12px;color:var(--mu);font-family:var(--mo)">Join another section:</span>
+    <div style="display:flex;gap:6px;flex:1;min-width:160px">
+      <input id="joinInp3" class="jinp" style="flex:1" maxlength="8" placeholder="ABC123"
+        onkeydown="if(event.key==='Enter')joinSection3()">
+      <button class="btn btn-s btn-sm" onclick="joinSection3()">Join</button>
+    </div>
+  </div>`;
+  el.appendChild(more);
 }
 
-window.joinSection=async function(){
-  const code=$('joinInp').value.trim().toUpperCase();
-  if(!code){toast('Enter a section code','err');return;}
+/* join from various inputs */
+window.joinSection = async function(){
+  await _joinSection($('joinInp')?.value);
+  if($('joinInp')) $('joinInp').value='';
+};
+window.joinSection2 = async function(){
+  await _joinSection($('joinInp2')?.value);
+};
+window.joinSection3 = async function(){
+  await _joinSection($('joinInp3')?.value);
+  if($('joinInp3')) $('joinInp3').value='';
+};
+
+async function _joinSection(code){
+  code = (code||'').trim().toUpperCase();
+  if(!code){ toast('Enter a section code','err'); return; }
   try{
     const snap=await getDocs(query(collection(db,'sections'),where('code','==',code)));
-    if(snap.empty){toast('Section not found!','err');return;}
+    if(snap.empty){ toast('Section not found!','err'); return; }
     const sd=snap.docs[0]; const data=sd.data();
     if(joinedSecs.find(s=>s.id===sd.id)){
-      toast('Already joined!'); openSection({id:sd.id,...data}); return;}
+      toast('Already joined!'); openSection({id:sd.id,...data}); return;
+    }
     await setDoc(doc(db,'users',me.uid,'joinedSections',sd.id),
       {name:data.name,code:data.code,joinedAt:serverTimestamp()});
     joinedSecs.push({id:sd.id,name:data.name,code:data.code});
-    renderJoined(); $('joinInp').value='';
+    renderJoined();
     toast('Joined: '+data.name+' 🎉');
     openSection({id:sd.id,...data});
-  }catch(e){toast('Error: '+e.message,'err');}
-};
+  }catch(e){ toast('Error: '+e.message,'err'); }
+}
 
-/* ══════════════════════════════════
-   STUDENT — SECTION VIEW
-══════════════════════════════════ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STUDENT — OPEN A SECTION (full page)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 async function openSection(sec){
-  activeSec=sec;
-  $('secHeader').innerHTML=`<div class="vt">📂 ${esc(sec.name)}</div>
-    <div class="vs">Solve problems and submit your solutions</div>`;
+  activeSec = sec;
+  /* update header */
+  $('secHeader').innerHTML=`
+    <div>
+      <div class="vt">📂 ${esc(sec.name)}</div>
+      <div class="vs">Solve problems · submit your solutions</div>
+    </div>`;
   solvedMap={}; imgStore={};
+  /* clear problem list */
+  $('probList').innerHTML=`<div class="empty"><p>Loading problems…</p></div>`;
+  /* show the section view — this is a FULL page switch */
+  goView('section');
+  /* show "Problems" tab in bottom nav */
+  const bs=$('botSection'); if(bs) bs.style.display='flex';
+  setBotActive('section');
   await loadSolved(sec.id);
   await loadProbs(sec.id);
-  gotoView('section');
 }
 
 async function loadSolved(secId){
   try{
     const snap=await getDocs(collection(db,'users',me.uid,'solved'));
-    snap.forEach(d=>{if(d.data().sectionId===secId)solvedMap[d.id]=true;});
+    snap.forEach(d=>{ if(d.data().sectionId===secId) solvedMap[d.id]=true; });
   }catch(e){}
 }
 
@@ -805,10 +1154,10 @@ async function loadProbs(secId){
   try{
     const snap=await getDocs(
       query(collection(db,'sections',secId,'problems'),orderBy('createdAt','asc')));
-    activeProbs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    activeProbs = snap.docs.map(d=>({id:d.id,...d.data()}));
     buildProbList();
     updateProg();
-  }catch(e){console.error(e);}
+  }catch(e){ console.error(e); }
 }
 
 function updateProg(){
@@ -817,254 +1166,292 @@ function updateProg(){
   $('progLbl').textContent=`${done}/${tot}`;
 }
 
-/* Build problem list — only adds NEW cards, never re-renders existing ones
-   so typing in textarea is never interrupted */
+/* Build problem list — does NOT re-render existing cards (preserves textarea content) */
 function buildProbList(){
   const list=$('probList');
-  // remove cards no longer in list
-  const ids=new Set(activeProbs.map(p=>p.id));
-  list.querySelectorAll('.pcard').forEach(c=>{
-    if(!ids.has(c.dataset.pid)) c.remove();
-  });
+  list.innerHTML='';
+  if(!activeProbs.length){
+    list.innerHTML=`<div class="empty"><span class="ei">📭</span>
+      <p>No problems in this section yet.</p></div>`;
+    return;
+  }
   activeProbs.forEach((p,i)=>{
-    if(document.getElementById('pc-'+p.id)) return; // already rendered
-    const card=makeProbCard(p,i);
-    list.appendChild(card);
+    if($('pc-'+p.id)) return; // already exists
+    list.appendChild(makeProbCard(p,i));
   });
 }
 
-function makeProbCard(p,idx){
-  const solved=!!solvedMap[p.id];
-  const card=document.createElement('div');
+function makeProbCard(p, idx){
+  const solved = !!solvedMap[p.id];
+  const card = document.createElement('div');
   card.className='pcard'+(solved?' solved':'');
   card.id='pc-'+p.id; card.dataset.pid=p.id;
 
   card.innerHTML=`
-  <div class="ph">
-    <div class="pchk${solved?' on':''}">${solved?'✓':''}</div>
-    <span class="pnum">#${idx+1}</span>
-    <span class="ptit${solved?' done':''}">${esc(p.title)}</span>
-    <span class="diff d${(p.difficulty||'Easy')[0]}">${p.difficulty||'Easy'}</span>
-    <span class="chev">▼</span>
-  </div>
-  <div class="pb">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-family:var(--mo);font-size:10px;background:var(--s2);color:var(--ac);
-        padding:3px 9px;border-radius:99px;border:1px solid var(--b2)">🧠 ${esc(p.concept||'')}</span>
+    <div class="ph">
+      <div class="pchk${solved?' on':''}">${solved?'✓':''}</div>
+      <span class="pnum">#${idx+1}</span>
+      <span class="ptit${solved?' done':''}">${esc(p.title)}</span>
+      <span class="diff d${(p.difficulty||'Easy')[0]}">${p.difficulty||'Easy'}</span>
+      <span class="chev">▼</span>
     </div>
-    <div class="blk b-prob">
-      <div class="blk-l">Problem</div>
-      <p class="blk-p">${esc(p.problem||'').replace(/\n/g,'<br>')}</p>
-    </div>
-    ${p.example?`<div class="blk b-ex">
-      <div class="blk-l">Example</div>
-      <pre class="blk-pre">${esc(p.example)}</pre>
-    </div>`:''}
-    ${p.hint?`<div class="blk b-hint">
-      <div class="blk-l">💡 Hint</div>
-      <p class="blk-p" style="font-family:var(--mo);font-size:12px;color:#fcd34d">${esc(p.hint)}</p>
-    </div>`:''}
-    <div class="blk b-code">
-      <div class="blk-l">✏️ Your Solution</div>
-      <textarea class="codearea" id="ca-${p.id}"
-        placeholder="# Write your solution here…"
-        onclick="event.stopPropagation()"
-        onkeydown="tabKey(event)"
-        rows="7"></textarea>
-      <div class="img-pre" id="ip-${p.id}">
-        <img id="ipr-${p.id}" src="" alt="">
-        <button class="btn btn-d btn-sm" style="margin-top:5px"
-          onclick="rmImg('${p.id}')">✕ Remove image</button>
+    <div class="pb">
+      ${p.concept?`<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+        <span style="font-size:10px;font-family:var(--mo);background:var(--s2);color:var(--ac);
+          padding:3px 9px;border-radius:99px;border:1px solid var(--b2)">🧠 ${esc(p.concept)}</span>
+      </div>`:''}
+      <div class="blk b-prob">
+        <div class="blk-l">Problem</div>
+        <p class="blk-p">${esc(p.problem||'').replace(/\n/g,'<br>')}</p>
       </div>
-      <div class="sub-row">
-        <button class="btn btn-p btn-sm" style="width:auto"
-          onclick="submitSol('${p.id}')">Submit →</button>
-        <button class="btn btn-s btn-sm"
-          onclick="pickImg('${p.id}')">📷 Image</button>
-        <span class="sub-done" id="sd-${p.id}">✓ Submitted</span>
+      ${p.example?`<div class="blk b-ex">
+        <div class="blk-l">Example</div>
+        <pre class="blk-pre">${esc(p.example)}</pre>
+      </div>`:''}
+      ${p.hint?`<div class="blk b-hint">
+        <div class="blk-l">💡 Hint</div>
+        <p class="blk-p" style="font-family:var(--mo);font-size:12px;color:#fcd34d">${esc(p.hint)}</p>
+      </div>`:''}
+      <div class="blk b-code">
+        <div class="blk-l">✏️ Your Solution</div>
+        <textarea class="codearea" id="ca-${p.id}"
+          placeholder="# Write your solution here…"
+          rows="7"
+          onkeydown="event.stopPropagation();tabKey(event)"
+          onclick="event.stopPropagation()"
+          onmousedown="event.stopPropagation()"
+          onfocus="event.stopPropagation()"></textarea>
+        <div class="img-pre" id="ip-${p.id}">
+          <img id="ipr-${p.id}" src="" alt="solution image">
+          <button class="btn btn-d btn-xs" style="margin-top:6px"
+            onclick="event.stopPropagation();rmImg('${p.id}')">✕ Remove image</button>
+        </div>
+        <div class="sub-row">
+          <button class="btn btn-p btn-sm" style="width:auto"
+            onclick="event.stopPropagation();submitSol('${p.id}')">Submit →</button>
+          <button class="btn btn-s btn-sm"
+            onclick="event.stopPropagation();pickImg('${p.id}')">📷 Image</button>
+          <span class="sub-done" id="sd-${p.id}">✓ Submitted</span>
+        </div>
       </div>
-    </div>
-    <div id="rb-${p.id}"></div>
-  </div>`;
+      <div id="rb-${p.id}"></div>
+    </div>`;
 
-  // header click — toggle body
-  const ph=card.querySelector('.ph');
-  const pb=card.querySelector('.pb');
-  const chev=card.querySelector('.chev');
-  ph.addEventListener('click',e=>{
-    if(e.target.closest('.pchk'))return;
-    const open=pb.classList.contains('open');
-    pb.classList.toggle('open',!open);
-    chev.style.transform=open?'':'rotate(180deg)';
+  /* toggle body on header click */
+  const ph  = card.querySelector('.ph');
+  const pb  = card.querySelector('.pb');
+  const chev= card.querySelector('.chev');
+  ph.addEventListener('click', e=>{
+    if(e.target.closest('.pchk')) return;
+    const open = pb.classList.toggle('open');
+    chev.style.transform = open ? 'rotate(180deg)' : '';
   });
 
-  // check click
-  card.querySelector('.pchk').addEventListener('click',e=>{
+  /* solved checkbox */
+  card.querySelector('.pchk').addEventListener('click', e=>{
     e.stopPropagation(); toggleSolved(p.id);
   });
+
+  /* load existing submission result */
+  loadProbResult(p.id);
 
   return card;
 }
 
-/* Tab key indent */
-window.tabKey=function(e){
-  if(e.key!=='Tab')return;
+async function loadProbResult(pid){
+  const rb=$('rb-'+pid); if(!rb) return;
+  try{
+    const snap=await getDocs(query(collection(db,'submissions'),
+      where('userId','==',me.uid),where('problemId','==',pid)));
+    if(snap.empty) return;
+    const s=snap.docs[0].data();
+    /* pre-fill textarea */
+    const ca=$('ca-'+pid); if(ca&&s.code) ca.value=s.code;
+    /* show image if submitted */
+    if(s.imageUrl){
+      const ipr=$('ipr-'+pid),ip=$('ip-'+pid);
+      if(ipr)ipr.src=s.imageUrl; if(ip)ip.classList.add('on');
+    }
+    /* show result */
+    if(s.status==='evaluated'){
+      rb.innerHTML=`<div class="res-strip res-ok">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="score-badge">Score: ${s.score}/10</span>
+          <span class="chip-eval chip-pend">Evaluated</span>
+        </div>
+        ${s.comment?`<p style="font-size:13px;color:var(--t2);margin-top:8px;line-height:1.6">${esc(s.comment)}</p>`:''}
+      </div>`;
+      const sd=$('sd-'+pid); if(sd)sd.classList.add('on');
+    } else {
+      rb.innerHTML=`<div class="res-strip res-pend">
+        <span class="pend-badge">⏳ Submitted — awaiting evaluation</span>
+      </div>`;
+      const sd=$('sd-'+pid); if(sd)sd.classList.add('on');
+    }
+  }catch(e){}
+}
+
+/* Tab key indent in textarea */
+window.tabKey = function(e){
+  if(e.key!=='Tab') return;
   e.preventDefault();
-  const t=e.target,s=t.selectionStart;
+  const t=e.target, s=t.selectionStart;
   t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);
   t.selectionStart=t.selectionEnd=s+2;
 };
 
-/* solved toggle */
+/* Toggle solved */
 async function toggleSolved(pid){
-  const was=!!solvedMap[pid];
+  const was = !!solvedMap[pid];
   if(was){
     delete solvedMap[pid];
     try{await deleteDoc(doc(db,'users',me.uid,'solved',pid));}catch(e){}
   } else {
     solvedMap[pid]=true;
     try{await setDoc(doc(db,'users',me.uid,'solved',pid),
-      {sectionId:activeSec.id,solvedAt:serverTimestamp()});}catch(e){}
+      {sectionId:activeSec?.id,solvedAt:serverTimestamp()});}catch(e){}
   }
   updateProg();
-  const card=document.getElementById('pc-'+pid); if(!card)return;
-  const chk=card.querySelector('.pchk');
-  const tit=card.querySelector('.ptit');
+  const card=$('pc-'+pid); if(!card) return;
   const now=!was;
-  chk.classList.toggle('on',now); chk.textContent=now?'✓':'';
-  tit.classList.toggle('done',now);
+  card.querySelector('.pchk').classList.toggle('on',now);
+  card.querySelector('.pchk').textContent=now?'✓':'';
+  card.querySelector('.ptit').classList.toggle('done',now);
   card.classList.toggle('solved',now);
 }
 
-/* ── IMAGE ─────────────────────────────────── */
-window.pickImg=function(pid){pendingImgProbId=pid;$('filePick').click();};
-window.rmImg=function(pid){
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   IMAGE HANDLING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.pickImg = function(pid){ pendingImgProbId=pid; $('filePick').click(); };
+window.rmImg   = function(pid){
   delete imgStore[pid];
   const t=$('ip-'+pid); if(t)t.classList.remove('on');
 };
 
-window.onFilePick=async function(e){
-  const file=e.target.files[0]; if(!file)return;
+window.onFilePick = async function(e){
+  const file=e.target.files[0]; if(!file) return;
   const pid=pendingImgProbId;
-  toast('Uploading…');
+  toast('Uploading image…');
   try{
-    const fd=new FormData(); fd.append('image',file);
-    const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB}`,{method:'POST',body:fd});
-    const d=await r.json();
-    if(!d.success)throw new Error('Upload failed');
-    imgStore[pid]={url:d.data.url};
-    const pr=$('ipr-'+pid), ip=$('ip-'+pid);
-    if(pr){pr.src=d.data.url;} if(ip)ip.classList.add('on');
-    toast('Image ready ✓');
+    /* Try imgbb first */
+    if(IMGBB_KEY && IMGBB_KEY!=='YOUR_IMGBB_KEY'){
+      const fd=new FormData(); fd.append('image',file);
+      const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:'POST',body:fd});
+      const d=await r.json();
+      if(!d.success) throw new Error('imgbb failed');
+      imgStore[pid]={url:d.data.url};
+      const pr=$('ipr-'+pid),ip=$('ip-'+pid);
+      if(pr)pr.src=d.data.url; if(ip)ip.classList.add('on');
+      toast('Image ready ✓');
+    } else {
+      throw new Error('use base64');
+    }
   }catch(err){
-    // fallback: store as base64 if imgbb key not set
+    /* Fallback: base64 */
     const reader=new FileReader();
     reader.onload=ev=>{
       imgStore[pid]={url:ev.target.result,isBase64:true};
       const pr=$('ipr-'+pid),ip=$('ip-'+pid);
       if(pr)pr.src=ev.target.result; if(ip)ip.classList.add('on');
-      toast('Image added (base64 fallback)');
+      toast('Image added ✓ (set IMGBB_KEY for external hosting)');
     };
     reader.readAsDataURL(file);
   }
   e.target.value='';
 };
 
-/* ── SUBMIT ─────────────────────────────────── */
-window.submitSol=async function(pid){
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SUBMIT SOLUTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.submitSol = async function(pid){
   const code=($('ca-'+pid)||{}).value||'';
   const img=imgStore[pid]||null;
-  if(!code.trim()&&!img){toast('Write a solution or add an image.','err');return;}
+  if(!code.trim()&&!img){ toast('Write a solution or add an image.','err'); return; }
   const prob=activeProbs.find(x=>x.id===pid);
+
   try{
-    // Check for existing submission to update
+    /* Check for existing submission — update instead of create duplicate */
     const existSnap=await getDocs(query(collection(db,'submissions'),
       where('userId','==',me.uid),where('problemId','==',pid)));
+
     const subData={
-      userId:me.uid,
-      userName:me.displayName||me.email,
-      sectionId:activeSec.id,
-      sectionName:activeSec.name,
-      problemId:pid,
-      problemTitle:prob?prob.title:pid,
-      code:code||null,
-      imageUrl:img?img.url:null,
-      status:'pending',
-      score:null,
-      comment:null,
+      userId:me.uid, userName:me.displayName||me.email,
+      sectionId:activeSec?.id||'', sectionName:activeSec?.name||'',
+      problemId:pid, problemTitle:prob?prob.title:pid,
+      code:code||null, imageUrl:img?img.url:null,
+      status:'pending', score:null, comment:null,
       submittedAt:serverTimestamp()
     };
+
     if(!existSnap.empty){
       await updateDoc(existSnap.docs[0].ref,{...subData,updatedAt:serverTimestamp()});
     } else {
       await addDoc(collection(db,'submissions'),subData);
     }
+
+    /* mark solved */
     if(!solvedMap[pid]){
       solvedMap[pid]=true;
       await setDoc(doc(db,'users',me.uid,'solved',pid),
-        {sectionId:activeSec.id,solvedAt:serverTimestamp()});
+        {sectionId:activeSec?.id,solvedAt:serverTimestamp()});
       updateProg();
-      toggleSolvedUI(pid,true);
+      const card=$('pc-'+pid);
+      if(card){
+        card.querySelector('.pchk').classList.add('on');
+        card.querySelector('.pchk').textContent='✓';
+        card.querySelector('.ptit').classList.add('done');
+        card.classList.add('solved');
+      }
     }
+
     const sd=$('sd-'+pid); if(sd)sd.classList.add('on');
     const rb=$('rb-'+pid);
     if(rb)rb.innerHTML=`<div class="res-strip res-pend">
       <span class="pend-badge">⏳ Submitted — awaiting evaluation</span></div>`;
     toast('Submitted! ✓');
-  }catch(err){toast('Submit failed: '+err.message,'err');}
+  }catch(err){ toast('Submit failed: '+err.message,'err'); }
 };
 
-function toggleSolvedUI(pid,on){
-  const card=document.getElementById('pc-'+pid); if(!card)return;
-  card.querySelector('.pchk').classList.toggle('on',on);
-  card.querySelector('.pchk').textContent=on?'✓':'';
-  card.querySelector('.ptit').classList.toggle('done',on);
-  card.classList.toggle('solved',on);
-}
-
-/* ── MY SUBMISSIONS (no composite index needed) ── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MY WORK (student submissions history)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 async function loadMyWork(){
   const list=$('myWorkList');
   list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
   try{
-    // Simple query — only filter by userId, no orderBy to avoid index requirement
-    const snap=await getDocs(
-      query(collection(db,'submissions'),where('userId','==',me.uid)));
+    const snap=await getDocs(query(collection(db,'submissions'),where('userId','==',me.uid)));
     if(snap.empty){
-      list.innerHTML=`<div class="empty"><div class="ei">📭</div>
-        <p>No submissions yet. Solve some problems!</p></div>`;return;
+      list.innerHTML=`<div class="empty"><span class="ei">📭</span>
+        <p>No submissions yet.<br>Solve some problems first!</p></div>`;
+      return;
     }
-    // Sort client-side
     const docs=snap.docs.map(d=>({id:d.id,...d.data()}))
       .sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
     list.innerHTML='';
     docs.forEach(s=>{
       const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleString():'–';
+      const isEval=s.status==='evaluated';
       const card=document.createElement('div');
-      card.className='sub-card';
-      let evalHtml='';
-      if(s.status==='evaluated'){
-        evalHtml=`<div style="margin-top:10px;padding:10px 12px;background:var(--s2);
-          border-radius:var(--r2);border:1px solid var(--b1)">
+      card.className='mw-card';
+      card.innerHTML=`
+        <div class="mw-head">
+          <div>
+            <div class="mw-title">${esc(s.problemTitle||'Untitled')}</div>
+            <div class="mw-meta">${esc(s.sectionName||'')} · ${ts}</div>
+          </div>
+          <span class="chip-pend${isEval?' chip-eval':''}">${isEval?'✓ Evaluated':'⏳ Pending'}</span>
+        </div>
+        ${s.code?`<div class="sub-code-view">${esc(s.code)}</div>`:''}
+        ${s.imageUrl?`<img class="sub-img-view" src="${s.imageUrl}" alt="">`:''}
+        ${isEval?`<div style="margin-top:10px;padding:11px 13px;background:var(--s2);
+          border:1px solid var(--b1);border-radius:var(--r2)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <span class="score-badge">Score: ${s.score}/10</span>
             <span class="chip-eval chip-pend">Evaluated</span>
           </div>
-          ${s.comment?`<p style="font-size:13px;color:var(--t2);line-height:1.6;margin-top:6px">${esc(s.comment)}</p>`:''}
-        </div>`;
-      } else {
-        evalHtml=`<div style="margin-top:8px"><span class="pend-badge">⏳ Pending evaluation</span></div>`;
-      }
-      card.innerHTML=`
-        <div class="sub-card-head">
-          <div>
-            <div class="sub-user">${esc(s.problemTitle||'')}</div>
-            <div class="sub-info">${esc(s.sectionName||'')} · ${ts}</div>
-          </div>
-        </div>
-        ${s.code?`<div class="sub-code-view">${esc(s.code)}</div>`:''}
-        ${s.imageUrl?`<img class="sub-img-view" src="${s.imageUrl}" alt="solution">`:''}
-        ${evalHtml}`;
+          ${s.comment?`<p style="font-size:13px;color:var(--t2);line-height:1.6">${esc(s.comment)}</p>`:''}
+        </div>`:`<div style="margin-top:8px"><span class="pend-badge">⏳ Awaiting evaluation</span></div>`}`;
       list.appendChild(card);
     });
   }catch(err){
@@ -1072,94 +1459,112 @@ async function loadMyWork(){
   }
 }
 
-/* ══════════════════════════════════
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    TEACHER — SECTIONS
-══════════════════════════════════ */
-window.createSection=async function(){
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function genCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+window.createSection = async function(){
   const name=$('secName').value.trim();
-  if(!name){toast('Enter a section name','err');return;}
+  if(!name){ toast('Enter a section name','err'); return; }
   try{
     const code=genCode();
     await addDoc(collection(db,'sections'),{name,code,createdAt:serverTimestamp()});
-    $('secName').value=''; toast('Section created! Code: '+code);
+    $('secName').value='';
+    toast(`Section created! Code: ${code} 🎉`);
     loadTSecs();
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){ toast('Error: '+e.message,'err'); }
 };
-
-function genCode(){
-  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let s=''; for(let i=0;i<6;i++)s+=c[Math.floor(Math.random()*c.length)]; return s;
-}
 
 async function loadTSecs(){
   const list=$('tSecList');
   list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
+
+  /* repopulate submissions filter */
+  const fSec=$('filterSec');
+  while(fSec.options.length>1) fSec.remove(1);
+
   try{
-    // No orderBy to avoid index issues — sort client side
     const snap=await getDocs(collection(db,'sections'));
     if(snap.empty){
-      list.innerHTML=`<div class="empty"><div class="ei">🗂️</div>
-        <p>No sections yet. Create one above.</p></div>`;return;
+      list.innerHTML=`<div class="empty"><span class="ei">🗂️</span>
+        <p>No sections yet. Create one above.</p></div>`; return;
     }
     const docs=snap.docs.map(d=>({id:d.id,...d.data()}))
       .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-
-    // Use a DocumentFragment so we build the list once
-    const frag=document.createDocumentFragment();
+    list.innerHTML='';
     docs.forEach(s=>{
+      fSec.appendChild(new Option(s.name,s.id));
       const card=document.createElement('div');
-      card.className='scard';
-      card.innerHTML=`<div class="scard-head">
-        <div>
-          <div class="scard-title">📂 ${esc(s.name)}</div>
-          <div class="scard-meta">Code: <span class="code-chip" style="font-size:11px;padding:3px 9px">${s.code}</span></div>
+      card.className='tsec-card';
+      card.innerHTML=`<div class="tsec-head">
+        <span class="tsec-ico">📂</span>
+        <div class="tsec-info">
+          <div class="tsec-name">${esc(s.name)}</div>
+          <div class="tsec-meta">Code: <strong>${s.code}</strong></div>
         </div>
-        <div class="scard-btns">
-          <button class="btn btn-s btn-sm" onclick="openTSec('${s.id}','${esc(s.name)}','${s.code}')">Open →</button>
-          <button class="btn btn-d btn-sm" onclick="deleteSec('${s.id}')">Delete</button>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-s btn-sm" onclick="event.stopPropagation();openTSec('${s.id}','${esc(s.name)}','${s.code}')">
+            Open →</button>
+          <button class="btn btn-d btn-sm" onclick="event.stopPropagation();deleteSec('${s.id}')">
+            Delete</button>
         </div>
       </div>`;
-      frag.appendChild(card);
+      list.appendChild(card);
     });
-    list.innerHTML=''; list.appendChild(frag);
-  }catch(e){list.innerHTML=`<div class="empty"><p style="color:var(--rd)">${esc(e.message)}</p></div>`;}
+  }catch(e){
+    list.innerHTML=`<div class="empty"><p style="color:var(--rd)">${esc(e.message)}</p></div>`;
+  }
 }
 
-window.openTSec=function(id,name,code){
-  currentTSecId=id; currentTSecCode=code;
+window.openTSec = function(id,name,code){
+  currentSecId=id; currentSecCode=code;
   $('tDetTitle').textContent=name;
   $('tDetCode').textContent=code;
   loadTProbs(id);
-  gotoView('tSecDet');
+  goView('tSecDet');
 };
 
-window.copyCode=function(){
-  navigator.clipboard.writeText(currentTSecCode).then(()=>toast('Code copied!'));
+window.copyCode = function(){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(currentSecCode).then(()=>toast('Code copied! '+currentSecCode));
+  } else {
+    toast('Code: '+currentSecCode);
+  }
 };
 
-window.deleteSec=async function(id){
-  if(!confirm('Delete this section and all its problems?'))return;
+window.deleteSec = async function(id){
+  if(!confirm('Delete this section and ALL its problems? Students will lose access.')) return;
   try{
     const ps=await getDocs(collection(db,'sections',id,'problems'));
     for(const p of ps.docs) await deleteDoc(p.ref);
     await deleteDoc(doc(db,'sections',id));
     toast('Section deleted.'); loadTSecs();
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
-/* ── ADD PROBLEM ─────────────────────────────── */
-window.addProblem=async function(){
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TEACHER — PROBLEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.addProblem = async function(){
   const title=$('qTitle').value.trim(), prob=$('qProb').value.trim();
-  if(!title||!prob){toast('Title and problem are required.','err');return;}
+  if(!title||!prob){ toast('Title and problem statement are required.','err'); return; }
   try{
-    await addDoc(collection(db,'sections',currentTSecId,'problems'),{
-      title,difficulty:$('qDiff').value,concept:$('qConcept').value.trim(),
-      problem:prob,example:$('qEx').value.trim(),hint:$('qHint').value.trim(),
+    await addDoc(collection(db,'sections',currentSecId,'problems'),{
+      title, difficulty:$('qDiff').value,
+      concept:$('qConcept').value.trim(),
+      problem:prob,
+      example:$('qEx').value.trim(),
+      hint:$('qHint').value.trim(),
       createdAt:serverTimestamp()
     });
     ['qTitle','qConcept','qProb','qEx','qHint'].forEach(id=>$(id).value='');
-    toast('Problem added ✓'); loadTProbs(currentTSecId);
-  }catch(e){toast('Error: '+e.message,'err');}
+    toast('Problem added ✓');
+    loadTProbs(currentSecId);
+  }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
 async function loadTProbs(secId){
@@ -1169,129 +1574,124 @@ async function loadTProbs(secId){
     const snap=await getDocs(
       query(collection(db,'sections',secId,'problems'),orderBy('createdAt','asc')));
     if(snap.empty){
-      list.innerHTML=`<div class="empty"><div class="ei">📭</div>
-        <p>No problems yet. Add one above.</p></div>`;return;
+      list.innerHTML=`<div class="empty"><span class="ei">📭</span>
+        <p>No problems yet. Add one above.</p></div>`; return;
     }
-    const frag=document.createDocumentFragment();
+    list.innerHTML='';
     snap.docs.forEach((d,i)=>{
       const p=d.data();
       const card=document.createElement('div');
-      card.className='scard';
-      card.innerHTML=`<div class="scard-head">
+      card.className='card';
+      card.style.display='flex';
+      card.style.alignItems='flex-start';
+      card.style.justifyContent='space-between';
+      card.style.gap='10px';
+      card.innerHTML=`
         <div style="flex:1;min-width:0">
-          <div class="scard-title">#${i+1} ${esc(p.title)}
+          <div style="font-size:14px;font-weight:800;margin-bottom:3px">
+            #${i+1} ${esc(p.title)}
             <span class="diff d${(p.difficulty||'Easy')[0]}" style="margin-left:6px">${p.difficulty||'Easy'}</span>
           </div>
-          <div class="scard-meta" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${esc((p.problem||'').substring(0,70))}…</div>
+          <div style="font-size:12px;color:var(--mu);font-family:var(--mo);
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            ${esc((p.problem||'').substring(0,80))}${(p.problem||'').length>80?'…':''}
+          </div>
         </div>
         <button class="btn btn-d btn-sm" style="flex-shrink:0"
-          onclick="deleteProb('${secId}','${d.id}')">Delete</button>
-      </div>`;
-      frag.appendChild(card);
+          onclick="deleteProb('${secId}','${d.id}')">Delete</button>`;
+      list.appendChild(card);
     });
-    list.innerHTML=''; list.appendChild(frag);
   }catch(e){}
 }
 
-window.deleteProb=async function(secId,pid){
-  if(!confirm('Delete this problem?'))return;
+window.deleteProb = async function(secId,pid){
+  if(!confirm('Delete this problem?')) return;
   await deleteDoc(doc(db,'sections',secId,'problems',pid));
-  toast('Deleted.'); loadTProbs(secId);
+  toast('Problem deleted.'); loadTProbs(secId);
 };
 
-/* ══════════════════════════════════
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    TEACHER — SUBMISSIONS (real-time)
-══════════════════════════════════ */
-window.loadTSubs=async function(){
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+window.loadTSubs = async function(){
   const list=$('tSubsList');
   list.innerHTML=`<div class="empty"><p>Loading…</p></div>`;
-  if(tSubsUnsub){tSubsUnsub();tSubsUnsub=null;}
-
-  // Populate section filter once
-  const secSel=$('filterSec');
-  if(secSel.options.length<=1){
-    try{
-      const snap=await getDocs(collection(db,'sections'));
-      snap.docs.sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0))
-        .forEach(d=>{
-          if(!Array.from(secSel.options).find(o=>o.value===d.id))
-            secSel.appendChild(new Option(d.data().name,d.id));
-        });
-    }catch(e){}
-  }
+  if(tSubsUnsub){ tSubsUnsub(); tSubsUnsub=null; }
 
   const secF=$('filterSec').value;
-  const stF=$('filterStatus').value;
+  const stF =$('filterStatus').value;
 
-  // Build query — avoid compound index by filtering status client-side
-  let q;
-  if(secF){ q=query(collection(db,'submissions'),where('sectionId','==',secF)); }
-  else     { q=query(collection(db,'submissions')); }
+  let q = secF
+    ? query(collection(db,'submissions'),where('sectionId','==',secF))
+    : query(collection(db,'submissions'));
 
-  tSubsUnsub=onSnapshot(q,snap=>{
+  tSubsUnsub = onSnapshot(q, snap=>{
     list.innerHTML='';
     let docs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    // client-side status filter
     if(stF) docs=docs.filter(d=>d.status===stF);
-    // sort newest first
     docs.sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
+
     if(!docs.length){
-      list.innerHTML=`<div class="empty"><div class="ei">📭</div>
-        <p>No submissions match your filters.</p></div>`;return;
+      list.innerHTML=`<div class="empty"><span class="ei">📭</span>
+        <p>No submissions match your filters.</p></div>`; return;
     }
-    const frag=document.createDocumentFragment();
+
     docs.forEach(s=>{
       const ts=s.submittedAt?new Date(s.submittedAt.seconds*1000).toLocaleString():'–';
-      const card=document.createElement('div');
-      card.className='sub-card';
       const isEval=s.status==='evaluated';
+      const card=document.createElement('div');
+      card.className='sub-card'+(isEval?' evaluated':'');
       card.innerHTML=`
         <div class="sub-card-head">
           <div>
-            <div class="sub-user">${esc(s.userName||'?')}</div>
+            <div class="sub-user">${esc(s.userName||'Unknown')}</div>
             <div class="sub-info">${esc(s.problemTitle||'')} · ${esc(s.sectionName||'')} · ${ts}</div>
           </div>
           <span class="chip-pend${isEval?' chip-eval':''}">${isEval?'✓ Evaluated':'⏳ Pending'}</span>
         </div>
         ${s.code?`<div class="sub-code-view">${esc(s.code)}</div>`:''}
-        ${s.imageUrl?`<img class="sub-img-view" src="${s.imageUrl}" alt="solution">`:''}
+        ${s.imageUrl?`<img class="sub-img-view" src="${s.imageUrl}" alt="student solution">`:''}
         ${isEval
-          ?`<div class="eval-row">
-              <span class="eval-done">Score: ${s.score}/10 · ${esc(s.comment||'')}</span>
-              <button class="btn btn-d btn-sm" onclick="deleteSub('${s.id}')">🗑 Delete</button>
+          ?`<div class="eval-done-row">
+              <span class="score-badge">Score: ${s.score}/10</span>
+              ${s.comment?`<span style="font-size:12px;color:var(--t2)">${esc(s.comment)}</span>`:''}
+              <button class="btn btn-d btn-sm" style="margin-left:auto"
+                onclick="deleteSub('${s.id}')">🗑 Delete</button>
             </div>`
           :`<div class="eval-row">
-              <input type="number" class="score-inp" id="sc-${s.id}" min="0" max="10" placeholder="0–10">
-              <input type="text" class="comment-inp" id="cm-${s.id}" placeholder="Feedback comment…">
+              <input type="number" class="score-inp" id="sc-${s.id}"
+                min="0" max="10" placeholder="0–10">
+              <input type="text" class="comment-inp" id="cm-${s.id}"
+                placeholder="Feedback comment (optional)…">
               <button class="btn btn-g btn-sm" onclick="evalSub('${s.id}')">Evaluate ✓</button>
-              <button class="btn btn-d btn-sm" onclick="deleteSub('${s.id}')">🗑 Delete</button>
+              <button class="btn btn-d btn-sm" onclick="deleteSub('${s.id}')">🗑</button>
             </div>`}`;
-      frag.appendChild(card);
+      list.appendChild(card);
     });
-    list.appendChild(frag);
-  },err=>{
+  }, err=>{
     list.innerHTML=`<div class="empty"><p style="color:var(--rd)">${esc(err.message)}</p></div>`;
   });
 };
 
-window.evalSub=async function(sid){
+window.evalSub = async function(sid){
   const scoreEl=$('sc-'+sid), commentEl=$('cm-'+sid);
-  if(!scoreEl)return;
+  if(!scoreEl) return;
   const score=parseInt(scoreEl.value);
   const comment=(commentEl?.value||'').trim();
-  if(isNaN(score)||score<0||score>10){toast('Enter a score 0–10','err');return;}
+  if(isNaN(score)||score<0||score>10){ toast('Enter a score between 0 and 10','err'); return; }
   try{
     await updateDoc(doc(db,'submissions',sid),
       {status:'evaluated',score,comment,evaluatedAt:serverTimestamp()});
     toast('Evaluated ✓');
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){ toast('Error: '+e.message,'err'); }
 };
 
-window.deleteSub=async function(sid){
-  if(!confirm('Delete this submission?'))return;
-  try{await deleteDoc(doc(db,'submissions',sid));toast('Deleted.');}
-  catch(e){toast('Error','err');}
+window.deleteSub = async function(sid){
+  if(!confirm('Delete this submission? The student will lose their evaluation result.')) return;
+  try{
+    await deleteDoc(doc(db,'submissions',sid));
+    toast('Submission deleted.');
+  }catch(e){ toast('Error: '+e.message,'err'); }
 };
 </script>
 </body>
