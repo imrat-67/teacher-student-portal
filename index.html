@@ -733,32 +733,6 @@ textarea.inp{resize:vertical;line-height:1.65;font-family:var(--mo);font-size:13
     </main>
   </div>
 
-  <!-- ── BOTTOM NAV (mobile) ── -->
-  <nav class="bot-nav" id="botNavStudent">
-    <div class="bot-nav-inner">
-      <button class="bot-item on" data-v="browse" onclick="goView('browse');setBotActive('browse')">
-        <span class="bot-item-ic">🏠</span>Sections
-      </button>
-      <button class="bot-item" data-v="section" onclick="goView('section');setBotActive('section')"
-        id="botSection" style="display:none">
-        <span class="bot-item-ic">📋</span>Problems
-      </button>
-      <button class="bot-item" data-v="mywork" onclick="goView('mywork');setBotActive('mywork')">
-        <span class="bot-item-ic">📨</span>Submissions
-      </button>
-    </div>
-  </nav>
-  <nav class="bot-nav" id="botNavTeacher" style="display:none">
-    <div class="bot-nav-inner">
-      <button class="bot-item on" data-v="tSec" onclick="goView('tSec');setTBotActive('tSec')">
-        <span class="bot-item-ic">🗂️</span>Sections
-      </button>
-      <button class="bot-item" data-v="tSubs" onclick="goView('tSubs');setTBotActive('tSubs')">
-        <span class="bot-item-ic">👁️</span>Submissions
-      </button>
-    </div>
-  </nav>
-
 </div><!-- end pgApp -->
 
 <!-- toast & file input -->
